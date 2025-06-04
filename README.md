@@ -1,15 +1,15 @@
 ### Project Title: Polarizr
 Group Members:
- Alton Liu (alton.liu@mail.utoronto.ca, liualton)
-Jeremy Neilson (jeremy.neilson@mail.utoronto.ca, neilso14)
-Juno Zhang (juno.zhang@mail.utoronto.ca, zha11325)
+* Alton Liu (alton.liu@mail.utoronto.ca, liualton)
+* Jeremy Neilson (jeremy.neilson@mail.utoronto.ca, neilso14)
+* Juno Zhang (juno.zhang@mail.utoronto.ca, zha11325)
 
 *Technical Specs:*
-	Framework:  Angular.js
-	Backend API: Express.js
-	Database: PostgreSQL
-	Deployment: Docker, Docker Compose, and Git Action for CI
-	Authentication: OAuth 2.0
+* Framework:  Angular.js
+* Backend API: Express.js
+* Database: PostgreSQL
+* Deployment: Docker, Docker Compose, and Git Action for CI
+* Authentication: OAuth 2.0
 
 ### Overview
 *Summary*
