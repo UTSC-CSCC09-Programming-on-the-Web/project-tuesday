@@ -1,5 +1,5 @@
 
-# Project Title: TBD
+# Project Title: GameStash
 
 ## Group Members
 - **Alton Liu**  
@@ -26,7 +26,7 @@
 ---
 
 ## Overview
-**TBD** is an online party game where players compete in a series of minigames to accumulate points and win.
+**GameStash** is an online party game where players compete in a series of minigames to accumulate points and win.
 
 Game lobbies and administration are controlled through a **desktop instance**, and players connect to the game using their **phones as gaming controllers**. Each minigame will feature a slightly different control scheme to complement its rules, and minigame details will be displayed on the desktop screen.
 
