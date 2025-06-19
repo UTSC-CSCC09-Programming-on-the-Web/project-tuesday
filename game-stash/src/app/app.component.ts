@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { io } from 'socket.io-client';
 
 @Component({
   selector: 'app-root',
@@ -14,8 +15,10 @@ export class AppComponent {
 
   constructor() {
     this.fetchMessage();
+    this.connectToSocket();
   }
 
+  // basic fetch request to the backend, runs on init
   fetchMessage() {
     fetch('http://localhost:3000/')
       .then(response => {
@@ -31,6 +34,16 @@ export class AppComponent {
         this.message = 'Error fetching data';
         console.error(error);
       });
+  }
+
+  connectToSocket() {
+    const socket = io("http://localhost:3000/");
+    
+    socket.on("welcome", (res) => {
+        console.log(res.message);
+    });
+
+    console.log('Running');
   }
 
 }
