@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 
 @Component({
     selector: 'app-lobby-view',
@@ -20,6 +20,7 @@ import { io } from 'socket.io-client';
 })
 
 export class LobbyViewComponent {
+    socket = io("http://localhost:3000/");
     roomId: string = "";
     
     constructor(private router: Router) {
@@ -35,26 +36,25 @@ export class LobbyViewComponent {
 
     // NOTE: The first person to join the room is considered the host.
     connectToSocket() {
-        const socket = io("http://localhost:3000/");
         
-        socket.on("welcome", (res) => {
+        this.socket.on("welcome", (res) => {
             console.log(res.message);
         });
 
         // Create a new lobby
-        socket.on("connect", () => {
-            socket.emit("createRoom", this.roomId);
+        this.socket.on("connect", () => {
+            this.socket.emit("createRoom", this.roomId);
         });
 
         // If a user leaves the lobby, update the UI accordingly
-        socket.on("userJoinedRoom", (message) => { 
+        this.socket.on("userJoinedRoom", (message) => { 
             const userId = message.split(" ")[0];
             console.log("user joined room:", message);
             document.querySelector('.current-players')!.innerHTML += `<p id=${userId}>player: ${userId}</p>`;
         }); 
 
         // If a user leaves the lobby, update the UI accordingly
-        socket.on("userLeftRoom", (message) => {
+        this.socket.on("userLeftRoom", (message) => {
            const userId = message.split(" ")[0]
            console.log("user left room:", message);
            document.querySelector(`#${userId}`)?.remove();
