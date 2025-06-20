@@ -3,6 +3,11 @@
     game-stash
     <router-outlet></router-outlet>
   </div>
+  <app-desk-create-lobby *ngIf="check"></app-desk-create-lobby>
+  <!-- <div class="content">
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+  </div> -->
 </main>
 
 <router-outlet />
