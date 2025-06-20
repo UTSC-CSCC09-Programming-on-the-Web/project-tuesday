@@ -1,8 +1,9 @@
 import { Component, Input } from '@angular/core';
+import { DeskMagicNumberComponent } from '../desk-magic-number/desk-magic-number.component';
 
 @Component({
   selector: 'app-desk-game-select',
-  imports: [],
+  imports: [DeskMagicNumberComponent],
   templateUrl: './desk-game-select.component.html',
   styleUrl: './desk-game-select.component.css'
 })
