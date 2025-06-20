@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { DeskCreateLobbyComponent } from "./desk-create-lobby/desk-create-lobby/desk-create-lobby.component";
+import { DeskCreateLobbyComponent } from "./desk-create-lobby/desk-create-lobby.component";
 import { NgIf } from '@angular/common';
 
 import { LobbyViewComponent } from './components/LobbyView/LobbyView';

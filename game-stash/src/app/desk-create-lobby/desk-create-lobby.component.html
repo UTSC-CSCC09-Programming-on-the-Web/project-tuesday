@@ -1,0 +1,24 @@
+<div class="lobby-wrapper">
+  <div class="create-lobby-wrapper" *ngIf="!lobbyCreated && !loading">
+    <div class="lobby-header">
+      <h1>Create a Lobby</h1>
+    </div>
+    <form>
+      <mat-form-field>
+        <mat-label for="lobbyName">Lobby Name</mat-label>
+        <input matInput id="lobbyName" type="text" [(ngModel)]="lobbyName" name="lobbyName" required>
+      </mat-form-field>
+      <br>
+      <button mat-button type="submit" (click)="createLobby()">Create Lobby</button>
+    </form>
+  </div>
+  <div class="loading" *ngIf="loading">
+    <h2>Creating Lobby...</h2>
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+  <div class="created-lobby" *ngIf="lobbyCreated && !loading">
+    <app-desk-game-select [lobbyCode]="lobbyCode" [lobbyName]="lobbyName"></app-desk-game-select>
+    <!-- <p>Lobby ID: {{ lobbyId }}</p> -->
+    <!-- <button matButton (click)="joinLobby()">Join Lobby</button> -->
+  </div>
+</div>
