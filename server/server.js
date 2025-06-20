@@ -33,7 +33,8 @@ io.on('connection', (socket) => {
   // Client disconnects, automatically leaves room, but need to notify admin to update lobby frontend
   socket.on('disconnect', () => {
     console.log('A user disconnected:', socket.id);
-    io.emit('userLeftRoom', `${socket.id} has left a room`); // Notify other clients in the room
+    // Ideally want to only emit to the room the user was in, but at the time of disconnect, socket.rooms is emptied
+    io.emit('userLeftRoom', `${socket.id} has left a room`); 
   });
 });
 
