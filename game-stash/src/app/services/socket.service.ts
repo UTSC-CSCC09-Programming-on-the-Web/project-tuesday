@@ -12,18 +12,13 @@ export class SocketService {
   private lobbyName: string = '';
   private lobbyCode: string = '';
 
+  private playersSubject = new BehaviorSubject<string[]>([]);
+  players$ = this.playersSubject.asObservable();
+
   constructor() { }
 
-  getLobbyName(): string {
-    return this.lobbyName;
-  }
-  getLobbyCode(): string {
-    return this.lobbyCode;
-  }
-
-  setLobby(lobbyName: string, lobbyCode: string) {
-    this.lobbyName = lobbyName;
-    this.lobbyCode = lobbyCode;
+  startGame() {
+    console.log("TODO: ADD GAME");
   }
 
   connectToSocket() {
@@ -52,8 +47,6 @@ export class SocketService {
         // document.querySelector(`#${userId}`)?.remove();
     });
   }
-  private playersSubject = new BehaviorSubject<string[]>([]);
-  players$ = this.playersSubject.asObservable(); // expose as observable
 
   get players(): string[] {
     return this.playersSubject.value;
@@ -71,5 +64,17 @@ export class SocketService {
   removePlayer(player: string) {
     const updated = this.playersSubject.value.filter(p => p !== player);
     this.playersSubject.next(updated);
+  }
+
+  getLobbyName(): string {
+    return this.lobbyName;
+  }
+  getLobbyCode(): string {
+    return this.lobbyCode;
+  }
+
+  setLobby(lobbyName: string, lobbyCode: string) {
+    this.lobbyName = lobbyName;
+    this.lobbyCode = lobbyCode;
   }
 }
