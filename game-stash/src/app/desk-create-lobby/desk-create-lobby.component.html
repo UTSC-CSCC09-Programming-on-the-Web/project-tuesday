@@ -1,5 +1,5 @@
 <div class="lobby-wrapper">
-  <div class="create-lobby-wrapper" *ngIf="!lobbyCreated && !loading">
+  <div class="create-lobby-wrapper" *ngIf="!loading">
     <div class="lobby-header">
       <h1>Create a Lobby</h1>
     </div>
@@ -15,10 +15,5 @@
   <div class="loading" *ngIf="loading">
     <h2>Creating Lobby...</h2>
     <mat-spinner diameter="50"></mat-spinner>
-  </div>
-  <div class="created-lobby" *ngIf="lobbyCreated && !loading">
-    <app-desk-game-select [lobbyCode]="lobbyCode" [lobbyName]="lobbyName"></app-desk-game-select>
-    <!-- <p>Lobby ID: {{ lobbyId }}</p> -->
-    <!-- <button matButton (click)="joinLobby()">Join Lobby</button> -->
   </div>
 </div>

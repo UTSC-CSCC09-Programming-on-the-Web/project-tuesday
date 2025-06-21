@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DeskCreateLobbyComponent } from './desk-create-lobby.component';
+import { DeviceRedirectComponent } from './device-redirect.component';
 
-describe('DeskCreateLobbyComponent', () => {
-  let component: DeskCreateLobbyComponent;
-  let fixture: ComponentFixture<DeskCreateLobbyComponent>;
+describe('DeviceRedirectComponent', () => {
+  let component: DeviceRedirectComponent;
+  let fixture: ComponentFixture<DeviceRedirectComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeskCreateLobbyComponent]
+      imports: [DeviceRedirectComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DeskCreateLobbyComponent);
+    fixture = TestBed.createComponent(DeviceRedirectComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

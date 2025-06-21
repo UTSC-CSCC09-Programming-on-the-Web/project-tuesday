@@ -5,7 +5,7 @@ import { io, Socket } from 'socket.io-client';
 @Component({
     selector: 'app-lobby-view',
     template: `
-        <div class="lobby-view">  
+        <div class="lobby-view">
             <p>this is the lobby view</p>
             <p>this is the lobby name: {{ roomId }}</p>
             <button (click)="openNewTab()">make new player</button>
@@ -22,7 +22,7 @@ import { io, Socket } from 'socket.io-client';
 export class LobbyViewComponent {
     socket = io("http://localhost:3000/");
     roomId: string = "";
-    
+
     constructor(private router: Router) {
         console.log("lobby component view");
         this.roomId = this.generate();
@@ -32,11 +32,11 @@ export class LobbyViewComponent {
     openNewTab() {
         const url = this.router.serializeUrl( this.router.createUrlTree(['/player', this.roomId]));
         window.open(url, '_blank');
-    }    
+    }
 
     // NOTE: The first person to join the room is considered the host.
     connectToSocket() {
-        
+
         this.socket.on("welcome", (res) => {
             console.log(res.message);
         });
@@ -47,11 +47,11 @@ export class LobbyViewComponent {
         });
 
         // If a user leaves the lobby, update the UI accordingly
-        this.socket.on("userJoinedRoom", (message) => { 
+        this.socket.on("userJoinedRoom", (message) => {
             const userId = message.split(" ")[0];
             console.log("user joined room:", message);
             document.querySelector('.current-players')!.innerHTML += `<p id=${userId}>player: ${userId}</p>`;
-        }); 
+        });
 
         // If a user leaves the lobby, update the UI accordingly
         this.socket.on("userLeftRoom", (message) => {
@@ -59,8 +59,8 @@ export class LobbyViewComponent {
            console.log("user left room:", message);
            document.querySelector(`#${userId}`)?.remove();
         });
-  } 
-    
+    }
+
     // TODO: replace
     // Generate a random name for the lobby, stolen from StackOverflow
     generate() {
