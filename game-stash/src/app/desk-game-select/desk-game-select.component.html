@@ -7,11 +7,22 @@
     <ul>
       <li *ngFor="let player of players">{{player}}</li>
     </ul>
-    <button mat-raised-button color="primary" (click)="openNewTab()">Add Player</button>
+    <button mat-button color="primary" (click)="openNewTab()">Add Player</button>
   </div>
 
   <div class="game-list">
 
   </div>
-  <app-desk-magic-number></app-desk-magic-number>
+  <div [ngSwitch]="selectedGame">
+    <div *ngSwitchCase="''">
+      <div>Please select a game</div>
+      <mat-action-list #shoes>
+        @for (game of games; track game) {
+          <mat-list-item (click)="playGame(game)">{{game}}</mat-list-item>
+        }
+      </mat-action-list>
+    </div>
+    <app-desk-magic-number *ngSwitchCase="'Magic Number'"></app-desk-magic-number>
+  </div>
+
 </div>
