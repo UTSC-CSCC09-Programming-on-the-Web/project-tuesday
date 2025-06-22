@@ -1,0 +1,28 @@
+<div class="game-select-wrapper">
+  <h1>Lobby Code: {{lobbyCode}}</h1>
+  <h2>{{lobbyName}}</h2>
+
+  <div class="player-list">
+    <h3>Players</h3>
+    <ul>
+      <li *ngFor="let player of players">{{player}}</li>
+    </ul>
+    <button mat-button color="primary" (click)="openNewTab()">Add Player</button>
+  </div>
+
+  <div class="game-list">
+
+  </div>
+  <div [ngSwitch]="selectedGame">
+    <div *ngSwitchCase="''">
+      <div>Please select a game</div>
+      <mat-action-list #shoes>
+        @for (game of games; track game) {
+          <mat-list-item (click)="playGame(game)">{{game}}</mat-list-item>
+        }
+      </mat-action-list>
+    </div>
+    <app-desk-magic-number *ngSwitchCase="'Magic Number'"></app-desk-magic-number>
+  </div>
+
+</div>

@@ -1,0 +1,12 @@
+<div class="player-view">  
+    <p>this is the player's view</p>
+</div>
+<div class="current-players"></div>
+<div [ngSwitch]="selectedGame">
+    <app-mobile-magic-number 
+        *ngSwitchCase="'Magic Number'"
+        [socket]="socket"
+        [lobbyCode] ="lobbyCode"
+        [gameId]="selectedGame" 
+    ></app-mobile-magic-number>
+</div>
