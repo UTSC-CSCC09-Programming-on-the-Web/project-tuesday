@@ -8,9 +8,6 @@ export const routes: Routes = [
   { path: 'lobby', component: DeskGameSelectComponent },
   { path: 'player/:lobbyCode', component: MobileGameSelectComponent },
   { path: 'create-lobby', component: DeskCreateLobbyComponent},
-  { path: '', component: DeviceRedirectComponent },
-  { path: '', redirectTo: '/', pathMatch: 'full' }, // default route
-  { path: '**', redirectTo: '/' }, // catch-all
   {
     path: 'phone-join-lobby',
     loadComponent: () => import('./phone-join-lobby/phone-join-lobby.component').then(m => m.PhoneJoinLobbyComponent)
@@ -27,5 +24,8 @@ export const routes: Routes = [
   {
     path: 'phone-rankings',
     loadComponent: () => import('./phone-rankings/phone-rankings.component').then(m => m.PhoneRankingsComponent)
-  }
+  },
+  { path: '', component: DeviceRedirectComponent },
+  { path: '', redirectTo: '/', pathMatch: 'full' }, // default route
+  { path: '**', redirectTo: '/' }, // catch-all
 ];
