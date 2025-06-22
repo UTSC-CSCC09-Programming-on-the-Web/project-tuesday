@@ -8,7 +8,6 @@ import { SocketService } from '../services/socket.service';
   styleUrl: './desk-magic-number.component.css'
 })
 export class DeskMagicNumberComponent implements OnInit {
-
   players: string[] = [];
 
   constructor( private socketService: SocketService) {}
@@ -17,11 +16,11 @@ export class DeskMagicNumberComponent implements OnInit {
     this.socketService.players$.subscribe(players => {
       this.players = players;
     });
+    this.startGame();
   }
-
 
   startGame() {
     console.log("Starting game with players:", this.players);
-    this.socketService.startGame();
+    this.socketService.startGame('Magic Number');
   }
 }

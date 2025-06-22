@@ -13,29 +13,60 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3000;
 
 // Socket.IO connection ---------------------------------------------------
+const lobbies = {}; // for storing lobby game state information =
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   // Client is asking to join a lobby, join and notify other clients in the lobby
-  socket.on('joinRoom', (arg) => {
-    console.log(`request to join room: ${arg} `);
-    socket.join(arg);
-    socket.to(arg).emit('userJoinedRoom', `${socket.id} just joined the room: ${arg}`); // sent to everyone in the room
+  socket.on('joinLobby', (arg) => {
+    socket.join(arg.lobbyCode);
+    socket.to(arg.lobbyCode).emit('userJoinedLobby', {
+      user: socket.id,
+    });
+
+    lobbies[arg.lobbyCode].players[socket.id] = false;
   })
 
   // Client is asking to create a lobby with a given name, should  only be called from lobby screen
-  // TODO: this should make the client the lobby admin explicitly, somehow
-  socket.on('createRoom', (arg) => {
-    socket.join(arg);
+  socket.on('createLobby', (arg) => {
+    socket.join(arg.lobbyCode); //add client to lobby lobby
+    lobbies[arg.lobbyCode] = {
+        admin: arg.admin, // Store the admin of the lobby
+        players: {}, // Track who is in the lobby, as well as whether or not they have responded
+        responses: {} // Store player response messages
+    };
+    console.log(lobbies)
   })
 
-  // Client disconnects, automatically leaves room, but need to notify admin to update lobby frontend
+  // Client disconnects, automatically leaves lobby, but need to notify admin to update lobby frontend
   socket.on('disconnect', () => {
     console.log('A user disconnected:', socket.id);
-    // Ideally want to only emit to the room the user was in, but at the time of disconnect, socket.rooms is emptied
-    io.emit('userLeftRoom', `${socket.id} has left a room`); 
+    // Ideally want to only emit to the lobby the user was in, but at the time of disconnect, socket.lobbys is emptied
+    io.emit('userLeftLobby', `${socket.id} has left a lobby`); 
   });
+
+  socket.on('startGame', (arg) => {
+    console.log(`Lobby: ${arg.lobbyCode} has requested to start the game: ${arg.gameId}`);
+    io.to(arg.lobbyCode).emit('startGamePlayer', {
+      gameId: arg.gameId
+    })
+  })
+
+  // Catch a game response from a player
+  socket.on('gameResponse', (arg) => {
+    lobbies[arg.lobbyCode].players[arg.playerId] = true;
+    lobbies[arg.lobbyCode].responses[arg.playerId] = arg.response;
+
+    // Check if all players have responded
+    const allResponded = Object.values(lobbies[arg.lobbyCode].players).every(v => v === true);
+    if (allResponded) {
+      io.to(arg.lobbyCode).emit('gameResults', {
+        responses: lobbies[arg.lobbyCode].responses,
+        gameId: arg.gameId
+      });
+    }
+  })
 });
 
 server.listen(3000, () => {

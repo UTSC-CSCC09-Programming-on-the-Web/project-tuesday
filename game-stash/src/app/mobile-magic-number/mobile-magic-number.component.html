@@ -1,0 +1,13 @@
+<p>Magic Number</p>
+<form>
+    <mat-form-field>
+        <mat-label for="gameResponse">Enter Guess</mat-label>
+        <input matInput id="gameResponse" type="text" [(ngModel)]="gameResponse" name="gameResponse" required>
+    </mat-form-field>
+    <br>
+    <button mat-button type="submit" (click)="respondToGameMagicNumber()">Submit Guess</button>
+</form>
+<div class="loading" *ngIf="loading">
+    <h2>Waiting for other players to respond</h2>
+    <mat-spinner diameter="50"></mat-spinner>
+</div>

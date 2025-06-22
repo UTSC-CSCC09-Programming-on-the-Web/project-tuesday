@@ -23,6 +23,7 @@ import {MatListModule} from '@angular/material/list';
   templateUrl: './desk-game-select.component.html',
   styleUrl: './desk-game-select.component.css'
 })
+
 export class DeskGameSelectComponent {
 
   constructor (

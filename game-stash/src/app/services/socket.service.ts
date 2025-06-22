@@ -2,9 +2,15 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { io } from 'socket.io-client';
 
+interface GameResults {
+  gameId: string;
+  responses: Record<string, number>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
+
 export class SocketService {
 
   private socket = io("http://localhost:3000/");
@@ -17,8 +23,13 @@ export class SocketService {
 
   constructor() { }
 
-  startGame() {
-    console.log("TODO: ADD GAME");
+  startGame(gameId: string) {
+    if (gameId === 'Magic Number') {
+      this.socket.emit("startGame", {
+        gameId: gameId,
+        lobbyCode: this.lobbyCode
+      })
+    }
   }
 
   connectToSocket() {
@@ -28,24 +39,63 @@ export class SocketService {
 
     // Create a new lobby
     this.socket.on("connect", () => {
-        this.socket.emit("createRoom", this.lobbyCode);
+        this.socket.emit("createLobby", {
+          lobbyCode: this.lobbyCode,
+          admin: this.socket.id,
+        });
     });
 
     // If a user leaves the lobby, update the UI accordingly
-    this.socket.on("userJoinedRoom", (message) => {
-        const userId = message.split(" ")[0];
+    this.socket.on("userJoinedLobby", (arg) => {
+        const userId = arg.user;
         this.addPlayer(userId);
-        // console.log("user joined room:", message);
-        // document.querySelector('.current-players')!.innerHTML += `<p id=${userId}>player: ${userId}</p>`;
     });
 
     // If a user leaves the lobby, update the UI accordingly
-    this.socket.on("userLeftRoom", (message) => {
+    this.socket.on("userLeftLobby", (message) => {
         const userId = message.split(" ")[0];
         this.setPlayers(this.players.filter(player => player !== userId));
-        console.log("user left room:", message);
-        // document.querySelector(`#${userId}`)?.remove();
+        console.log("user left lobby:", message);
     });
+
+    this.socket.on("gameResults", (arg: GameResults) => {
+      switch (arg.gameId) {
+        case 'Magic Number':
+          const winners = [];
+          const answerNumber = this.getRandomInt(100);
+          let lowestDifference : number = 100;
+
+          const responses = arg.responses;
+
+          // calculate the difference between each player's response and the answer number
+          for (const [player, response] of Object.entries(responses)) {
+            let difference = Math.abs(response - answerNumber);
+            responses[player] = difference;
+            
+            if (difference < lowestDifference) {
+              lowestDifference = difference;
+            } 
+          }
+
+          // find all the winning players
+          for (const [player, response] of Object.entries(responses)) {
+            if (response === lowestDifference) {
+              winners.push(player);
+            }
+
+            console.log("winners: ", winners);
+          }
+
+          break;
+        default:
+          console.log("Unknown game ID:", arg.gameId);
+          break;
+      }
+    })
+  }
+
+  getRandomInt(max: number) {
+    return Math.floor(Math.random() * max);
   }
 
   get players(): string[] {
@@ -69,6 +119,7 @@ export class SocketService {
   getLobbyName(): string {
     return this.lobbyName;
   }
+
   getLobbyCode(): string {
     return this.lobbyCode;
   }

@@ -20,16 +20,4 @@ export class AppComponent {
     console.log("app component view");
   }
 
-  /*
-  connectToSocket() {
-    const socket = io("http://localhost:3000/");
-
-    socket.on("welcome", (res) => {
-        console.log(res.message);
-    });
-
-    console.log('Running');
-  }
-  */
-
 }
