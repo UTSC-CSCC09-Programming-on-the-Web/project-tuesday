@@ -1,0 +1,33 @@
+<div class="waiting-container">
+  <!-- Lobby Code Header -->
+  <div class="lobby-header">
+    <div class="lobby-code-display">
+      <span class="lobby-label">Lobby Code</span>
+      <span class="lobby-code">{{ lobbyCode() }}</span>
+    </div>
+  </div>
+  <!-- Main Content -->
+  <div class="content">
+    <!-- Player Info -->
+    <div class="player-info">
+      <h2>Welcome, {{ playerName() }}!</h2>
+    </div>
+    
+    <!-- Waiting Message -->
+    <div class="waiting-message">
+      <div class="loading-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <h3>Waiting for the host to start the game</h3>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="leave-btn" (click)="onLeaveLobby()">
+      Leave Lobby
+    </button>
+  </div>
+</div>

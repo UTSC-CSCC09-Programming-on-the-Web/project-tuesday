@@ -1,0 +1,46 @@
+<div class="qr-scanner-modal" (click)="closeScanner()">
+  <div class="qr-scanner-content" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="scanner-header">
+      <h3>Scan QR Code</h3>
+      <button class="close-btn" (click)="closeScanner()">×</button>
+    </div>
+
+    <!-- Camera Scanner -->
+    <div class="scanner-container" *ngIf="hasPermission()">
+      <zxing-scanner
+        [enable]="scannerEnabled()"
+        [formats]="allowedFormats"
+        [device]="currentDevice()"
+        (camerasFound)="onCamerasFound($event)"
+        (codeScannerResult)="onCodeResult($event)"
+        (permissionResponse)="onPermissionResponse($event)"
+        (scanError)="onScanError($event)"
+        class="qr-camera">
+      </zxing-scanner>
+      
+      <!-- Scanning overlay -->
+      <div class="scan-overlay">
+        <div class="scan-frame">
+          <div class="corner top-left"></div>
+          <div class="corner top-right"></div>
+          <div class="corner bottom-left"></div>
+          <div class="corner bottom-right"></div>        </div>
+        <p class="scan-instruction">Position QR code within the frame</p>
+      </div>
+    </div>
+
+    <!-- Permission/Loading state -->
+    <div class="scanner-placeholder" *ngIf="!hasPermission()">
+      <div class="loading-spinner"></div>
+      <p>Requesting camera access...</p>
+    </div>
+
+    <!-- Camera controls -->
+    <div class="camera-controls" *ngIf="hasMultipleCameras() && hasPermission()">
+      <button class="switch-camera-btn" (click)="switchCamera()">
+        📷 Switch Camera
+      </button>
+    </div>
+  </div>
+</div>

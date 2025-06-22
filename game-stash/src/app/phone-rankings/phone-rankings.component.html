@@ -1,0 +1,71 @@
+<div class="rankings-container">  <header class="rankings-header">
+    <h1>
+      @if (isGameOver()) {
+        Final Results
+      } @else {
+        Round {{ roundNumber() }} Results
+      }
+    </h1>
+    <p class="target-info">Target Number: <span class="target-number">{{ targetNumber() }}</span></p>
+      <!-- Round Winner Display -->
+    @if (!isGameOver()) {
+      <div class="round-winner-display">
+        @if (getRoundWinners().length === 1) {
+          <p class="winner-text">Round Winner: <span class="winner-name">{{ getRoundWinners()[0] }}</span></p>
+        } @else {
+          <p class="winner-text">Round Winners:</p>
+          <div class="multiple-winners">
+            @for (winner of getRoundWinners(); track winner) {
+              <span class="winner-name">{{ winner }}</span>
+            }
+          </div>
+        }
+      </div>
+    }
+    
+    @if (!isGameOver()) {
+      <div class="countdown-display">
+        <p class="countdown-text">Next round in</p>
+        <div class="countdown-div">
+          <span class="countdown-number">{{ countdown() }}</span>
+        </div>
+      </div>
+    }
+  </header>
+
+  <main class="rankings-content">    <div class="player-result">      <div class="result-card" [class.winner]="getPlayerPoints() === 1" [class.podium]="playerRank() <= 3">
+        <div class="rank-badge">
+          <span class="rank-text">{{ playerRank() }}{{ getRankSuffix(playerRank()) }} Place</span>
+        </div><h2>{{ playerName() }}</h2>
+        <p class="guess-info">Your guess: <span class="guess-number">{{ guess() }}</span></p>
+      </div>
+    </div>
+
+    <div class="all-rankings">
+      <h3>All Players</h3>
+      <div class="rankings-list">        @for (player of rankings(); track player.name) {
+          <div class="ranking-item" [class.current-player]="player.name === playerName()" [class.winner]="player.points === 1">
+            <div class="rank-position">
+              <span class="rank-number">{{ player.rank }}</span>
+            </div><div class="player-details">
+              <span class="player-name">{{ player.name }}</span>
+              <span class="player-guess">Guess: {{ player.guess }}</span>
+            </div>
+            <div class="player-points">{{ player.points }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  </main>  <footer class="rankings-footer">
+    @if (isGameOver()) {
+      <div class="final-actions">
+        <button (click)="onStayInLobby()" class="stay-btn">
+          Stay in Lobby
+        </button>
+        <button (click)="onLeaveLobby()" class="leave-btn">
+          Leave Lobby
+        </button>
+      </div>
+    }
+  </footer>
+</div>

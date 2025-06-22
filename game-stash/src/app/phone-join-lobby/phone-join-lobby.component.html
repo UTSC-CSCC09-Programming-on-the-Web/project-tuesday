@@ -1,0 +1,101 @@
+<div class="join-lobby-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Game Stash</h1>
+    <p>Join a game lobby</p>
+  </div>
+
+  <!-- Main Form -->
+  <div class="form-card">
+    <!-- Player Name Input -->
+    <div class="input-group">
+      <label for="playerName">Your Name</label>
+      <input
+        id="playerName"
+        type="text"
+        [ngModel]="playerName()"
+        (ngModelChange)="playerName.set($event)"
+        (input)="formatPlayerName($event)"
+        placeholder="Enter your display name"
+        maxlength="20"
+        class="input-field"
+        [class.error]="playerName().length > 0 && !isPlayerNameValid()"
+      />
+      <small class="input-hint">{{ playerNameLength() }}/20 characters</small>
+    </div>
+
+    <!-- Lobby Code Input -->
+    <div class="input-group">
+      <label for="lobbyCode">Lobby Code</label>
+      <input
+        id="lobbyCode"
+        type="text"
+        [ngModel]="lobbyCode()"
+        (ngModelChange)="lobbyCode.set($event)"
+        (input)="formatLobbyCode($event)"
+        placeholder="ABCD12"
+        maxlength="6"
+        class="input-field code-input"
+        [class.error]="lobbyCode().length > 0 && !isLobbyCodeValid()"
+      />
+      <small class="input-hint">Enter the 6-character code from the host</small>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+
+    <!-- Join Button -->
+    <button
+      class="join-btn"
+      [disabled]="!isFormValid()"
+      (click)="onJoinLobby()"
+    >
+      <span *ngIf="!isJoining()">Join Game</span>
+      <span *ngIf="isJoining()" class="loading">
+        <span class="spinner"></span>
+        Joining...
+      </span>
+    </button>
+
+    <!-- Divider -->
+    <div class="divider">
+      <span>or</span>
+    </div>
+
+    <!-- QR Code Scanner Button -->
+    <button
+      class="qr-btn"
+      (click)="onShowQrScanner()"
+      [disabled]="!isPlayerNameValid()"
+    >
+      <svg class="qr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <rect x="3" y="3" width="7" height="7"/>
+        <rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/>
+        <rect x="5" y="5" width="3" height="3" fill="currentColor"/>
+        <rect x="16" y="5" width="3" height="3" fill="currentColor"/>
+        <rect x="5" y="16" width="3" height="3" fill="currentColor"/>
+        <line x1="14" y1="14" x2="15" y2="14"/>
+        <line x1="17" y1="14" x2="21" y2="14"/>
+        <line x1="14" y1="17" x2="17" y2="17"/>
+        <line x1="19" y1="17" x2="21" y2="17"/>
+        <line x1="21" y1="19" x2="21" y2="21"/>
+        <line x1="19" y1="19" x2="19" y2="21"/>
+      </svg>
+      Scan QR Code
+    </button>
+
+    <small class="qr-hint" *ngIf="!isPlayerNameValid()">
+      Enter your name first to enable QR scanning
+    </small>
+  </div>
+
+  <!-- QR Scanner Modal -->
+  <app-qr-scanner
+    *ngIf="showQrScanner()"
+    (codeScanned)="onQrCodeScanned($event)"
+    (scannerClosed)="onQrScannerClosed()"
+  ></app-qr-scanner>
+</div>
