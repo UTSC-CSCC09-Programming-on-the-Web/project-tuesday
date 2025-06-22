@@ -1,0 +1,59 @@
+<div class="game-container">
+  <header class="game-header">
+    <h1>Round {{ roundNumber() }}</h1>
+    <p class="player-info">{{ playerName() }} • Lobby: {{ lobbyCode() }}</p>
+  </header>
+
+  <main class="game-content">
+    <div class="instruction">
+      <h2>Guess a Number</h2>
+      <p>Enter a number between 1 and 100</p>
+    </div>
+
+    <div class="guess-form">      <div class="input-container">
+        <input
+          type="text"
+          [(ngModel)]="guess"
+          (input)="formatGuess($event)"
+          placeholder="Enter your guess"
+          class="guess-input"
+          [class.error]="guess() && !isGuessValid()"
+          [disabled]="isSubmitting()"
+          maxlength="3"
+        />
+      </div>
+      
+      @if (guess() && !isGuessValid()) {
+        <div class="validation-error">
+          Please enter a number between 1 and 100
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <div class="error-message">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button
+        (click)="onSubmitGuess()"
+        [disabled]="!isFormValid()"
+        class="submit-btn"
+        [class.loading]="isSubmitting()"
+      >
+        @if (isSubmitting()) {
+          <span class="spinner"></span>
+          Submitting...
+        } @else {
+          Submit Guess
+        }
+      </button>
+    </div>
+  </main>
+
+  <footer class="game-footer">
+    <button (click)="onLeaveLobby()" class="leave-btn" [disabled]="isSubmitting()">
+      Leave Lobby
+    </button>
+  </footer>
+</div>

@@ -3,25 +3,28 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-phone-lobby',
+  selector: 'app-phone-guessing-game-waiting',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './phone-lobby.component.html',
-  styleUrls: ['./phone-lobby.component.css']
+  templateUrl: './phone-guessing-game-waiting.component.html',
+  styleUrls: ['./phone-guessing-game-waiting.component.css']
 })
-export class PhoneLobbyComponent implements OnInit {
-  lobbyCode = signal('');
+export class PhoneGuessingGameWaitingComponent implements OnInit {  lobbyCode = signal('');
   playerName = signal('');
+  roundNumber = signal(1);
+  guess = signal(0);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router
   ) {}
   ngOnInit(): void {
-    // Get lobby details from query parameters
+    // Get game details from query parameters
     this.route.queryParams.subscribe(params => {
       const lobbyCode = params['lobbyCode'];
       const playerName = params['playerName'];
+      const round = params['round'] || '1';
+      const guess = params['guess'] || '0';
       
       if (!lobbyCode || !playerName) {
         // Redirect to join lobby if missing required parameters
@@ -31,20 +34,21 @@ export class PhoneLobbyComponent implements OnInit {
       
       this.lobbyCode.set(lobbyCode);
       this.playerName.set(playerName);
-    });
-
-    // Simulate game starting after some time (in real app, this would be WebSocket/polling)
+      this.roundNumber.set(parseInt(round));
+      this.guess.set(parseInt(guess));
+    });    // Simulate waiting for other players (in real app, this would be WebSocket/polling)
     setTimeout(() => {
-      this.startGame();
-    }, 8000); // Wait 8 seconds then start game
+      this.navigateToRankings();
+    }, 5000); // Wait 5 seconds then show rankings
   }
-  private startGame(): void {
-    // Navigate to game screen
-    this.router.navigate(['/phone-guessing-game'], {
+
+  private navigateToRankings(): void {
+    this.router.navigate(['/phone-rankings'], {
       queryParams: {
         lobbyCode: this.lobbyCode(),
         playerName: this.playerName(),
-        round: 1
+        round: this.roundNumber(),
+        guess: this.guess()
       }
     });
   }
