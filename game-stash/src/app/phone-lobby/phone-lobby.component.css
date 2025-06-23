@@ -112,6 +112,13 @@
   margin: 0 0 0.5rem 0;
 }
 
+.connection-status {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0 0;
+  text-align: center;
+}
+
 /* Actions */
 .actions {
   padding: 1rem 0;

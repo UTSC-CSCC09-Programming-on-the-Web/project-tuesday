@@ -12,15 +12,15 @@
     <div class="player-info">
       <h2>Welcome, {{ playerName() }}!</h2>
     </div>
-    
-    <!-- Waiting Message -->
+      <!-- Waiting Message -->
     <div class="waiting-message">
-      <div class="loading-dots">
+      <div class="loading-dots" *ngIf="isWaitingForGame()">
         <span></span>
         <span></span>
         <span></span>
       </div>
-      <h3>Waiting for the host to start the game</h3>
+      <h3 *ngIf="isWaitingForGame()">Waiting for the host to start the game</h3>
+      <p class="connection-status">{{ connectionStatus() }}</p>
     </div>
   </div>
 

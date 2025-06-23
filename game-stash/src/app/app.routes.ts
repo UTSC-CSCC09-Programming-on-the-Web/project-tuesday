@@ -27,5 +27,5 @@ export const routes: Routes = [
   },
   { path: '', component: DeviceRedirectComponent },
   { path: '', redirectTo: '/', pathMatch: 'full' }, // default route
-  { path: '**', redirectTo: '/' }, // catch-all
+  { path: '**', redirectTo: '/' } // catch-all
 ];
