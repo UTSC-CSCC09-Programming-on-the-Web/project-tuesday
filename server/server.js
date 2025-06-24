@@ -20,12 +20,24 @@ io.on('connection', (socket) => {
 
   // Client is asking to join a lobby, join and notify other clients in the lobby
   socket.on('joinLobby', (arg) => {
+    // If the lobby does not exist, reject
+    if (!lobbies[arg.lobbyCode]) {
+      socket.emit('joinLobbyDenied', { reason: 'Lobby does not exist.' });
+      return;
+    }
+    // If the game has started, reject
+    if (lobbies[arg.lobbyCode].gameStarted) {
+      socket.emit('joinLobbyDenied', { reason: 'Wait for the current game to end before joining lobby' });
+      return;
+    }
     socket.join(arg.lobbyCode);
     socket.to(arg.lobbyCode).emit('userJoinedLobby', {
       user: socket.id,
     });
 
     lobbies[arg.lobbyCode].players[socket.id] = false;
+    // Notify the joining client that join was successful
+    socket.emit('joinLobbySuccess');
   })
 
   // Client is asking to create a lobby with a given name, should  only be called from lobby screen
@@ -47,6 +59,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('startGame', (arg) => {
+    if (lobbies[arg.lobbyCode]) {
+      lobbies[arg.lobbyCode].gameStarted = true;
+    }
     console.log(`Lobby: ${arg.lobbyCode} has requested to start the game: ${arg.gameId}`);
     io.to(arg.lobbyCode).emit('startGamePlayer', {
       gameId: arg.gameId
@@ -66,7 +81,14 @@ io.on('connection', (socket) => {
         gameId: arg.gameId
       });
     }
-  })
+  });
+
+  // When game ends, reset gameStarted
+  socket.on('gameEnded', (arg) => {
+    if (lobbies[arg.lobbyCode]) {
+      lobbies[arg.lobbyCode].gameStarted = false;
+    }
+  });
 });
 
 server.listen(3000, () => {

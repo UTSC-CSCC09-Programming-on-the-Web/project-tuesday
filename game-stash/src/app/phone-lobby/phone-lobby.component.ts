@@ -89,7 +89,13 @@ export class PhoneLobbyComponent implements OnInit, OnDestroy {
     switch (gameId) {
       case 'Magic Number':
         // For Magic Number, navigate to mobile component with lobbyCode as route parameter
-        this.router.navigate(['/player', this.lobbyCode()]);
+        this.router.navigate(['/phone-guessing-game'], {
+          queryParams: {
+            lobbyCode: this.lobbyCode(),
+            playerName: this.playerName(),
+            round: 1
+          }
+        });
         break;
       default:
         // Fallback to guessing game for unknown game types

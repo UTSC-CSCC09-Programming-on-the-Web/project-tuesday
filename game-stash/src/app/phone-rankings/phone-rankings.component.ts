@@ -1,6 +1,7 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SocketService } from '../services/socket.service';
 
 interface PlayerRanking {
   name: string;
@@ -32,7 +33,8 @@ export class PhoneRankingsComponent implements OnInit, OnDestroy {
   
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private socketService: SocketService
   ) {}
 
   ngOnInit(): void {
@@ -58,6 +60,13 @@ export class PhoneRankingsComponent implements OnInit, OnDestroy {
 
     // Determine if this is the final round
     this.isGameOver.set(this.roundNumber() >= 5);
+
+    if (this.isGameOver()) {
+      // Emit gameEnded to backend as soon as final rankings screen is shown
+      this.socketService['socket'].emit('gameEnded', {
+        lobbyCode: this.lobbyCode()
+      });
+    }
 
     if (!this.isGameOver()) {
       // Start countdown for next round

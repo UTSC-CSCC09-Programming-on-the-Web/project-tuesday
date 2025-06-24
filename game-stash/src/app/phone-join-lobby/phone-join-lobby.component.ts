@@ -44,8 +44,10 @@ export class PhoneJoinLobbyComponent implements OnDestroy {
         lobbyCode: this.lobbyCode(),
         client: this.socket.id
       });
+    });
 
-      // Navigate to waiting room with lobby details
+    // Only navigate to waiting room if join is successful
+    this.socket.on('joinLobbySuccess', () => {
       this.router.navigate(['/phone-lobby'], {
         queryParams: {
           lobbyCode: this.lobbyCode(),
@@ -59,6 +61,13 @@ export class PhoneJoinLobbyComponent implements OnDestroy {
       console.error("Socket connection error:", error);
       this.isJoining.set(false);
       this.errorMessage.set('Failed to connect to game server. Please try again.');
+    });
+
+    // Handle joinLobbyDenied event
+    this.socket.on('joinLobbyDenied', (data) => {
+      this.isJoining.set(false);
+      this.errorMessage.set(data.reason || 'Unable to join lobby.');
+      this.socket.disconnect();
     });
 
     // Set a timeout in case connection takes too long
