@@ -1,1 +1,8 @@
-<p>Waiting on all players to respond...</p>
+<div class="player-list">
+  <h2>Waiting for players to answer...</h2>
+  <ul class="game-list">
+    <li class="player-item player-unresponse" *ngFor="let player of unresponded">{{ player }}</li>
+    <li class="player-item player-response" *ngFor="let player of responded">{{ player }}</li>
+  </ul>
+  <button class="leave-btn" color="primary">Add Player</button>
+</div>

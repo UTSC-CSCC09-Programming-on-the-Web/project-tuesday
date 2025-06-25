@@ -111,6 +111,11 @@ io.on('connection', (socket) => {
     lobbies[arg.lobbyCode].responses[arg.playerId] = arg.response;
     lobbies[arg.lobbyCode].players[adminId] = true;
 
+    console.log('sending gameResponseReceived to lobby:', arg.lobbyCode, arg.playerId);
+    io.to(arg.lobbyCode).emit('gameResponseReceived', {
+      playerId: arg.playerId,
+    });
+
     // Check if all players have responded (admin is always true, so only real players need to respond)
     const allResponded = Object.values(lobbies[arg.lobbyCode].players).every(v => v === true);
     console.log(`All players responded: ${allResponded}`);

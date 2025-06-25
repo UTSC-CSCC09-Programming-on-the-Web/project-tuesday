@@ -31,6 +31,9 @@ export class SocketService {
   private playersSubject = new BehaviorSubject<string[]>([]);
   players$ = this.playersSubject.asObservable();
 
+  private respondedSubject = new BehaviorSubject<string[]>([]);
+  responded$ = this.respondedSubject.asObservable();
+
   private selectedGameSubject = new BehaviorSubject<string>('');
   selectedGame$ = this.selectedGameSubject.asObservable();
 
@@ -61,6 +64,7 @@ export class SocketService {
     }
   }
   connectToSocket() {
+    console.log('SocketService: connectToSocket called');
     // Initialize socket for admin/desk if not already created
     if (!this.socket) {
       console.log('SocketService: Creating new socket connection for admin');
@@ -92,11 +96,64 @@ export class SocketService {
         this.removePlayer(userId);
         console.log("user left lobby:", message);
     });
+
+    this.socket.on("gameResponseReceived", (arg: any) => {
+      const currentResponses = this.respondedSubject.value;
+      console.log(currentResponses, arg.playerId);
+      if (!currentResponses.includes(arg.playerId)) {
+        console.log("Adding player response:", arg.playerId);
+        currentResponses.push(arg.playerId);
+        this.setResponded(currentResponses);
+      }
+      console.log("player with id:", arg.playerId, "has submitted their response");
+    });
+
+    this.socket.on("gameResults", (arg: GameResults) => {
+      console.log("SocketService received gameResults for gameId:", arg.gameId);
+      console.log("SocketService gameResults data:", arg);
+
+      switch (arg.gameId) {
+        case 'Magic Number':
+          const answerNumber = arg.targetNumber || 50; // Use server-provided target number, fallback to 50
+          this.targetNumberSubject.next(answerNumber);
+          let lowestDifference: number = 100;
+          const winners: string[] = [];
+          const responses = arg.responses;
+
+          // Calculate the difference between each player's response and the answer number
+          const playerDifferences: Record<string, number> = {};
+          for (const [player, response] of Object.entries(responses)) {
+            let difference = Math.abs(response - answerNumber);
+            playerDifferences[player] = difference;
+
+            if (difference < lowestDifference) {
+              lowestDifference = difference;
+            }
+          }
+
+          // Find all the winning players
+          for (const [player, difference] of Object.entries(playerDifferences)) {
+            if (difference === lowestDifference) {
+              winners.push(player);
+            }
+          }
+
+          console.log("Answer number:", answerNumber);
+          console.log("Winners:", winners);
+
+          this.updateMagicNumberRankings(responses, winners);
+
+          break;
+        default:
+          console.log("Unknown game ID:", arg.gameId);
+          break;
+      }
+    });
   }
 
   connectToSocketPhone() {
     console.log('SocketService: connectToSocketPhone called');
-    
+
     // Disconnect any existing socket first to avoid conflicts
     if (this.socket) {
       console.log('SocketService: Disconnecting existing socket');
@@ -148,7 +205,7 @@ export class SocketService {
     this.socket.on("gameResults", (arg: GameResults) => {
       console.log("SocketService received gameResults for gameId:", arg.gameId);
       console.log("SocketService gameResults data:", arg);
-      
+
       switch (arg.gameId) {
         case 'Magic Number':
           const answerNumber = arg.targetNumber || 50; // Use server-provided target number, fallback to 50
@@ -185,7 +242,7 @@ export class SocketService {
           console.log("Unknown game ID:", arg.gameId);
           break;
       }
-      
+
       console.log("SocketService: Game round complete, all players submitted");
       this.gameRoundCompleteSubject.next();
     });
@@ -217,6 +274,14 @@ export class SocketService {
     this.removeMagicNumberPlayer(player);
   }
 
+  get responded(): string[] {
+    return this.respondedSubject.value;
+  }
+
+  setResponded(responded: string[]) {
+    this.respondedSubject.next(responded);
+  }
+
   getLobbyName(): string {
     return this.lobbyName;
   }
@@ -224,7 +289,7 @@ export class SocketService {
   getLobbyCode(): string {
     return this.lobbyCode;
   }
-  
+
   setLobby(lobbyName: string, lobbyCode: string) {
     this.lobbyName = lobbyName;
     this.lobbyCode = lobbyCode;
@@ -286,8 +351,8 @@ export class SocketService {
 
   // MagicNumberRankings management methods
   private updateMagicNumberRankings(
-    responses: Record<string, number>, 
-    winners: string[], 
+    responses: Record<string, number>,
+    winners: string[],
   ) {
     const currentRankings = this.magicNumberRankingsSubject.value;
     const updatedRankings: MagicNumberRankings[] = [];
@@ -295,10 +360,10 @@ export class SocketService {
     // Create or update rankings for each player
     for (const [playerId, guess] of Object.entries(responses)) {
       const isWinner = winners.includes(playerId);
-      
+
       // Find existing ranking or create new one
       let existingRanking = currentRankings.find(r => r.playerId === playerId);
-      
+
       if (existingRanking) {
         existingRanking.guess = guess;
         existingRanking.points += isWinner ? 1 : 0;
@@ -327,7 +392,7 @@ export class SocketService {
       if (i > 0) {
         const current = updatedRankings[i];
         const previous = updatedRankings[i - 1];
-        
+
         if (current.points === previous.points) {
           // Same points, same rank
           current.rank = previous.rank;
@@ -364,7 +429,7 @@ export class SocketService {
   addMagicNumberPlayer(playerId: string, playerName: string) {
     const currentRankings = this.magicNumberRankingsSubject.value;
     const existingPlayer = currentRankings.find(r => r.playerId === playerId);
-    
+
     if (!existingPlayer) {
       const newRanking: MagicNumberRankings = {
         name: playerName,
@@ -374,9 +439,9 @@ export class SocketService {
         rank: 0, // Will be calculated below
         isRoundWinner: false
       };
-      
+
       const updatedRankings = [...currentRankings, newRanking];
-      
+
       // Sort by points and recalculate all ranks using Olympic-style ranking
       updatedRankings.sort((a, b) => {
         return b.points - a.points; // Higher points first
@@ -389,7 +454,7 @@ export class SocketService {
         }
         updatedRankings[i].rank = currentRank;
       }
-      
+
       this.magicNumberRankingsSubject.next(updatedRankings);
     }
   }
@@ -397,7 +462,7 @@ export class SocketService {
   removeMagicNumberPlayer(playerId: string) {
     const currentRankings = this.magicNumberRankingsSubject.value;
     const updatedRankings = currentRankings.filter(r => r.playerId !== playerId);
-    
+
     // Recalculate Olympic-style ranks
     if (updatedRankings.length > 0) {
       updatedRankings.sort((a, b) => {
@@ -416,7 +481,7 @@ export class SocketService {
         updatedRankings[i].rank = currentRank;
       }
     }
-    
+
     this.magicNumberRankingsSubject.next(updatedRankings);
   }
 }
