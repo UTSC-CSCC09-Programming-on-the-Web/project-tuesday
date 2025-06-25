@@ -1,28 +1,32 @@
-<div class="game-select-wrapper">
-  <h1>Lobby Code: {{lobbyCode}}</h1>
-  <h2>{{lobbyName}}</h2>
-
-  <div class="player-list">
-    <h3>Players</h3>
-    <ul>
-      <li *ngFor="let player of players">{{player}}</li>
-    </ul>
-    <button mat-button color="primary" (click)="openNewTab()">Add Player</button>
-  </div>
-
-  <div class="game-list">
-
-  </div>
-  <div [ngSwitch]="selectedGame">
-    <div *ngSwitchCase="''">
-      <div>Please select a game</div>
-      <mat-action-list #shoes>
-        @for (game of games; track game) {
-          <mat-list-item (click)="playGame(game)">{{game}}</mat-list-item>
-        }
-      </mat-action-list>
+<div class="game-select-wrapper waiting-containe row">
+  <div class="lobby-header col-12">
+    <div class="lobby-code-display">
+      <span class="lobby-label">Lobby Code</span>
+      <span class="lobby-code">{{ lobbyCode }}</span>
     </div>
-    <app-desk-magic-number *ngSwitchCase="'Magic Number'"></app-desk-magic-number>
   </div>
+  <div class=" col-3">
+    <div class="player-list player-info">
+      <h2>Players</h2>
+      <ul class="game-list">
+        <li class="player-item"*ngFor="let player of players">{{player}}</li>
+      </ul>
+      <button class="leave-btn" color="primary" (click)="openNewTab()">Add Player</button>
+    </div>
+  </div>
+  <div class=" col-6">
 
+    <div [ngSwitch]="selectedGame">
+      <div *ngSwitchCase="''">
+        <div class="player-info">
+          <h2>Select a Game</h2>
+        </div>
+        <ul class="game-list">
+          <li class="game-item" *ngFor="let game of games" (click)="playGame(game)">{{game}}</li>
+        </ul>
+      </div>
+      <app-desk-magic-number *ngSwitchCase="'Magic Number'"></app-desk-magic-number>
+    </div>
+  </div>
+  <div class="col-3"></div>
 </div>
