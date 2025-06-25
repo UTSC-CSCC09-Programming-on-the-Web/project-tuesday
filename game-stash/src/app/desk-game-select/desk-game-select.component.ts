@@ -38,6 +38,9 @@ export class DeskGameSelectComponent {
 
   games: string[] = [
     'Magic Number',
+    'exampleGame1',
+    'exampleGame2',
+    'exampleGame3',
   ];
 
   selectedGame: string = '';

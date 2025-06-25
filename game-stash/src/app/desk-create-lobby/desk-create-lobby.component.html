@@ -1,16 +1,9 @@
-<div class="lobby-wrapper">
-  <div class="create-lobby-wrapper" *ngIf="!loading">
-    <div class="lobby-header">
-      <h1>Create a Lobby</h1>
+<div class="lobby-wrapper waiting-containe">
+  <div class="create-lobby-wrapper row" *ngIf="!loading">
+    <div class="lobby-header col-12">
+      <h1>Game Stash</h1>
     </div>
-    <form>
-      <mat-form-field>
-        <mat-label for="lobbyName">Lobby Name</mat-label>
-        <input matInput id="lobbyName" type="text" [(ngModel)]="lobbyName" name="lobbyName" required>
-      </mat-form-field>
-      <br>
-      <button mat-button type="submit" (click)="createLobby()">Create Lobby</button>
-    </form>
+    <button class="leave-btn content"(click)="createLobby()">Start a Lobby</button>
   </div>
   <div class="loading" *ngIf="loading">
     <h2>Creating Lobby...</h2>
