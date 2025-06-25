@@ -1,4 +1,5 @@
-<div class="rankings-container">  <header class="rankings-header">
+<div class="rankings-container">
+  <header class="rankings-header">
     <h1>
       @if (isGameOver()) {
         Final Results
@@ -33,7 +34,7 @@
     }
   </header>
 
-  <main class="rankings-content">    <div class="player-result">      <div class="result-card" [class.winner]="getPlayerPoints() === 1" [class.podium]="playerRank() <= 3">
+  <main class="rankings-content">    <div class="player-result">      <div class="result-card" [class.winner]="playerRank() === 1" [class.podium]="playerRank() <= 3">
         <div class="rank-badge">
           <span class="rank-text">{{ playerRank() }}{{ getRankSuffix(playerRank()) }} Place</span>
         </div><h2>{{ playerName() }}</h2>
@@ -44,7 +45,7 @@
     <div class="all-rankings">
       <h3>All Players</h3>
       <div class="rankings-list">        @for (player of rankings(); track player.name) {
-          <div class="ranking-item" [class.current-player]="player.name === playerName()" [class.winner]="player.points === 1">
+          <div class="ranking-item" [class.current-player]="player.name === playerName()" [class.winner]="player.rank === 1">
             <div class="rank-position">
               <span class="rank-number">{{ player.rank }}</span>
             </div><div class="player-details">

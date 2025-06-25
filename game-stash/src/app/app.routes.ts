@@ -1,29 +1,31 @@
 import { Routes } from '@angular/router';
-import { MobileGameSelectComponent } from './mobile-game-select/mobile-game-select.component';
 import { DeskCreateLobbyComponent } from './desk-create-lobby/desk-create-lobby.component';
 import { DeskGameSelectComponent } from './desk-game-select/desk-game-select.component';
 import { DeviceRedirectComponent } from './device-redirect/device-redirect.component';
 
 export const routes: Routes = [
   { path: 'lobby', component: DeskGameSelectComponent },
-  { path: 'player/:lobbyCode', component: MobileGameSelectComponent },
-  { path: 'create-lobby', component: DeskCreateLobbyComponent},
+  { path: 'player/:lobbyCode', redirectTo: '/mobile-join-lobby', pathMatch: 'full' },
+  { path: 'create-lobby', component: DeskCreateLobbyComponent },
   {
-    path: 'phone-join-lobby',
-    loadComponent: () => import('./phone-join-lobby/phone-join-lobby.component').then(m => m.PhoneJoinLobbyComponent)
+    path: 'mobile-join-lobby',
+    loadComponent: () => import('./mobile-join-lobby/mobile-join-lobby.component').then(m => m.MobileJoinLobbyComponent)
   },
   {
-    path: 'phone-lobby',
-    loadComponent: () => import('./phone-lobby/phone-lobby.component').then(m => m.PhoneLobbyComponent)  },  {
-    path: 'phone-guessing-game',
-    loadComponent: () => import('./phone-guessing-game/phone-guessing-game.component').then(m => m.PhoneGuessingGameComponent)
-  },  {
-    path: 'phone-guessing-game-waiting',
-    loadComponent: () => import('./phone-guessing-game-waiting/phone-guessing-game-waiting.component').then(m => m.PhoneGuessingGameWaitingComponent)
+    path: 'mobile-lobby',
+    loadComponent: () => import('./mobile-lobby/mobile-lobby.component').then(m => m.MobileLobbyComponent)
   },
   {
-    path: 'phone-rankings',
-    loadComponent: () => import('./phone-rankings/phone-rankings.component').then(m => m.PhoneRankingsComponent)
+    path: 'mobile-magic-number',
+    loadComponent: () => import('./mobile-magic-number/mobile-magic-number.component').then(m => m.MobileMagicNumberComponent)
+  },
+  {
+    path: 'mobile-magic-number-waiting',
+    loadComponent: () => import('./mobile-magic-number-waiting/mobile-magic-number-waiting.component').then(m => m.MobileMagicNumberWaitingComponent)
+  },
+  {
+    path: 'mobile-rankings',
+    loadComponent: () => import('./mobile-rankings/mobile-rankings.component').then(m => m.MobileRankingsComponent)
   },
   { path: '', component: DeviceRedirectComponent },
   { path: '', redirectTo: '/', pathMatch: 'full' }, // default route

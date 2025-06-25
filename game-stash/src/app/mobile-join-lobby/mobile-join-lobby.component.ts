@@ -3,31 +3,65 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { QrScannerComponent } from '../components/qr-scanner/qr-scanner.component';
-import { io, Socket } from 'socket.io-client';
+import { SocketService } from '../services/socket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-phone-join-lobby',
+  selector: 'app-mobile-join-lobby',
   standalone: true,
   imports: [CommonModule, FormsModule, QrScannerComponent],
-  templateUrl: './phone-join-lobby.component.html',
-  styleUrls: ['./phone-join-lobby.component.css']
+  templateUrl: './mobile-join-lobby.component.html',
+  styleUrls: ['./mobile-join-lobby.component.css']
 })
-export class PhoneJoinLobbyComponent implements OnDestroy {
+
+export class MobileJoinLobbyComponent implements OnDestroy {
   playerName = signal('');
   lobbyCode = signal('');
   isJoining = signal(false);
   errorMessage = signal('');
   showQrScanner = signal(false);
-  
-  private socket: Socket;
+
+  players = signal<string[]>([])
+
+  private subscriptions: Subscription[] = [];
 
   // Computed properties for validation
   playerNameLength = computed(() => this.playerName().length);
   isPlayerNameValid = computed(() => this.playerName().trim().length >= 1);
   isLobbyCodeValid = computed(() => /^[A-Z0-9]{6}$/.test(this.lobbyCode()));
-  isFormValid = computed(() => this.isPlayerNameValid() && this.isLobbyCodeValid() && !this.isJoining());  constructor(private router: Router) {
-    // Initialize socket but don't connect yet
-    this.socket = io("http://localhost:3000/", { autoConnect: false });
+  isFormValid = computed(() => this.isPlayerNameValid() && this.isLobbyCodeValid() && !this.isJoining());
+
+  constructor(
+    private router: Router,
+    private socketService: SocketService,
+  ) {
+    // Subscribe to join lobby events
+    this.subscriptions.push(
+      this.socketService.joinLobbySuccess$.subscribe(() => {
+        console.log('Join lobby successful, navigating to mobile-lobby');
+        this.isJoining.set(false); // Reset joining state
+        this.router.navigate(['/mobile-lobby'], {
+          queryParams: {
+            lobbyCode: this.lobbyCode(),
+            playerName: this.playerName().trim()
+          }
+        });
+      })
+    );
+
+    this.subscriptions.push(
+      this.socketService.joinLobbyDenied$.subscribe((data) => {
+        console.log('Join lobby denied:', data);
+        this.isJoining.set(false);
+        this.errorMessage.set(data.reason || 'Unable to join lobby.');
+      })
+    );
+
+    this.subscriptions.push(
+      this.socketService.players$.subscribe(players => {
+        this.players.set(players);
+      })
+    );
   }
 
   onJoinLobby(): void {
@@ -36,46 +70,13 @@ export class PhoneJoinLobbyComponent implements OnDestroy {
     this.isJoining.set(true);
     this.errorMessage.set('');
 
-    // Connect to socket and join lobby
-    this.socket.connect();
-    
-    this.socket.on("connect", () => {
-      this.socket.emit("joinLobby", {
-        lobbyCode: this.lobbyCode(),
-        client: this.socket.id
-      });
-    });
+    // Use SocketService to join lobby
+    this.socketService.joinLobby(this.lobbyCode(), this.playerName().trim());
 
-    // Only navigate to waiting room if join is successful
-    this.socket.on('joinLobbySuccess', () => {
-      this.router.navigate(['/phone-lobby'], {
-        queryParams: {
-          lobbyCode: this.lobbyCode(),
-          playerName: this.playerName().trim()
-        }
-      });
-    });
-
-    // Handle connection errors
-    this.socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-      this.isJoining.set(false);
-      this.errorMessage.set('Failed to connect to game server. Please try again.');
-    });
-
-    // Handle joinLobbyDenied event
-    this.socket.on('joinLobbyDenied', (data) => {
-      this.isJoining.set(false);
-      this.errorMessage.set(data.reason || 'Unable to join lobby.');
-      this.socket.disconnect();
-    });
-
-    // Set a timeout in case connection takes too long
     setTimeout(() => {
       if (this.isJoining()) {
         this.isJoining.set(false);
         this.errorMessage.set('Connection timeout. Please try again.');
-        this.socket.disconnect();
       }
     }, 5000);
   }
@@ -87,7 +88,7 @@ export class PhoneJoinLobbyComponent implements OnDestroy {
   onQrCodeScanned(code: string): void {
     this.lobbyCode.set(code.toUpperCase());
     this.showQrScanner.set(false);
-    
+
     // Auto-join if player name is valid
     if (this.isPlayerNameValid()) {
       this.onJoinLobby();
@@ -105,6 +106,7 @@ export class PhoneJoinLobbyComponent implements OnDestroy {
     }
     this.lobbyCode.set(value);
   }
+
   formatPlayerName(event: any): void {
     let value = event.target.value.replace(/[^a-zA-Z0-9\s]/g, '');
     if (value.length > 20) {
@@ -114,8 +116,7 @@ export class PhoneJoinLobbyComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.socket) {
-      this.socket.disconnect();
-    }
+    // Unsubscribe from all observables
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 }

@@ -6,28 +6,25 @@
       <span class="lobby-code">{{ lobbyCode() }}</span>
     </div>
   </div>
-  <!-- Main Content -->
   <div class="content">
-    <!-- Player Info -->
     <div class="player-info">
       <h2>Welcome, {{ playerName() }}!</h2>
     </div>
-      <!-- Waiting Message -->
+
     <div class="waiting-message">
-      <div class="loading-dots" *ngIf="isWaitingForGame()">
+      <div class="loading-dots">
         <span></span>
         <span></span>
         <span></span>
       </div>
-      <h3 *ngIf="isWaitingForGame()">Waiting for the host to start the game</h3>
+      <h3>Waiting for the host to start the game</h3>
       <p class="connection-status">{{ connectionStatus() }}</p>
     </div>
-  </div>
 
-  <!-- Actions -->
-  <div class="actions">
-    <button class="leave-btn" (click)="onLeaveLobby()">
-      Leave Lobby
-    </button>
+    <div class="actions">
+      <button class="leave-btn" (click)="onLeaveLobby()">
+        Leave Lobby
+      </button>
+    </div>
   </div>
 </div>
