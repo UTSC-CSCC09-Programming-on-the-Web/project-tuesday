@@ -25,7 +25,7 @@
           <li class="game-item" *ngFor="let game of games" (click)="playGame(game)">{{game}}</li>
         </ul>
       </div>
-      <app-desk-magic-number *ngSwitchCase="'Magic Number'"></app-desk-magic-number>
+      <app-desk-magic-number *ngSwitchCase="'Magic Number'" (gameOver)="selectedGame = ''"></app-desk-magic-number>
     </div>
   </div>
   <div class="col-3"></div>

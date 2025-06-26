@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SocketService } from '../services/socket.service';
 import { Subscription } from 'rxjs';
 
-interface PlayerRanking {
+export interface PlayerRanking {
   playerId: string;
   name: string;
   guess: number;
@@ -27,26 +27,26 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   playerRank = signal(0);
   isGameOver = signal(false);
   countdown = signal(10);
-  
+
   // Signals to store data from route parameters
   lobbyCode = signal('');
   playerName = signal('');
   roundNumber = signal(1);
   selectedGame = signal('');
   guess = signal(0);
-  
+
   private countdownInterval?: number;
   private subscriptions: Subscription[] = [];
-  
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private socketService: SocketService
   ) {}
-  
+
   ngOnInit(): void {
     console.log('PhoneRankings: Component initialized');
-    
+
     // Reset all signals to default values
     this.targetNumber.set(0);
     this.rankings.set([]);
@@ -58,9 +58,9 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     this.roundNumber.set(1);
     this.selectedGame.set('');
     this.guess.set(0);
-    
+
     console.log('PhoneRankings: All signals reset to defaults');
-    
+
     // Read all parameters from route
     this.subscriptions.push(
       this.route.queryParams.subscribe(params => {
@@ -69,19 +69,19 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         const roundNumber = params['roundNumber'];
         const selectedGame = params['selectedGame'] || 'Magic Number';
         const guess = params['guess'];
-        
+
         if (!lobbyCode || !playerName) {
           console.error('PhoneRankings: Missing required parameters');
           this.router.navigate(['/mobile-join-lobby']);
           return;
         }
-        
+
         this.lobbyCode.set(lobbyCode);
         this.playerName.set(playerName);
         this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
         this.selectedGame.set(selectedGame);
         this.guess.set(guess ? parseInt(guess) : 0);
-        
+
         console.log('PhoneRankings: Loaded parameters', {
           lobbyCode: this.lobbyCode(),
           playerName: this.playerName(),
@@ -89,7 +89,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
           selectedGame: this.selectedGame(),
           guess: this.guess()
         });
-        
+
         // Determine if this is the final round
         this.isGameOver.set(this.roundNumber() >= 5);
 
@@ -103,7 +103,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         }
       })
     );
-    
+
     // Subscribe to rankings from SocketService
     this.subscriptions.push(
       this.socketService.magicNumberRankings$.subscribe(rankings => {
@@ -116,9 +116,9 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
           rank: ranking.rank,
           isRoundWinner: ranking.isRoundWinner
         }));
-        
+
         this.rankings.set(playerRankings);
-        
+
         // Find current player's rank based on socket ID
         const socketId = this.socketService.getSocketId();
         if (socketId) {
@@ -163,7 +163,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       clearInterval(this.countdownInterval);
     }
   }
-  
+
   private moveToNextRound(): void {
     // Reset round-specific parameters for next round
     console.log('PhoneRankings: Resetting round-specific state');
@@ -171,7 +171,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     this.rankings.set([]);
     this.targetNumber.set(0);
     this.playerRank.set(0);
-    
+
     const nextRound = this.roundNumber() + 1;
     console.log('PhoneRankings: Moving to next round', nextRound);
       this.router.navigate(['/mobile-magic-number'], {
@@ -192,17 +192,17 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       }
     });
   }
-  
+
   onLeaveLobby(): void {
     console.log('PhoneRankings: User clicked leave lobby');
     this.socketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }
-  
+
   getPlayerPoints(): number {
     const socketId = this.socketService.getSocketId();
     if (!socketId) return 0;
-    
+
     const playerRanking = this.rankings().find(p => p.playerId === socketId);
     return playerRanking ? playerRanking.points : 0;
   }
@@ -212,7 +212,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       .filter(player => player.isRoundWinner)
       .map(player => player.name);
   }
-  
+
   getRankSuffix(rank: number): string {
     if (rank === 1) return 'st';
     if (rank === 2) return 'nd';

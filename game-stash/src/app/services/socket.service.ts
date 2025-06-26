@@ -63,6 +63,13 @@ export class SocketService {
       })
     }
   }
+
+  endGame(gameId: string) {
+    if (gameId === 'Magic Number') {
+      this.setResponded([]);
+    }
+  }
+
   connectToSocket() {
     console.log('SocketService: connectToSocket called');
     // Initialize socket for admin/desk if not already created

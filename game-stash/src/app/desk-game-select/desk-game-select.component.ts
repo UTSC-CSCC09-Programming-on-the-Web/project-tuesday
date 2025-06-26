@@ -5,8 +5,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SocketService } from '../services/socket.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatOption, MatSelect } from '@angular/material/select';
-import { MatButton } from '@angular/material/button';
 import {MatListModule} from '@angular/material/list';
 
 @Component({
@@ -15,9 +13,6 @@ import {MatListModule} from '@angular/material/list';
     DeskMagicNumberComponent,
     CommonModule,
     MatFormFieldModule,
-    MatSelect,
-    MatOption,
-    MatButton,
     MatListModule,
   ],
   templateUrl: './desk-game-select.component.html',
@@ -67,7 +62,12 @@ export class DeskGameSelectComponent {
 
   playGame(game: string) {
     if (game === 'Magic Number') {
-      this.selectedGame = 'Magic Number';
+      if (this.players.length < 2) {
+        alert('At least 2 players are required to start the game.');
+      }
+      else {
+        this.selectedGame = 'Magic Number';
+      }
     } else {
       console.error('Game not implemented:', game);
     }
