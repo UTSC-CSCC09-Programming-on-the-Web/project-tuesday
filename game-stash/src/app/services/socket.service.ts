@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
 
+const SERVER_ADDRESS = "http://localhost:3000/";
+
 interface GameResults {
   gameId: string;
   responses: Record<string, number>;
@@ -75,7 +77,9 @@ export class SocketService {
     // Initialize socket for admin/desk if not already created
     if (!this.socket) {
       console.log('SocketService: Creating new socket connection for admin');
-      this.socket = io("http://localhost:3000/");
+      this.socket = io(SERVER_ADDRESS, {
+        transports: ["websocket", "polling"]
+      });
     }
 
     this.socket.on("welcome", (res: any) => {
@@ -170,10 +174,11 @@ export class SocketService {
 
     // Create a fresh socket for phone client
     console.log('SocketService: Creating new socket connection for phone');
-    this.socket = io("http://localhost:3000/", {
+    this.socket = io(SERVER_ADDRESS, {
       forceNew: true,  // Force a new connection
       reconnection: true,
-      timeout: 5000
+      timeout: 5000,
+      transports: ["websocket", "polling"]
     });
 
     this.socket.on("welcome", (res: any) => {
