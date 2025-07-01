@@ -8,7 +8,7 @@ Go into ./game-stash and run `ng serve --disable-host-check` to start the fronte
 run `ngrok http 4200` the port should be the port that the frontend is hosted on. /
 The mobile link will display on the terminal running ngrok
 
-## Seting up ngrok
+## Setting up ngrok
 
 1. Make an [ngrok account](https://ngrok.com/)
 
