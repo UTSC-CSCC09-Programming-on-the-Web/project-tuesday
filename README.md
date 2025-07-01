@@ -42,7 +42,7 @@ tunnels:
 	frontend:
 		proto: http
 		addr: 4200
-backend:
-	proto: http
-	addr: 3000
+	backend:
+		proto: http
+		addr: 3000
 ```
