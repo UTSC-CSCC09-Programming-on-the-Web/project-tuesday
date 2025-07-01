@@ -32,4 +32,17 @@ Go into ./game-stash and run `ng serve --disable-host-check` to start the fronte
 
 3. On the ngrok website again, find your **auth token**, and copy it down
 
-4. We are going to change our ngrok configuration in order to serve our webapp. Run `ngrok config check` to find the location of your ngrok.yml configuration file, and **replace it with the one found in this repository** (don't forget to paste in your auth token as well).
+4. We are going to change our ngrok configuration in order to serve our webapp. Run `ngrok config check` to find the location of your ngrok.yml configuration file, and **replace it with the following** (don't forget to paste in your auth token as well).
+
+```
+version: "3"
+agent:
+	authtoken: # AUTH TOKEN HERE
+tunnels:
+	frontend:
+		proto: http
+		addr: 4200
+backend:
+	proto: http
+	addr: 3000
+```
