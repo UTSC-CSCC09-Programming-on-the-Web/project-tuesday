@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
@@ -7,6 +7,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
+import { AuthService, User } from '../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-desk-create-lobby',
@@ -22,7 +24,7 @@ import { Router } from '@angular/router';
   templateUrl: './desk-create-lobby.component.html',
   styleUrl: './desk-create-lobby.component.css'
 })
-export class DeskCreateLobbyComponent  {
+export class DeskCreateLobbyComponent implements OnInit, OnDestroy {
   /*
   Checklist for creating a new lobby:
   - button to create a new lobby
@@ -35,10 +37,48 @@ export class DeskCreateLobbyComponent  {
 
   lobbyName: string = '';
   lobbyCode: string = '';
-
   loading: boolean = false;
+  user: User | null = null;
+  
+  private userSubscription?: Subscription;
 
-  constructor (private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    // Subscribe to current user
+    this.userSubscription = this.authService.currentUser$.subscribe(user => {
+      this.user = user;
+      
+      // If user is not authenticated, redirect to login
+      if (!user) {
+        this.router.navigate(['/desk-login']);
+        return;
+      }
+      
+      // If user doesn't have active subscription, redirect to account page
+      if (!this.authService.hasActiveSubscription()) {
+        this.router.navigate(['/user-account']);
+        return;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
+  }
+
+  goToUserAccount(): void {
+    this.router.navigate(['/user-account'], { queryParams: { from: 'menu' } });
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
 
   /* ID generator gotten from: https://stackoverflow.com/questions/1349404/generate-a-string-of-random-characters */
   makeId(length: number): string {

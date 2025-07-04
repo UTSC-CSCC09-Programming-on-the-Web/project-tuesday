@@ -2,11 +2,16 @@ import { Routes } from '@angular/router';
 import { DeskCreateLobbyComponent } from './desk-create-lobby/desk-create-lobby.component';
 import { DeskGameSelectComponent } from './desk-game-select/desk-game-select.component';
 import { DeviceRedirectComponent } from './device-redirect/device-redirect.component';
+import { DeskLoginComponent } from './desk-login/desk-login.component';
+import { UserAccountComponent } from './user-account/user-account.component';
 
 export const routes: Routes = [
+  { path: 'desk-login', component: DeskLoginComponent },
+  { path: 'user-account', component: UserAccountComponent },
   { path: 'lobby', component: DeskGameSelectComponent },
   { path: 'player/:lobbyCode', redirectTo: '/mobile-join-lobby', pathMatch: 'full' },
   { path: 'create-lobby', component: DeskCreateLobbyComponent },
+  { path: 'desk-create-lobby', component: DeskCreateLobbyComponent },
   {
     path: 'mobile-join-lobby',
     loadComponent: () => import('./mobile-join-lobby/mobile-join-lobby.component').then(m => m.MobileJoinLobbyComponent)
