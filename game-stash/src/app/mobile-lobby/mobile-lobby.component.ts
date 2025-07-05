@@ -25,7 +25,7 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
     private router: Router,
     private socketService: SocketService
   ) { }
-  
+
   ngOnInit(): void {
     // Get lobby details from query parameters
     this.subscriptions.push(
@@ -64,7 +64,7 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
   private navigateToGame(gameId: string): void {
     console.log('PhoneLobby: Navigating to game:', gameId);
 
-    this.router.navigate(['/mobile-magic-number'], {
+    this.router.navigate(['/mobile-load-balancing'], {
       queryParams: {
         lobbyCode: this.lobbyCode(),
         playerName: this.playerName(),
@@ -72,6 +72,14 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
         roundNumber: 1
       }
     });
+    // this.router.navigate(['/mobile-magic-number'], {
+    //   queryParams: {
+    //     lobbyCode: this.lobbyCode(),
+    //     playerName: this.playerName(),
+    //     selectedGame: gameId,
+    //     roundNumber: 1
+    //   }
+    // });
   }
 
   ngOnDestroy(): void {

@@ -16,6 +16,10 @@ export const routes: Routes = [
     loadComponent: () => import('./mobile-lobby/mobile-lobby.component').then(m => m.MobileLobbyComponent)
   },
   {
+    path: 'mobile-load-balancing',
+    loadComponent: () => import('./mobile-load-balancing/mobile-load-balancing.component').then(m => m.MobileLoadBalancingComponent)
+  },
+  {
     path: 'mobile-magic-number',
     loadComponent: () => import('./mobile-magic-number/mobile-magic-number.component').then(m => m.MobileMagicNumberComponent)
   },
