@@ -1,8 +1,7 @@
 import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
-import { SocketService } from '../services/socket.service';
+import { SocketService, PlayerRanking } from '../services/socket.service';
 import {MatListModule} from '@angular/material/list';
 import { CommonModule } from '@angular/common';
-import { PlayerRanking } from '../mobile-rankings/mobile-rankings.component';
 
 @Component({
   selector: 'app-desk-magic-number',
@@ -53,18 +52,8 @@ export class DeskMagicNumberComponent implements OnInit {
       this.targetNumber.set(targetNumber);
     });
 
-    this.socketService.magicNumberRankings$.subscribe(rankings => {
-      // Convert MagicNumberRankings to PlayerRanking format for display
-      const playerRankings: PlayerRanking[] = rankings.map(ranking => ({
-        playerId: ranking.playerId,
-        name: ranking.name,
-        guess: ranking.guess,
-        points: ranking.points,
-        rank: ranking.rank,
-        isRoundWinner: ranking.isRoundWinner
-      }));
-
-      this.rankings.set(playerRankings);
+    this.socketService.playerRankings$.subscribe(rankings => {
+      this.rankings.set(rankings);
     })
 
     this.startGame();

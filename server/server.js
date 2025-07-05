@@ -8,7 +8,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:4200", // This must match the frontend's URL
-  }
+    credentials: true
+  }, 
 });
 const PORT = process.env.PORT || 3000;
 

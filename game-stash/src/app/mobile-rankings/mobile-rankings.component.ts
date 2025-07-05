@@ -1,17 +1,10 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SocketService } from '../services/socket.service';
+import { SocketService, PlayerRanking } from '../services/socket.service';
 import { Subscription } from 'rxjs';
 
-export interface PlayerRanking {
-  playerId: string;
-  name: string;
-  guess: number;
-  points: number;
-  rank: number;
-  isRoundWinner: boolean;
-}
+
 
 @Component({
   selector: 'app-mobile-rankings',
@@ -106,18 +99,8 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
     // Subscribe to rankings from SocketService
     this.subscriptions.push(
-      this.socketService.magicNumberRankings$.subscribe(rankings => {
-        // Convert MagicNumberRankings to PlayerRanking format for display
-        const playerRankings: PlayerRanking[] = rankings.map(ranking => ({
-          playerId: ranking.playerId,
-          name: ranking.name,
-          guess: ranking.guess,
-          points: ranking.points,
-          rank: ranking.rank,
-          isRoundWinner: ranking.isRoundWinner
-        }));
-
-        this.rankings.set(playerRankings);
+      this.socketService.playerRankings$.subscribe(rankings => {
+        this.rankings.set(rankings);
 
         // Find current player's rank based on socket ID
         const socketId = this.socketService.getSocketId();

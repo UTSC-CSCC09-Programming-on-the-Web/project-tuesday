@@ -10,13 +10,22 @@ interface GameResults {
   targetNumber?: number;
 }
 
-interface MagicNumberRankings {
+interface gameState {
+  players: string[];
+  responded: string[];
+  selectedGame: string;
+  playerRankings: PlayerRanking[];
+  targetNumber: number;
+}
+
+export interface PlayerRanking {
   name: string;
   playerId: string;
-  guess: number;
   points: number;
   rank: number;
   isRoundWinner: boolean;
+
+  data: number; //variable field used differently by different games
 }
 
 @Injectable({
@@ -39,8 +48,8 @@ export class SocketService {
   private selectedGameSubject = new BehaviorSubject<string>('');
   selectedGame$ = this.selectedGameSubject.asObservable();
 
-  private magicNumberRankingsSubject = new BehaviorSubject<MagicNumberRankings[]>([]);
-  magicNumberRankings$ = this.magicNumberRankingsSubject.asObservable();
+  private playerRankingsSubject = new BehaviorSubject<PlayerRanking[]>([]);
+  playerRankings$ = this.playerRankingsSubject.asObservable();
 
   private targetNumberSubject = new BehaviorSubject<number>(0);
   targetNumber$ = this.targetNumberSubject.asObservable();
@@ -152,7 +161,7 @@ export class SocketService {
           console.log("Answer number:", answerNumber);
           console.log("Winners:", winners);
 
-          this.updateMagicNumberRankings(responses, winners);
+          this.updateplayerRankings(responses, winners);
 
           break;
         default:
@@ -247,7 +256,7 @@ export class SocketService {
           console.log("Answer number:", answerNumber);
           console.log("Winners:", winners);
 
-          this.updateMagicNumberRankings(responses, winners);
+          this.updateplayerRankings(responses, winners);
 
           break;
         default:
@@ -361,13 +370,13 @@ export class SocketService {
     }
   }
 
-  // MagicNumberRankings management methods
-  private updateMagicNumberRankings(
+  // playerRankings management methods
+  private updateplayerRankings(
     responses: Record<string, number>,
     winners: string[],
   ) {
-    const currentRankings = this.magicNumberRankingsSubject.value;
-    const updatedRankings: MagicNumberRankings[] = [];
+    const currentRankings = this.playerRankingsSubject.value;
+    const updatedRankings: PlayerRanking[] = [];
 
     // Create or update rankings for each player
     for (const [playerId, guess] of Object.entries(responses)) {
@@ -377,18 +386,18 @@ export class SocketService {
       let existingRanking = currentRankings.find(r => r.playerId === playerId);
 
       if (existingRanking) {
-        existingRanking.guess = guess;
         existingRanking.points += isWinner ? 1 : 0;
         existingRanking.isRoundWinner = isWinner;
         updatedRankings.push({ ...existingRanking });
       } else {
-        const newRanking: MagicNumberRankings = {
+        const newRanking: PlayerRanking = {
           name: this.getPlayerName(playerId),
           playerId: playerId,
-          guess: guess,
           points: isWinner ? 1 : 0,
           rank: 0, // Will be calculated below
-          isRoundWinner: isWinner
+          isRoundWinner: isWinner,
+
+          data: guess //guess?
         };
         updatedRankings.push(newRanking);
       }
@@ -419,7 +428,7 @@ export class SocketService {
       }
     }
 
-    this.magicNumberRankingsSubject.next(updatedRankings);
+    this.playerRankingsSubject.next(updatedRankings);
     console.log("Updated Magic Number Rankings:", updatedRankings);
   }
 
@@ -429,27 +438,28 @@ export class SocketService {
     return playerId.substring(0, 8) + '...';
   }
 
-  // Public methods for MagicNumberRankings management
-  getMagicNumberRankings(): MagicNumberRankings[] {
-    return this.magicNumberRankingsSubject.value;
+  // Public methods for playerRankings management
+  getplayerRankings(): PlayerRanking[] {
+    return this.playerRankingsSubject.value;
   }
 
-  clearMagicNumberRankings() {
-    this.magicNumberRankingsSubject.next([]);
+  clearplayerRankings() {
+    this.playerRankingsSubject.next([]);
   }
 
   addMagicNumberPlayer(playerId: string, playerName: string) {
-    const currentRankings = this.magicNumberRankingsSubject.value;
+    const currentRankings = this.playerRankingsSubject.value;
     const existingPlayer = currentRankings.find(r => r.playerId === playerId);
 
     if (!existingPlayer) {
-      const newRanking: MagicNumberRankings = {
+      const newRanking: PlayerRanking = {
         name: playerName,
         playerId: playerId,
-        guess: 0,
         points: 0,
         rank: 0, // Will be calculated below
-        isRoundWinner: false
+        isRoundWinner: false,
+
+        data: 0 //Magic NUmber guess?
       };
 
       const updatedRankings = [...currentRankings, newRanking];
@@ -467,12 +477,12 @@ export class SocketService {
         updatedRankings[i].rank = currentRank;
       }
 
-      this.magicNumberRankingsSubject.next(updatedRankings);
+      this.playerRankingsSubject.next(updatedRankings);
     }
   }
 
   removeMagicNumberPlayer(playerId: string) {
-    const currentRankings = this.magicNumberRankingsSubject.value;
+    const currentRankings = this.playerRankingsSubject.value;
     const updatedRankings = currentRankings.filter(r => r.playerId !== playerId);
 
     // Recalculate Olympic-style ranks
@@ -494,6 +504,6 @@ export class SocketService {
       }
     }
 
-    this.magicNumberRankingsSubject.next(updatedRankings);
+    this.playerRankingsSubject.next(updatedRankings);
   }
 }
