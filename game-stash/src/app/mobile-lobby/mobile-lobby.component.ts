@@ -2,16 +2,15 @@ import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SocketService } from '../services/socket.service';
-import { Subscription } from 'rxjs';
+import { Subscription, map } from 'rxjs';
 
 @Component({
   selector: 'app-mobile-lobby',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './mobile-lobby.component.html',
-  styleUrls: ['./mobile-lobby.component.css']
+  styleUrls: ['./mobile-lobby.component.css'],
 })
-
 export class MobileLobbyComponent implements OnInit, OnDestroy {
   lobbyCode = signal('');
   playerName = signal('');
@@ -23,13 +22,13 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService
-  ) { }
-  
+    private socketService: SocketService,
+  ) {}
+
   ngOnInit(): void {
     // Get lobby details from query parameters
     this.subscriptions.push(
-      this.route.queryParams.subscribe(params => {
+      this.route.queryParams.subscribe((params) => {
         const lobbyCode = params['lobbyCode'];
         const playerName = params['playerName'];
 
@@ -43,21 +42,23 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
         this.playerName.set(playerName);
 
         this.setupSocketSubscriptions();
-      })
+      }),
     );
   }
 
   private setupSocketSubscriptions(): void {
     // Subscribe to selected game for navigation
     this.subscriptions.push(
-      this.socketService.selectedGame$.subscribe(gameId => {
-        if (gameId) {
-          console.log("Received game start event:", gameId);
-          this.selectedGame.set(gameId);
+      this.socketService.gameState$
+        .pipe(map((gameState) => gameState.selectedGame))
+        .subscribe((gameId) => {
+          if (gameId) {
+            console.log('Received game start event:', gameId);
+            this.selectedGame.set(gameId);
 
-          this.navigateToGame(gameId);
-        }
-      })
+            this.navigateToGame(gameId);
+          }
+        }),
     );
   }
 
@@ -69,13 +70,13 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
         lobbyCode: this.lobbyCode(),
         playerName: this.playerName(),
         selectedGame: gameId,
-        roundNumber: 1
-      }
+        roundNumber: 1,
+      },
     });
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   onLeaveLobby(): void {

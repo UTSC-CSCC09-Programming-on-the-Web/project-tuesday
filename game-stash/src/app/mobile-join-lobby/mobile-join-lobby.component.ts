@@ -4,16 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { QrScannerComponent } from '../components/qr-scanner/qr-scanner.component';
 import { SocketService } from '../services/socket.service';
-import { Subscription } from 'rxjs';
+import { Subscription, map } from 'rxjs';
 
 @Component({
   selector: 'app-mobile-join-lobby',
   standalone: true,
   imports: [CommonModule, FormsModule, QrScannerComponent],
   templateUrl: './mobile-join-lobby.component.html',
-  styleUrls: ['./mobile-join-lobby.component.css']
+  styleUrls: ['./mobile-join-lobby.component.css'],
 })
-
 export class MobileJoinLobbyComponent implements OnDestroy {
   playerName = signal('');
   lobbyCode = signal('');
@@ -21,7 +20,7 @@ export class MobileJoinLobbyComponent implements OnDestroy {
   errorMessage = signal('');
   showQrScanner = signal(false);
 
-  players = signal<string[]>([])
+  players = signal<string[]>([]);
 
   private subscriptions: Subscription[] = [];
 
@@ -29,7 +28,10 @@ export class MobileJoinLobbyComponent implements OnDestroy {
   playerNameLength = computed(() => this.playerName().length);
   isPlayerNameValid = computed(() => this.playerName().trim().length >= 1);
   isLobbyCodeValid = computed(() => /^[A-Z0-9]{6}$/.test(this.lobbyCode()));
-  isFormValid = computed(() => this.isPlayerNameValid() && this.isLobbyCodeValid() && !this.isJoining());
+  isFormValid = computed(
+    () =>
+      this.isPlayerNameValid() && this.isLobbyCodeValid() && !this.isJoining(),
+  );
 
   constructor(
     private router: Router,
@@ -43,10 +45,10 @@ export class MobileJoinLobbyComponent implements OnDestroy {
         this.router.navigate(['/mobile-lobby'], {
           queryParams: {
             lobbyCode: this.lobbyCode(),
-            playerName: this.playerName().trim()
-          }
+            playerName: this.playerName().trim(),
+          },
         });
-      })
+      }),
     );
 
     this.subscriptions.push(
@@ -54,14 +56,12 @@ export class MobileJoinLobbyComponent implements OnDestroy {
         console.log('Join lobby denied:', data);
         this.isJoining.set(false);
         this.errorMessage.set(data.reason || 'Unable to join lobby.');
-      })
+      }),
     );
 
-    this.subscriptions.push(
-      this.socketService.players$.subscribe(players => {
-        this.players.set(players);
-      })
-    );
+    this.socketService.gameState$
+      .pipe(map((gameState) => gameState.players))
+      .subscribe((players) => this.players.set(players));
   }
 
   onJoinLobby(): void {
@@ -117,6 +117,6 @@ export class MobileJoinLobbyComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     // Unsubscribe from all observables
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

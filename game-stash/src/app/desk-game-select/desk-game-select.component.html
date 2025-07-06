@@ -5,27 +5,37 @@
       <span class="lobby-code">{{ lobbyCode }}</span>
     </div>
   </div>
-  <div class=" col-3">
+  <div class="col-3">
     <div class="player-list player-info">
       <h2>Players</h2>
       <ul class="game-list">
-        <li class="player-item"*ngFor="let player of players">{{player}}</li>
+        <li class="player-item" *ngFor="let player of players">{{ player }}</li>
       </ul>
-      <button class="leave-btn" color="primary" (click)="openNewTab()">Add Player</button>
+      <button class="leave-btn" color="primary" (click)="openNewTab()">
+        Add Player
+      </button>
     </div>
   </div>
-  <div class=" col-6">
-
+  <div class="col-6">
     <div [ngSwitch]="selectedGame">
       <div *ngSwitchCase="''">
         <div class="player-info">
           <h2>Select a Game</h2>
         </div>
         <ul class="game-list">
-          <li class="game-item" *ngFor="let game of games" (click)="playGame(game)">{{game}}</li>
+          <li
+            class="game-item"
+            *ngFor="let game of games"
+            (click)="playGame(game)"
+          >
+            {{ game }}
+          </li>
         </ul>
       </div>
-      <app-desk-magic-number *ngSwitchCase="'Magic Number'" (gameOver)="selectedGame = ''"></app-desk-magic-number>
+      <app-desk-magic-number
+        *ngSwitchCase="'Magic Number'"
+        (gameOver)="selectedGame = ''"
+      ></app-desk-magic-number>
     </div>
   </div>
   <div class="col-3"></div>

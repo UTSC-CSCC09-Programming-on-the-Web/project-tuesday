@@ -4,10 +4,14 @@
     <p class="player-info">{{ playerName() }} • Lobby: {{ lobbyCode() }}</p>
   </header>
 
-  <main class="waiting-content">    <div class="submission-confirmation">
+  <main class="waiting-content">
+    <div class="submission-confirmation">
       <h2>Guess Submitted!</h2>
-      <p class="guess-display">Your guess: <span class="guess-number">{{ guess() }}</span></p>
-    </div>    <div class="waiting-animation">
+      <p class="guess-display">
+        Your guess: <span class="guess-number">{{ guess() }}</span>
+      </p>
+    </div>
+    <div class="waiting-animation">
       <div class="loading-dots">
         <span></span>
         <span></span>
@@ -18,8 +22,6 @@
   </main>
 
   <footer class="waiting-footer">
-    <button (click)="onLeaveLobby()" class="leave-btn">
-      Leave Lobby
-    </button>
+    <button (click)="onLeaveLobby()" class="leave-btn">Leave Lobby</button>
   </footer>
 </div>

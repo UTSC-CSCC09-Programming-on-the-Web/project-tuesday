@@ -16,16 +16,18 @@
         (codeScannerResult)="onCodeResult($event)"
         (permissionResponse)="onPermissionResponse($event)"
         (scanError)="onScanError($event)"
-        class="qr-camera">
+        class="qr-camera"
+      >
       </zxing-scanner>
-      
+
       <!-- Scanning overlay -->
       <div class="scan-overlay">
         <div class="scan-frame">
           <div class="corner top-left"></div>
           <div class="corner top-right"></div>
           <div class="corner bottom-left"></div>
-          <div class="corner bottom-right"></div>        </div>
+          <div class="corner bottom-right"></div>
+        </div>
         <p class="scan-instruction">Position QR code within the frame</p>
       </div>
     </div>
@@ -37,7 +39,10 @@
     </div>
 
     <!-- Camera controls -->
-    <div class="camera-controls" *ngIf="hasMultipleCameras() && hasPermission()">
+    <div
+      class="camera-controls"
+      *ngIf="hasMultipleCameras() && hasPermission()"
+    >
       <button class="switch-camera-btn" (click)="switchCamera()">
         📷 Switch Camera
       </button>

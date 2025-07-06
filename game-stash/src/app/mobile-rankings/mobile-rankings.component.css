@@ -13,9 +13,13 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
   color: white;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -49,7 +53,11 @@
 .round-winner-display {
   margin: 20px 0;
   padding: 15px 20px;
-  background: linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(255, 193, 7, 0.1));
+  background: linear-gradient(
+    45deg,
+    rgba(255, 215, 0, 0.2),
+    rgba(255, 193, 7, 0.1)
+  );
   border: 2px solid rgba(255, 215, 0, 0.5);
   border-radius: var(--border-radius);
   backdrop-filter: blur(10px);
@@ -126,12 +134,20 @@
 }
 
 .result-card.winner {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 193, 7, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.3),
+    rgba(255, 193, 7, 0.2)
+  );
   border-color: #ffd700;
 }
 
 .result-card.podium {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25),
+    rgba(255, 255, 255, 0.15)
+  );
   border-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -233,7 +249,11 @@
 }
 
 .ranking-item.winner {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 193, 7, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.2),
+    rgba(255, 193, 7, 0.1)
+  );
   border-color: #ffd700;
 }
 
@@ -327,40 +347,40 @@
   .rankings-container {
     padding: 15px;
   }
-  
+
   .rankings-header h1 {
     font-size: 2rem;
   }
-  
+
   .round-winner-display {
     margin: 15px 0;
     padding: 12px 15px;
   }
-  
+
   .winner-text {
     font-size: 1rem;
   }
-  
+
   .winner-name {
     font-size: 1.1rem;
   }
-  
+
   .multiple-winners .winner-name {
     padding: 4px 8px;
     font-size: 1rem;
   }
-    .result-card {
+  .result-card {
     padding: 20px;
   }
-  
+
   .result-card h2 {
     font-size: 1.5rem;
   }
-  
+
   .ranking-item {
     padding: 12px;
   }
-    .rank-position {
+  .rank-position {
     min-width: 50px;
     margin-right: 10px;
   }

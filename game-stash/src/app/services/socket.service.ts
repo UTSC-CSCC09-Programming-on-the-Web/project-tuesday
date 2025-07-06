@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
 
-const SERVER_ADDRESS = "http://localhost:3000/";
+const SERVER_ADDRESS = 'http://localhost:3000/';
 
 interface GameResults {
   gameId: string;
@@ -10,12 +10,13 @@ interface GameResults {
   targetNumber?: number;
 }
 
-interface gameState {
+export interface GameState {
   players: string[];
   responded: string[];
   selectedGame: string;
   playerRankings: PlayerRanking[];
-  targetNumber: number;
+
+  data: number; //implicit value for different games
 }
 
 export interface PlayerRanking {
@@ -29,30 +30,24 @@ export interface PlayerRanking {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class SocketService {
-
   private socket: any = null;
 
   private lobbyName: string = '';
   private lobbyCode: string = '';
 
-  private playersSubject = new BehaviorSubject<string[]>([]);
-  players$ = this.playersSubject.asObservable();
+  private gameStateSubject = new BehaviorSubject<GameState>({
+    players: [],
+    responded: [],
+    selectedGame: '',
+    playerRankings: [],
 
-  private respondedSubject = new BehaviorSubject<string[]>([]);
-  responded$ = this.respondedSubject.asObservable();
+    data: 0,
+  });
 
-  private selectedGameSubject = new BehaviorSubject<string>('');
-  selectedGame$ = this.selectedGameSubject.asObservable();
-
-  private playerRankingsSubject = new BehaviorSubject<PlayerRanking[]>([]);
-  playerRankings$ = this.playerRankingsSubject.asObservable();
-
-  private targetNumberSubject = new BehaviorSubject<number>(0);
-  targetNumber$ = this.targetNumberSubject.asObservable();
+  gameState$ = this.gameStateSubject.asObservable();
 
   private joinLobbySuccessSubject = new Subject<void>();
   joinLobbySuccess$ = this.joinLobbySuccessSubject.asObservable();
@@ -64,14 +59,14 @@ export class SocketService {
   private gameRoundCompleteSubject = new Subject<void>();
   gameRoundComplete$ = this.gameRoundCompleteSubject.asObservable();
 
-  constructor() { }
+  constructor() {}
 
   startGame(gameId: string) {
     if (gameId === 'Magic Number') {
-      this.socket.emit("startGame", {
+      this.socket.emit('startGame', {
         gameId: gameId,
-        lobbyCode: this.lobbyCode
-      })
+        lobbyCode: this.lobbyCode,
+      });
     }
   }
 
@@ -87,55 +82,60 @@ export class SocketService {
     if (!this.socket) {
       console.log('SocketService: Creating new socket connection for admin');
       this.socket = io(SERVER_ADDRESS, {
-        transports: ["websocket", "polling"]
+        transports: ['websocket', 'polling'],
       });
     }
 
-    this.socket.on("welcome", (res: any) => {
-        console.log(res.message);
+    this.socket.on('welcome', (res: any) => {
+      console.log(res.message);
     });
 
     // Create a new lobby
-    this.socket.on("connect", () => {
-      console.log("Creating lobby with lobbyCode: ", this.lobbyCode)
-        this.socket.emit("createLobby", {
-          lobbyCode: this.lobbyCode,
-          admin: this.socket.id,
-        });
+    this.socket.on('connect', () => {
+      console.log('Creating lobby with lobbyCode: ', this.lobbyCode);
+      this.socket.emit('createLobby', {
+        lobbyCode: this.lobbyCode,
+        admin: this.socket.id,
+      });
     });
 
     // If a user leaves the lobby, update the UI accordingly
-    this.socket.on("userJoinedLobby", (arg: any) => {
-        const userId = arg.user;
-        this.addPlayer(userId);
+    this.socket.on('userJoinedLobby', (arg: any) => {
+      const userId = arg.user;
+      this.addPlayer(userId);
     });
 
     // If a user leaves the lobby, update the UI accordingly
-    this.socket.on("userLeftLobby", (message: any) => {
-        const userId = message.split(" ")[0];
-        this.removePlayer(userId);
-        console.log("user left lobby:", message);
+    this.socket.on('userLeftLobby', (message: any) => {
+      const userId = message.split(' ')[0];
+      this.removePlayer(userId);
+      console.log('user left lobby:', message);
     });
 
-    this.socket.on("gameResponseReceived", (arg: any) => {
-      const currentResponses = this.respondedSubject.value;
+    this.socket.on('gameResponseReceived', (arg: any) => {
+      const currentResponses = this.gameStateSubject.value.responded;
       console.log(currentResponses, arg.playerId);
       if (!currentResponses.includes(arg.playerId)) {
-        console.log("Adding player response:", arg.playerId);
+        console.log('Adding player response:', arg.playerId);
         currentResponses.push(arg.playerId);
         this.setResponded(currentResponses);
       }
-      console.log("player with id:", arg.playerId, "has submitted their response");
+      console.log(
+        'player with id:',
+        arg.playerId,
+        'has submitted their response',
+      );
     });
 
-    this.socket.on("gameResults", (arg: GameResults) => {
-      console.log("SocketService received gameResults for gameId:", arg.gameId);
-      console.log("SocketService gameResults data:", arg);
+    this.socket.on('gameResults', (arg: GameResults) => {
+      console.log('SocketService received gameResults for gameId:', arg.gameId);
+      console.log('SocketService gameResults data:', arg);
 
       switch (arg.gameId) {
         case 'Magic Number':
           const answerNumber = arg.targetNumber || 50; // Use server-provided target number, fallback to 50
-          this.targetNumberSubject.next(answerNumber);
+
+          this.updateState({ data: answerNumber });
           let lowestDifference: number = 100;
           const winners: string[] = [];
           const responses = arg.responses;
@@ -152,20 +152,22 @@ export class SocketService {
           }
 
           // Find all the winning players
-          for (const [player, difference] of Object.entries(playerDifferences)) {
+          for (const [player, difference] of Object.entries(
+            playerDifferences,
+          )) {
             if (difference === lowestDifference) {
               winners.push(player);
             }
           }
 
-          console.log("Answer number:", answerNumber);
-          console.log("Winners:", winners);
+          console.log('Answer number:', answerNumber);
+          console.log('Winners:', winners);
 
           this.updateplayerRankings(responses, winners);
 
           break;
         default:
-          console.log("Unknown game ID:", arg.gameId);
+          console.log('Unknown game ID:', arg.gameId);
           break;
       }
     });
@@ -184,27 +186,27 @@ export class SocketService {
     // Create a fresh socket for phone client
     console.log('SocketService: Creating new socket connection for phone');
     this.socket = io(SERVER_ADDRESS, {
-      forceNew: true,  // Force a new connection
+      forceNew: true, // Force a new connection
       reconnection: true,
       timeout: 5000,
-      transports: ["websocket", "polling"]
+      transports: ['websocket', 'polling'],
     });
 
-    this.socket.on("welcome", (res: any) => {
+    this.socket.on('welcome', (res: any) => {
       console.log('SocketService: Received welcome:', res.message);
     });
 
-    this.socket.on("connect", () => {
-      console.log("SocketService: Phone connected, socket ID:", this.socket.id);
-      console.log("SocketService: Joining lobby:", this.lobbyCode);
-      this.socket.emit("joinLobby", {
+    this.socket.on('connect', () => {
+      console.log('SocketService: Phone connected, socket ID:', this.socket.id);
+      console.log('SocketService: Joining lobby:', this.lobbyCode);
+      this.socket.emit('joinLobby', {
         lobbyCode: this.lobbyCode,
-        client: this.socket.id
+        client: this.socket.id,
       });
     });
 
-    this.socket.on("connect_error", (error: any) => {
-      console.error("SocketService: Socket connection error:", error);
+    this.socket.on('connect_error', (error: any) => {
+      console.error('SocketService: Socket connection error:', error);
     });
 
     this.socket.on('joinLobbySuccess', () => {
@@ -218,19 +220,20 @@ export class SocketService {
     });
 
     // Listen for game start event
-    this.socket.on("startGamePlayer", (arg: any) => {
-      console.log("SocketService: received ping to start ", arg.gameId)
-      this.selectedGameSubject.next(arg.gameId);
+    this.socket.on('startGamePlayer', (arg: any) => {
+      console.log('SocketService: received ping to start ', arg.gameId);
+      this.updateState({ selectedGame: arg.gameId });
     });
 
-    this.socket.on("gameResults", (arg: GameResults) => {
-      console.log("SocketService received gameResults for gameId:", arg.gameId);
-      console.log("SocketService gameResults data:", arg);
+    this.socket.on('gameResults', (arg: GameResults) => {
+      console.log('SocketService received gameResults for gameId:', arg.gameId);
+      console.log('SocketService gameResults data:', arg);
 
       switch (arg.gameId) {
         case 'Magic Number':
           const answerNumber = arg.targetNumber || 50; // Use server-provided target number, fallback to 50
-          this.targetNumberSubject.next(answerNumber);
+          this.updateState({ data: answerNumber });
+
           let lowestDifference: number = 100;
           const winners: string[] = [];
           const responses = arg.responses;
@@ -247,28 +250,30 @@ export class SocketService {
           }
 
           // Find all the winning players
-          for (const [player, difference] of Object.entries(playerDifferences)) {
+          for (const [player, difference] of Object.entries(
+            playerDifferences,
+          )) {
             if (difference === lowestDifference) {
               winners.push(player);
             }
           }
 
-          console.log("Answer number:", answerNumber);
-          console.log("Winners:", winners);
+          console.log('Answer number:', answerNumber);
+          console.log('Winners:', winners);
 
           this.updateplayerRankings(responses, winners);
 
           break;
         default:
-          console.log("Unknown game ID:", arg.gameId);
+          console.log('Unknown game ID:', arg.gameId);
           break;
       }
 
-      console.log("SocketService: Game round complete, all players submitted");
+      console.log('SocketService: Game round complete, all players submitted');
       this.gameRoundCompleteSubject.next();
     });
 
-    console.log("SocketService: Socket connection initiated");
+    console.log('SocketService: Socket connection initiated');
   }
 
   getRandomInt(max: number) {
@@ -276,31 +281,33 @@ export class SocketService {
   }
 
   get players(): string[] {
-    return this.playersSubject.value;
+    return this.gameStateSubject.value.players;
   }
 
   setPlayers(players: string[]) {
-    this.playersSubject.next(players);
+    this.updateState({ players: players });
   }
 
   addPlayer(player: string) {
-    const updated = [...this.playersSubject.value, player];
-    this.playersSubject.next(updated);
+    const updated = [...this.gameStateSubject.value.players, player];
+    this.updateState({ players: updated });
     this.addMagicNumberPlayer(player, this.getPlayerName(player));
   }
 
   removePlayer(player: string) {
-    const updated = this.playersSubject.value.filter(p => p !== player);
-    this.playersSubject.next(updated);
+    const updated = this.gameStateSubject.value.players.filter(
+      (p) => p !== player,
+    );
+    this.updateState({ players: updated });
     this.removeMagicNumberPlayer(player);
   }
 
   get responded(): string[] {
-    return this.respondedSubject.value;
+    return this.gameStateSubject.value.responded;
   }
 
   setResponded(responded: string[]) {
-    this.respondedSubject.next(responded);
+    this.updateState({ responded: responded });
   }
 
   getLobbyName(): string {
@@ -317,7 +324,10 @@ export class SocketService {
   }
 
   joinLobby(lobbyCode: string, playerName: string) {
-    console.log('SocketService: Starting joinLobby process', { lobbyCode, playerName });
+    console.log('SocketService: Starting joinLobby process', {
+      lobbyCode,
+      playerName,
+    });
     this.lobbyCode = lobbyCode;
     this.lobbyName = playerName;
     this.connectToSocketPhone();
@@ -342,15 +352,20 @@ export class SocketService {
 
   submitGameResponse(gameId: string, response: number) {
     if (this.socket && this.socket.connected) {
-      console.log('SocketService: Submitting game response', { gameId, response });
+      console.log('SocketService: Submitting game response', {
+        gameId,
+        response,
+      });
       this.socket.emit('gameResponse', {
         gameId: gameId,
         lobbyCode: this.lobbyCode,
         playerId: this.socket.id,
-        response: response
+        response: response,
       });
     } else {
-      console.error('SocketService: Cannot submit game response - socket not connected');
+      console.error(
+        'SocketService: Cannot submit game response - socket not connected',
+      );
     }
   }
 
@@ -363,10 +378,12 @@ export class SocketService {
     if (this.socket && this.socket.connected) {
       console.log('SocketService: Emitting gameEnded event');
       this.socket.emit('gameEnded', {
-        lobbyCode: this.lobbyCode
+        lobbyCode: this.lobbyCode,
       });
     } else {
-      console.error('SocketService: Cannot emit gameEnded - socket not connected');
+      console.error(
+        'SocketService: Cannot emit gameEnded - socket not connected',
+      );
     }
   }
 
@@ -375,7 +392,7 @@ export class SocketService {
     responses: Record<string, number>,
     winners: string[],
   ) {
-    const currentRankings = this.playerRankingsSubject.value;
+    const currentRankings = this.gameStateSubject.value.playerRankings;
     const updatedRankings: PlayerRanking[] = [];
 
     // Create or update rankings for each player
@@ -383,7 +400,9 @@ export class SocketService {
       const isWinner = winners.includes(playerId);
 
       // Find existing ranking or create new one
-      let existingRanking = currentRankings.find(r => r.playerId === playerId);
+      let existingRanking = currentRankings.find(
+        (r) => r.playerId === playerId,
+      );
 
       if (existingRanking) {
         existingRanking.points += isWinner ? 1 : 0;
@@ -397,7 +416,7 @@ export class SocketService {
           rank: 0, // Will be calculated below
           isRoundWinner: isWinner,
 
-          data: guess //guess?
+          data: guess, //guess?
         };
         updatedRankings.push(newRanking);
       }
@@ -428,8 +447,8 @@ export class SocketService {
       }
     }
 
-    this.playerRankingsSubject.next(updatedRankings);
-    console.log("Updated Magic Number Rankings:", updatedRankings);
+    this.updateState({ playerRankings: updatedRankings });
+    console.log('Updated Magic Number Rankings:', updatedRankings);
   }
 
   private getPlayerName(playerId: string): string {
@@ -440,16 +459,16 @@ export class SocketService {
 
   // Public methods for playerRankings management
   getplayerRankings(): PlayerRanking[] {
-    return this.playerRankingsSubject.value;
+    return this.gameStateSubject.value.playerRankings;
   }
 
   clearplayerRankings() {
-    this.playerRankingsSubject.next([]);
+    this.updateState({ playerRankings: [] });
   }
 
   addMagicNumberPlayer(playerId: string, playerName: string) {
-    const currentRankings = this.playerRankingsSubject.value;
-    const existingPlayer = currentRankings.find(r => r.playerId === playerId);
+    const currentRankings = this.gameStateSubject.value.playerRankings;
+    const existingPlayer = currentRankings.find((r) => r.playerId === playerId);
 
     if (!existingPlayer) {
       const newRanking: PlayerRanking = {
@@ -459,7 +478,7 @@ export class SocketService {
         rank: 0, // Will be calculated below
         isRoundWinner: false,
 
-        data: 0 //Magic NUmber guess?
+        data: 0, //Magic NUmber guess?
       };
 
       const updatedRankings = [...currentRankings, newRanking];
@@ -471,19 +490,24 @@ export class SocketService {
 
       let currentRank = 1;
       for (let i = 0; i < updatedRankings.length; i++) {
-        if (i > 0 && updatedRankings[i].points !== updatedRankings[i - 1].points) {
+        if (
+          i > 0 &&
+          updatedRankings[i].points !== updatedRankings[i - 1].points
+        ) {
           currentRank = i + 1;
         }
         updatedRankings[i].rank = currentRank;
       }
 
-      this.playerRankingsSubject.next(updatedRankings);
+      this.updateState({ playerRankings: updatedRankings });
     }
   }
 
   removeMagicNumberPlayer(playerId: string) {
-    const currentRankings = this.playerRankingsSubject.value;
-    const updatedRankings = currentRankings.filter(r => r.playerId !== playerId);
+    const currentRankings = this.gameStateSubject.value.playerRankings;
+    const updatedRankings = currentRankings.filter(
+      (r) => r.playerId !== playerId,
+    );
 
     // Recalculate Olympic-style ranks
     if (updatedRankings.length > 0) {
@@ -497,13 +521,24 @@ export class SocketService {
 
       let currentRank = 1;
       for (let i = 0; i < updatedRankings.length; i++) {
-        if (i > 0 && updatedRankings[i].points !== updatedRankings[i - 1].points) {
+        if (
+          i > 0 &&
+          updatedRankings[i].points !== updatedRankings[i - 1].points
+        ) {
           currentRank = i + 1;
         }
         updatedRankings[i].rank = currentRank;
       }
     }
 
-    this.playerRankingsSubject.next(updatedRankings);
+    this.updateState({ playerRankings: updatedRankings });
+  }
+
+  // update the game state
+  private updateState(patch: Partial<GameState>) {
+    this.gameStateSubject.next({
+      ...this.gameStateSubject.value,
+      ...patch,
+    });
   }
 }

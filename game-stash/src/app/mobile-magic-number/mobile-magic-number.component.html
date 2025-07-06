@@ -1,4 +1,4 @@
-<div class="game-container"> 
+<div class="game-container">
   <header class="game-header">
     <h1>Round {{ roundNumber() }}</h1>
     <p class="player-info">{{ playerName() }} • Lobby: {{ lobbyCode() }}</p>
@@ -23,7 +23,7 @@
           maxlength="3"
         />
       </div>
-      
+
       @if (guessInput() && !isGuessValid()) {
         <div class="validation-error">
           Please enter a number between 1 and 100
@@ -53,7 +53,11 @@
   </main>
 
   <footer class="game-footer">
-    <button (click)="onLeaveLobby()" class="leave-btn" [disabled]="isSubmitting()">
+    <button
+      (click)="onLeaveLobby()"
+      class="leave-btn"
+      [disabled]="isSubmitting()"
+    >
       Leave Lobby
     </button>
   </footer>

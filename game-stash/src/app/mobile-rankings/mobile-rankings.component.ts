@@ -1,19 +1,21 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SocketService, PlayerRanking } from '../services/socket.service';
+import {
+  SocketService,
+  PlayerRanking,
+  GameState,
+} from '../services/socket.service';
 import { Subscription } from 'rxjs';
-
-
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-mobile-rankings',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './mobile-rankings.component.html',
-  styleUrls: ['./mobile-rankings.component.css']
+  styleUrls: ['./mobile-rankings.component.css'],
 })
-
 export class MobileRankingsComponent implements OnInit, OnDestroy {
   targetNumber = signal(0);
   rankings = signal<PlayerRanking[]>([]);
@@ -34,7 +36,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService
+    private socketService: SocketService,
   ) {}
 
   ngOnInit(): void {
@@ -56,7 +58,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
     // Read all parameters from route
     this.subscriptions.push(
-      this.route.queryParams.subscribe(params => {
+      this.route.queryParams.subscribe((params) => {
         const lobbyCode = params['lobbyCode'];
         const playerName = params['playerName'];
         const roundNumber = params['roundNumber'];
@@ -80,7 +82,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
           playerName: this.playerName(),
           roundNumber: this.roundNumber(),
           selectedGame: this.selectedGame(),
-          guess: this.guess()
+          guess: this.guess(),
         });
 
         // Determine if this is the final round
@@ -94,40 +96,48 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         if (!this.isGameOver()) {
           this.startCountdown();
         }
-      })
+      }),
     );
 
     // Subscribe to rankings from SocketService
     this.subscriptions.push(
-      this.socketService.playerRankings$.subscribe(rankings => {
-        this.rankings.set(rankings);
+      this.socketService.gameState$
+        .pipe(map((gameState) => gameState.playerRankings))
+        .subscribe((rankings) => {
+          this.rankings.set(rankings);
 
-        // Find current player's rank based on socket ID
-        const socketId = this.socketService.getSocketId();
-        if (socketId) {
-          const currentPlayerRanking = rankings.find(r => r.playerId === socketId);
-          if (currentPlayerRanking) {
-            this.playerRank.set(currentPlayerRanking.rank);
+          // Find current player's rank based on socket ID
+          const socketId = this.socketService.getSocketId();
+          if (socketId) {
+            const currentPlayerRanking = rankings.find(
+              (r) => r.playerId === socketId,
+            );
+            if (currentPlayerRanking) {
+              this.playerRank.set(currentPlayerRanking.rank);
+            }
           }
-        }
-      })
+        }),
     );
 
-    // Subscribe to target number from SocketService
     this.subscriptions.push(
-      this.socketService.targetNumber$.subscribe(targetNumber => {
-        this.targetNumber.set(targetNumber);
-      })
+      this.socketService.gameState$
+        .pipe(map((gameState) => gameState.data))
+        .subscribe((targetNumber) => {
+          this.targetNumber.set(targetNumber);
+        }),
     );
   }
 
   ngOnDestroy(): void {
     this.stopCountdown();
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   private startCountdown(): void {
-    console.log('PhoneRankings: Starting countdown for round', this.roundNumber());
+    console.log(
+      'PhoneRankings: Starting countdown for round',
+      this.roundNumber(),
+    );
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
       console.log('PhoneRankings: Countdown tick:', current);
@@ -157,13 +167,13 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
     const nextRound = this.roundNumber() + 1;
     console.log('PhoneRankings: Moving to next round', nextRound);
-      this.router.navigate(['/mobile-magic-number'], {
+    this.router.navigate(['/mobile-magic-number'], {
       queryParams: {
         lobbyCode: this.lobbyCode(),
         playerName: this.playerName(),
         roundNumber: nextRound,
-        selectedGame: this.selectedGame() || 'Magic Number'
-      }
+        selectedGame: this.selectedGame() || 'Magic Number',
+      },
     });
   }
 
@@ -171,8 +181,8 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/mobile-lobby'], {
       queryParams: {
         lobbyCode: this.lobbyCode(),
-        playerName: this.playerName()
-      }
+        playerName: this.playerName(),
+      },
     });
   }
 
@@ -186,14 +196,14 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     const socketId = this.socketService.getSocketId();
     if (!socketId) return 0;
 
-    const playerRanking = this.rankings().find(p => p.playerId === socketId);
+    const playerRanking = this.rankings().find((p) => p.playerId === socketId);
     return playerRanking ? playerRanking.points : 0;
   }
 
   getRoundWinners(): string[] {
     return this.rankings()
-      .filter(player => player.isRoundWinner)
-      .map(player => player.name);
+      .filter((player) => player.isRoundWinner)
+      .map((player) => player.name);
   }
 
   getRankSuffix(rank: number): string {

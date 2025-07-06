@@ -1,4 +1,11 @@
-import { Component, signal, computed, OnInit, OnDestroy, input } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  OnInit,
+  OnDestroy,
+  input,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,9 +17,8 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './mobile-magic-number.component.html',
-  styleUrls: ['./mobile-magic-number.component.css']
+  styleUrls: ['./mobile-magic-number.component.css'],
 })
-
 export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   // Signals to store data from route parameters
   lobbyCode = signal('');
@@ -43,9 +49,9 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService
-  ) { }
-  
+    private socketService: SocketService,
+  ) {}
+
   ngOnInit(): void {
     console.log('PhoneGuessingGameComponent initialized');
 
@@ -60,7 +66,7 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
 
     // Read all parameters from route
     this.subscriptions.push(
-      this.route.queryParams.subscribe(params => {
+      this.route.queryParams.subscribe((params) => {
         const lobbyCode = params['lobbyCode'];
         const playerName = params['playerName'];
         const roundNumber = params['roundNumber'];
@@ -81,12 +87,12 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
           lobbyCode: this.lobbyCode(),
           playerName: this.playerName(),
           roundNumber: this.roundNumber(),
-          selectedGame: this.selectedGame()
+          selectedGame: this.selectedGame(),
         });
-      })
+      }),
     );
   }
-  
+
   onSubmitGuess(): void {
     if (!this.isFormValid()) return;
 
@@ -105,7 +111,10 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    console.log('PhoneGuessingGame: Set isSubmitting to true, navigating to waiting screen with guess:', guessValue);
+    console.log(
+      'PhoneGuessingGame: Set isSubmitting to true, navigating to waiting screen with guess:',
+      guessValue,
+    );
 
     this.router.navigate(['/mobile-magic-number-waiting'], {
       queryParams: {
@@ -113,8 +122,8 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
         playerName: this.playerName(),
         roundNumber: this.roundNumber(),
         selectedGame: this.selectedGame(),
-        guess: guessValue
-      }
+        guess: guessValue,
+      },
     });
   }
 
@@ -133,6 +142,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

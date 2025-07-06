@@ -1,16 +1,18 @@
 import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
-import { SocketService, PlayerRanking } from '../services/socket.service';
-import {MatListModule} from '@angular/material/list';
+import {
+  SocketService,
+  PlayerRanking,
+  GameState,
+} from '../services/socket.service';
+import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-desk-magic-number',
-  imports: [
-    MatListModule,
-    CommonModule,
-  ],
+  imports: [MatListModule, CommonModule],
   templateUrl: './desk-magic-number.component.html',
-  styleUrl: './desk-magic-number.component.css'
+  styleUrl: './desk-magic-number.component.css',
 })
 export class DeskMagicNumberComponent implements OnInit {
   players: string[] = [];
@@ -28,39 +30,44 @@ export class DeskMagicNumberComponent implements OnInit {
 
   private countdownInterval?: number;
 
-  constructor( private socketService: SocketService) {}
+  constructor(private socketService: SocketService) {}
 
   getRoundWinners(): string[] {
     return this.rankings()
-      .filter(player => player.isRoundWinner)
-      .map(player => player.name);
+      .filter((player) => player.isRoundWinner)
+      .map((player) => player.name);
   }
 
   ngOnInit(): void {
-    this.socketService.players$.subscribe(players => {
-      this.players = players;
-    });
+    this.socketService.gameState$
+      .pipe(map((gameState) => gameState.players))
+      .subscribe((players) => (this.players = players));
 
-    this.socketService.responded$.subscribe(responded => {
-      this.responded = responded;
-      this.unresponded = this.players.filter(player => !responded.includes(player));
-      if (this.unresponded.length === 0)
-        this.roundEnd();
-    });
+    this.socketService.gameState$
+      .pipe(map((gameState) => gameState.responded))
+      .subscribe((responded) => {
+        this.responded = responded;
+        this.unresponded = this.players.filter(
+          (player) => !responded.includes(player),
+        );
+        if (this.unresponded.length === 0) this.roundEnd();
+      });
 
-    this.socketService.targetNumber$.subscribe(targetNumber => {
-      this.targetNumber.set(targetNumber);
-    });
+    this.socketService.gameState$
+      .pipe(map((gameState) => gameState.data))
+      .subscribe((targetNumber) => {
+        this.targetNumber.set(targetNumber);
+      });
 
-    this.socketService.playerRankings$.subscribe(rankings => {
-      this.rankings.set(rankings);
-    })
+    this.socketService.gameState$
+      .pipe(map((gameState) => gameState.playerRankings))
+      .subscribe((rankings) => this.rankings.set(rankings));
 
     this.startGame();
   }
 
   startGame() {
-    console.log("Starting game with players:", this.players);
+    console.log('Starting game with players:', this.players);
     this.socketService.startGame('Magic Number');
   }
 
@@ -97,7 +104,10 @@ export class DeskMagicNumberComponent implements OnInit {
   }
 
   private startCountdown(): void {
-    console.log('Magic Number: Starting countdown for round', this.roundNumber());
+    console.log(
+      'Magic Number: Starting countdown for round',
+      this.roundNumber(),
+    );
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
       console.log('Magic Number: Countdown tick:', current);
@@ -110,5 +120,4 @@ export class DeskMagicNumberComponent implements OnInit {
       }
     }, 1000);
   }
-
 }

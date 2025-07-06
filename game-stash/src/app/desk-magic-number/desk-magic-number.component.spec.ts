@@ -8,9 +8,8 @@ describe('DeskMagicNumberComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeskMagicNumberComponent]
-    })
-    .compileComponents();
+      imports: [DeskMagicNumberComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DeskMagicNumberComponent);
     component = fixture.componentInstance;

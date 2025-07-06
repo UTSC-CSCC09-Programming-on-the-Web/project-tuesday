@@ -18,11 +18,11 @@ import { Router } from '@angular/router';
     FormsModule,
     MatProgressSpinnerModule,
     CommonModule,
-],
+  ],
   templateUrl: './desk-create-lobby.component.html',
-  styleUrl: './desk-create-lobby.component.css'
+  styleUrl: './desk-create-lobby.component.css',
 })
-export class DeskCreateLobbyComponent  {
+export class DeskCreateLobbyComponent {
   /*
   Checklist for creating a new lobby:
   - button to create a new lobby
@@ -38,7 +38,7 @@ export class DeskCreateLobbyComponent  {
 
   loading: boolean = false;
 
-  constructor (private router: Router) {}
+  constructor(private router: Router) {}
 
   /* ID generator gotten from: https://stackoverflow.com/questions/1349404/generate-a-string-of-random-characters */
   makeId(length: number): string {
@@ -46,7 +46,7 @@ export class DeskCreateLobbyComponent  {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
+    for (var i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
@@ -58,6 +58,8 @@ export class DeskCreateLobbyComponent  {
     console.log('Lobby created with code:', this.lobbyCode);
     console.log('Creating lobby with name:', this.lobbyName);
 
-    this.router.navigate(['/lobby'], { queryParams: { lobbyName: this.lobbyName, lobbyCode: this.lobbyCode } });
+    this.router.navigate(['/lobby'], {
+      queryParams: { lobbyName: this.lobbyName, lobbyCode: this.lobbyCode },
+    });
   }
 }
