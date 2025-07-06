@@ -58,12 +58,10 @@ export class SocketService {
   constructor() { }
 
   startGame(gameId: string) {
-    if (gameId === 'Magic Number') {
-      this.socket.emit("startGame", {
-        gameId: gameId,
-        lobbyCode: this.lobbyCode
-      })
-    }
+    this.socket.emit("startGame", {
+      gameId: gameId,
+      lobbyCode: this.lobbyCode
+    })
   }
 
   endGame(gameId: string) {
@@ -162,6 +160,28 @@ export class SocketService {
     });
   }
 
+  playerEmit(event: string, data: any) {
+    console.log('SocketService: playerEmit called with event:', event, 'and data:', data);
+    this.socket.emit(event, {
+      data,
+      playerId: this.socket.id,
+      lobbyCode: this.lobbyCode,
+    });
+  }
+
+  lobbyEmit(event: string, data: any) {
+    data.lobbyCode = this.lobbyCode; // Ensure lobbyCode is included in the data
+    this.socket.emit(event, data);
+  }
+
+  useEffect(event: string, callback: (data: any) => void) {
+    if (this.socket) {
+      this.socket.on(event, (arg: any) => { callback(arg) });
+    } else {
+      console.error("Socket not initialized. Call connectToSocket() first.");
+    }
+  }
+
   connectToSocketPhone() {
     console.log('SocketService: connectToSocketPhone called');
 
@@ -174,11 +194,10 @@ export class SocketService {
 
     // Create a fresh socket for phone client
     console.log('SocketService: Creating new socket connection for phone');
-    this.socket = io(SERVER_ADDRESS, {
+    this.socket = io("http://localhost:3000/", {
       forceNew: true,  // Force a new connection
       reconnection: true,
-      timeout: 5000,
-      transports: ["websocket", "polling"]
+      timeout: 5000
     });
 
     this.socket.on("welcome", (res: any) => {
@@ -283,6 +302,8 @@ export class SocketService {
   removePlayer(player: string) {
     const updated = this.playersSubject.value.filter(p => p !== player);
     this.playersSubject.next(updated);
+
+    // updated responded here too
     this.removeMagicNumberPlayer(player);
   }
 

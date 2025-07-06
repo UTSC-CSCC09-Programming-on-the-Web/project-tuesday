@@ -64,22 +64,24 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
   private navigateToGame(gameId: string): void {
     console.log('PhoneLobby: Navigating to game:', gameId);
 
-    this.router.navigate(['/mobile-load-balancing'], {
-      queryParams: {
-        lobbyCode: this.lobbyCode(),
-        playerName: this.playerName(),
-        selectedGame: gameId,
-        roundNumber: 1
-      }
-    });
-    // this.router.navigate(['/mobile-magic-number'], {
-    //   queryParams: {
-    //     lobbyCode: this.lobbyCode(),
-    //     playerName: this.playerName(),
-    //     selectedGame: gameId,
-    //     roundNumber: 1
-    //   }
-    // });
+    if (gameId === 'Load Balancing')
+      this.router.navigate(['/mobile-load-balancing'], {
+        queryParams: {
+          lobbyCode: this.lobbyCode(),
+          playerName: this.playerName(),
+          selectedGame: gameId,
+          roundNumber: 1
+        }
+      });
+    else if (gameId === 'Magic Number')
+      this.router.navigate(['/mobile-magic-number'], {
+        queryParams: {
+          lobbyCode: this.lobbyCode(),
+          playerName: this.playerName(),
+          selectedGame: gameId,
+          roundNumber: 1
+        }
+      });
   }
 
   ngOnDestroy(): void {

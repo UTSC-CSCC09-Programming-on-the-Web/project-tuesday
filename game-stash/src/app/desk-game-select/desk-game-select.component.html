@@ -26,6 +26,7 @@
         </ul>
       </div>
       <app-desk-magic-number *ngSwitchCase="'Magic Number'" (gameOver)="selectedGame = ''"></app-desk-magic-number>
+      <app-desk-load-balancing *ngSwitchCase="'Load Balancing'" (gameOver)="selectedGame = ''"></app-desk-load-balancing>
     </div>
   </div>
   <div class="col-3"></div>

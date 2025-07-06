@@ -2,12 +2,13 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import { loadBalancing } from "./load_balancing.js";
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:4200", // This must match the frontend's URL
+    origin: "*", // This must match the frontend's URL
   }
 });
 const PORT = process.env.PORT || 3000;
@@ -94,11 +95,19 @@ io.on('connection', (socket) => {
     if (lobbies[arg.lobbyCode]) {
       lobbies[arg.lobbyCode].gameStarted = true;
     }
+    if (arg.gameId === 'Load Balancing')
+      loadBalancing(socket);
+
     console.log(`Lobby: ${arg.lobbyCode} has requested to start the game: ${arg.gameId}`);
     io.to(arg.lobbyCode).emit('startGamePlayer', {
       gameId: arg.gameId
     })
-  })
+  });
+
+  socket.on('playerStart', (arg) => {
+    loadBalancing(socket);
+    console.log(`Player ${socket.id} has started the game in lobby ${arg.lobbyCode}`);
+  });
 
   // Catch a game response from a player
   socket.on('gameResponse', (arg) => {
@@ -142,13 +151,12 @@ io.on('connection', (socket) => {
       });
     }
   });
-
-  // When game ends, reset gameStarted
   socket.on('gameEnded', (arg) => {
     if (lobbies[arg.lobbyCode]) {
-      lobbies[arg.lobbyCode].gameStarted = false;
+        lobbies[arg.lobbyCode].gameStarted = false;
     }
-  });
+    socket.to(arg.lobbyCode).emit("gameEnded");
+});
 });
 
 server.listen(3000, () => {
