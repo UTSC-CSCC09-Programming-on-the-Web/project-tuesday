@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
 
-const SERVER_ADDRESS = "http://localhost:3000/";
+const SERVER_ADDRESS = "https://3c84-142-188-64-168.ngrok-free.app";
 
 interface GameResults {
   gameId: string;
@@ -194,7 +194,7 @@ export class SocketService {
 
     // Create a fresh socket for phone client
     console.log('SocketService: Creating new socket connection for phone');
-    this.socket = io("http://localhost:3000/", {
+    this.socket = io(SERVER_ADDRESS, {
       forceNew: true,  // Force a new connection
       reconnection: true,
       timeout: 5000

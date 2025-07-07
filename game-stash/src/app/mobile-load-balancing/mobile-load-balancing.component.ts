@@ -80,7 +80,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
       }
     });
 
-    const ground = Bodies.rectangle(this.width / 2, this.height - 20, 410, 60, {
+    const ground = Bodies.rectangle(this.width / 2, this.height - 20, this.width - 10, 60, {
         isStatic: false,
         frictionAir: 1,
         density: 100,
@@ -137,7 +137,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
     this.socketService.useEffect("spawnBox", (data) => {
       console.log(data);
-      const box = Bodies.rectangle(data.x, data.y, data.size, data.size);
+      const box = Bodies.circle(data.x, data.y, data.size / 2);
       this.bodies.push(box);
       World.add(this.engine.world, box);
     });

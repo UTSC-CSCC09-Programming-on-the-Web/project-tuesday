@@ -38,9 +38,9 @@ export class DeskLoadBalancingComponent implements OnInit {
       // Example of a game action after 5 seconds
       console.log("Game action executed after 5 seconds");
 
-      const x = Math.random() * this.width;
-      const y = Math.random() * 100;
       const size = Math.random() * 50 + 20;
+      const x = Math.random() * (this.width - size) + size / 2;
+      const y = Math.random() * 100;
 
 
       // const box = Bodies.rectangle(x, y, size, size);
