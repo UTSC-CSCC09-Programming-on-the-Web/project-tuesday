@@ -197,7 +197,8 @@ export class SocketService {
     this.socket = io(SERVER_ADDRESS, {
       forceNew: true,  // Force a new connection
       reconnection: true,
-      timeout: 5000
+      timeout: 5000,
+      transports: ["websocket", "polling"]
     });
 
     this.socket.on("welcome", (res: any) => {
