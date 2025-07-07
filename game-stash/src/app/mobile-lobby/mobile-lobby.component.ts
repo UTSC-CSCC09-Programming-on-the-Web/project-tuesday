@@ -1,7 +1,11 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SocketService } from '../services/socket.service';
+import {
+  AdminSocketService,
+  GameState,
+} from '../services/admin.socket.service';
+import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription, map } from 'rxjs';
 
 @Component({
@@ -22,7 +26,8 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService,
+    private adminSocketService: AdminSocketService,
+    private playerSocketService: PlayerSocketService,
   ) {}
 
   ngOnInit(): void {
@@ -49,8 +54,8 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
   private setupSocketSubscriptions(): void {
     // Subscribe to selected game for navigation
     this.subscriptions.push(
-      this.socketService.gameState$
-        .pipe(map((gameState) => gameState.selectedGame))
+      this.playerSocketService.playerState$
+        .pipe(map((playerState) => playerState.selectedGame))
         .subscribe((gameId) => {
           if (gameId) {
             console.log('Received game start event:', gameId);
@@ -81,7 +86,7 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
 
   onLeaveLobby(): void {
     console.log('PhoneLobby: User clicked leave lobby');
-    this.socketService.leaveLobby();
+    this.playerSocketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }
 }

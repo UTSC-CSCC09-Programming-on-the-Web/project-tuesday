@@ -3,7 +3,7 @@ import { DeskMagicNumberComponent } from '../desk-magic-number/desk-magic-number
 import { io } from 'socket.io-client';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { SocketService } from '../services/socket.service';
+import { AdminSocketService } from '../services/admin.socket.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatListModule } from '@angular/material/list';
 import { map } from 'rxjs';
@@ -23,7 +23,7 @@ export class DeskGameSelectComponent {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService,
+    private adminSocketService: AdminSocketService,
   ) {}
 
   players: string[] = [];
@@ -41,21 +41,24 @@ export class DeskGameSelectComponent {
 
   ngOnInit() {
     this.route.queryParams.subscribe((value) => {
-      this.socketService.setLobby(value['lobbyName'], value['lobbyCode']);
-      this.lobbyName = this.socketService.getLobbyName();
-      this.lobbyCode = this.socketService.getLobbyCode();
+      this.adminSocketService.setLobby(value['lobbyName'], value['lobbyCode']);
+      this.lobbyName = this.adminSocketService.getLobbyName();
+      this.lobbyCode = this.adminSocketService.getLobbyCode();
     });
 
-    this.socketService.connectToSocket();
+    this.adminSocketService.connectToSocket();
 
-    this.socketService.gameState$
+    this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.players))
       .subscribe((players) => (this.players = players));
   }
 
   openNewTab() {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/player', this.socketService.getLobbyCode()]),
+      this.router.createUrlTree([
+        '/player',
+        this.adminSocketService.getLobbyCode(),
+      ]),
     );
     window.open(url, '_blank');
   }

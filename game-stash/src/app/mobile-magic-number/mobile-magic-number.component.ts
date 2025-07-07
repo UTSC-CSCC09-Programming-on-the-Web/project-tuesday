@@ -9,7 +9,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SocketService } from '../services/socket.service';
+import { AdminSocketService } from '../services/admin.socket.service';
+import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -49,7 +50,8 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService,
+    private adminSocketService: AdminSocketService,
+    private playerSocketService: PlayerSocketService,
   ) {}
 
   ngOnInit(): void {
@@ -129,7 +131,7 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
 
   onLeaveLobby(): void {
     console.log('PhoneGuessingGame: User clicked leave lobby');
-    this.socketService.leaveLobby();
+    this.playerSocketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }
 

@@ -1,14 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
-
-const SERVER_ADDRESS = 'http://localhost:3000/';
-
-interface GameResults {
-  gameId: string;
-  responses: Record<string, number>;
-  targetNumber?: number;
-}
+import { SERVER_ADDRESS, GameResults } from './socket.service.constants';
 
 export interface GameState {
   players: string[];
@@ -32,7 +25,7 @@ export interface PlayerRanking {
 @Injectable({
   providedIn: 'root',
 })
-export class SocketService {
+export class AdminSocketService {
   private socket: any = null;
 
   private lobbyName: string = '';
@@ -48,12 +41,6 @@ export class SocketService {
   });
 
   gameState$ = this.gameStateSubject.asObservable();
-
-  private joinLobbySuccessSubject = new Subject<void>();
-  joinLobbySuccess$ = this.joinLobbySuccessSubject.asObservable();
-
-  private joinLobbyDeniedSubject = new Subject<{ reason: string }>();
-  joinLobbyDenied$ = this.joinLobbyDeniedSubject.asObservable();
 
   // Subject for when game round is complete (all players submitted)
   private gameRoundCompleteSubject = new Subject<void>();
@@ -77,10 +64,12 @@ export class SocketService {
   }
 
   connectToSocket() {
-    console.log('SocketService: connectToSocket called');
+    console.log('AdminSocketService: connectToSocket called');
     // Initialize socket for admin/desk if not already created
     if (!this.socket) {
-      console.log('SocketService: Creating new socket connection for admin');
+      console.log(
+        'AdminSocketService: Creating new socket connection for admin',
+      );
       this.socket = io(SERVER_ADDRESS, {
         transports: ['websocket', 'polling'],
       });
@@ -127,9 +116,29 @@ export class SocketService {
       );
     });
 
+    this.socket.on('gameResultsAdmin', (arg: any) => {
+      const gameId = arg.gameId;
+      switch (gameId) {
+        case 'Magic Number':
+          const targetNumber = Math.floor(Math.random() * 100) + 1; // Generate 1-100
+      }
+    });
+
     this.socket.on('gameResults', (arg: GameResults) => {
-      console.log('SocketService received gameResults for gameId:', arg.gameId);
-      console.log('SocketService gameResults data:', arg);
+      switch (arg.gameId) {
+        case 'Magic Number':
+          // REACT TO THE GAME RESULTS AS THE ADMIN HERE----------
+          break;
+        default:
+          console.log('Unknown game ID:', arg.gameId);
+          break;
+      }
+    });
+
+    /*
+    this.socket.on('gameResults', (arg: GameResults) => {
+      console.log('AdminSocketService received gameResults for gameId:', arg.gameId);
+      console.log('AdminSocketService gameResults data:', arg);
 
       switch (arg.gameId) {
         case 'Magic Number':
@@ -164,116 +173,14 @@ export class SocketService {
           console.log('Winners:', winners);
 
           this.updateplayerRankings(responses, winners);
-
+          //EMIT THE RESULTS
           break;
         default:
           console.log('Unknown game ID:', arg.gameId);
           break;
       }
     });
-  }
-
-  connectToSocketPhone() {
-    console.log('SocketService: connectToSocketPhone called');
-
-    // Disconnect any existing socket first to avoid conflicts
-    if (this.socket) {
-      console.log('SocketService: Disconnecting existing socket');
-      this.socket.disconnect();
-      this.socket = null;
-    }
-
-    // Create a fresh socket for phone client
-    console.log('SocketService: Creating new socket connection for phone');
-    this.socket = io(SERVER_ADDRESS, {
-      forceNew: true, // Force a new connection
-      reconnection: true,
-      timeout: 5000,
-      transports: ['websocket', 'polling'],
-    });
-
-    this.socket.on('welcome', (res: any) => {
-      console.log('SocketService: Received welcome:', res.message);
-    });
-
-    this.socket.on('connect', () => {
-      console.log('SocketService: Phone connected, socket ID:', this.socket.id);
-      console.log('SocketService: Joining lobby:', this.lobbyCode);
-      this.socket.emit('joinLobby', {
-        lobbyCode: this.lobbyCode,
-        client: this.socket.id,
-      });
-    });
-
-    this.socket.on('connect_error', (error: any) => {
-      console.error('SocketService: Socket connection error:', error);
-    });
-
-    this.socket.on('joinLobbySuccess', () => {
-      console.log('SocketService: Join lobby successful');
-      this.joinLobbySuccessSubject.next();
-    });
-
-    this.socket.on('joinLobbyDenied', (data: any) => {
-      console.log('SocketService: Join lobby denied:', data);
-      this.joinLobbyDeniedSubject.next(data);
-    });
-
-    // Listen for game start event
-    this.socket.on('startGamePlayer', (arg: any) => {
-      console.log('SocketService: received ping to start ', arg.gameId);
-      this.updateState({ selectedGame: arg.gameId });
-    });
-
-    this.socket.on('gameResults', (arg: GameResults) => {
-      console.log('SocketService received gameResults for gameId:', arg.gameId);
-      console.log('SocketService gameResults data:', arg);
-
-      switch (arg.gameId) {
-        case 'Magic Number':
-          const answerNumber = arg.targetNumber || 50; // Use server-provided target number, fallback to 50
-          this.updateState({ data: answerNumber });
-
-          let lowestDifference: number = 100;
-          const winners: string[] = [];
-          const responses = arg.responses;
-
-          // Calculate the difference between each player's response and the answer number
-          const playerDifferences: Record<string, number> = {};
-          for (const [player, response] of Object.entries(responses)) {
-            let difference = Math.abs(response - answerNumber);
-            playerDifferences[player] = difference;
-
-            if (difference < lowestDifference) {
-              lowestDifference = difference;
-            }
-          }
-
-          // Find all the winning players
-          for (const [player, difference] of Object.entries(
-            playerDifferences,
-          )) {
-            if (difference === lowestDifference) {
-              winners.push(player);
-            }
-          }
-
-          console.log('Answer number:', answerNumber);
-          console.log('Winners:', winners);
-
-          this.updateplayerRankings(responses, winners);
-
-          break;
-        default:
-          console.log('Unknown game ID:', arg.gameId);
-          break;
-      }
-
-      console.log('SocketService: Game round complete, all players submitted');
-      this.gameRoundCompleteSubject.next();
-    });
-
-    console.log('SocketService: Socket connection initiated');
+    */
   }
 
   getRandomInt(max: number) {
@@ -323,49 +230,12 @@ export class SocketService {
     this.lobbyCode = lobbyCode;
   }
 
-  joinLobby(lobbyCode: string, playerName: string) {
-    console.log('SocketService: Starting joinLobby process', {
-      lobbyCode,
-      playerName,
-    });
-    this.lobbyCode = lobbyCode;
-    this.lobbyName = playerName;
-    this.connectToSocketPhone();
-  }
-
-  leaveLobby() {
-    console.log('SocketService: Leaving lobby', this.lobbyCode);
-    if (this.socket && this.lobbyCode) {
-      this.socket.emit('leaveLobby', { lobbyCode: this.lobbyCode });
-    }
-    this.disconnect();
-  }
-
   // Method to disconnect the socket
   disconnect() {
     if (this.socket) {
-      console.log('SocketService: Disconnecting socket');
+      console.log('AdminSocketService: Disconnecting socket');
       this.socket.disconnect();
       this.socket = null;
-    }
-  }
-
-  submitGameResponse(gameId: string, response: number) {
-    if (this.socket && this.socket.connected) {
-      console.log('SocketService: Submitting game response', {
-        gameId,
-        response,
-      });
-      this.socket.emit('gameResponse', {
-        gameId: gameId,
-        lobbyCode: this.lobbyCode,
-        playerId: this.socket.id,
-        response: response,
-      });
-    } else {
-      console.error(
-        'SocketService: Cannot submit game response - socket not connected',
-      );
     }
   }
 
@@ -376,13 +246,13 @@ export class SocketService {
 
   emitGameEnded() {
     if (this.socket && this.socket.connected) {
-      console.log('SocketService: Emitting gameEnded event');
+      console.log('AdminSocketService: Emitting gameEnded event');
       this.socket.emit('gameEnded', {
         lobbyCode: this.lobbyCode,
       });
     } else {
       console.error(
-        'SocketService: Cannot emit gameEnded - socket not connected',
+        'AdminSocketService: Cannot emit gameEnded - socket not connected',
       );
     }
   }

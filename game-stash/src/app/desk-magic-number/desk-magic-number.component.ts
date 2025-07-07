@@ -1,9 +1,9 @@
 import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
 import {
-  SocketService,
+  AdminSocketService,
   PlayerRanking,
   GameState,
-} from '../services/socket.service';
+} from '../services/admin.socket.service';
 import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
 import { map } from 'rxjs/operators';
@@ -30,7 +30,7 @@ export class DeskMagicNumberComponent implements OnInit {
 
   private countdownInterval?: number;
 
-  constructor(private socketService: SocketService) {}
+  constructor(private adminSocketService: AdminSocketService) {}
 
   getRoundWinners(): string[] {
     return this.rankings()
@@ -39,11 +39,11 @@ export class DeskMagicNumberComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.socketService.gameState$
+    this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.players))
       .subscribe((players) => (this.players = players));
 
-    this.socketService.gameState$
+    this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.responded))
       .subscribe((responded) => {
         this.responded = responded;
@@ -53,13 +53,13 @@ export class DeskMagicNumberComponent implements OnInit {
         if (this.unresponded.length === 0) this.roundEnd();
       });
 
-    this.socketService.gameState$
+    this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.data))
       .subscribe((targetNumber) => {
         this.targetNumber.set(targetNumber);
       });
 
-    this.socketService.gameState$
+    this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.playerRankings))
       .subscribe((rankings) => this.rankings.set(rankings));
 
@@ -68,7 +68,7 @@ export class DeskMagicNumberComponent implements OnInit {
 
   startGame() {
     console.log('Starting game with players:', this.players);
-    this.socketService.startGame('Magic Number');
+    this.adminSocketService.startGame('Magic Number');
   }
 
   roundEnd() {
@@ -93,7 +93,7 @@ export class DeskMagicNumberComponent implements OnInit {
     this.targetNumber.set(0);
     this.roundNumber.set(this.roundNumber() + 1);
     this.responded = [];
-    this.socketService.setResponded([]);
+    this.adminSocketService.setResponded([]);
     this.unresponded = this.players.slice();
   }
 

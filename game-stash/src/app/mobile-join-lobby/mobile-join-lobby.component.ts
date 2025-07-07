@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { QrScannerComponent } from '../components/qr-scanner/qr-scanner.component';
-import { SocketService } from '../services/socket.service';
+import { AdminSocketService } from '../services/admin.socket.service';
+import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription, map } from 'rxjs';
 
 @Component({
@@ -35,11 +36,12 @@ export class MobileJoinLobbyComponent implements OnDestroy {
 
   constructor(
     private router: Router,
-    private socketService: SocketService,
+    private adminSocketService: AdminSocketService,
+    private playerSocketService: PlayerSocketService,
   ) {
     // Subscribe to join lobby events
     this.subscriptions.push(
-      this.socketService.joinLobbySuccess$.subscribe(() => {
+      this.playerSocketService.joinLobbySuccess$.subscribe(() => {
         console.log('Join lobby successful, navigating to mobile-lobby');
         this.isJoining.set(false); // Reset joining state
         this.router.navigate(['/mobile-lobby'], {
@@ -52,14 +54,14 @@ export class MobileJoinLobbyComponent implements OnDestroy {
     );
 
     this.subscriptions.push(
-      this.socketService.joinLobbyDenied$.subscribe((data) => {
+      this.playerSocketService.joinLobbyDenied$.subscribe((data) => {
         console.log('Join lobby denied:', data);
         this.isJoining.set(false);
         this.errorMessage.set(data.reason || 'Unable to join lobby.');
       }),
     );
 
-    this.socketService.gameState$
+    this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.players))
       .subscribe((players) => this.players.set(players));
   }
@@ -70,8 +72,11 @@ export class MobileJoinLobbyComponent implements OnDestroy {
     this.isJoining.set(true);
     this.errorMessage.set('');
 
-    // Use SocketService to join lobby
-    this.socketService.joinLobby(this.lobbyCode(), this.playerName().trim());
+    // Use PlayerSocketService to join lobby
+    this.playerSocketService.joinLobby(
+      this.lobbyCode(),
+      this.playerName().trim(),
+    );
 
     setTimeout(() => {
       if (this.isJoining()) {

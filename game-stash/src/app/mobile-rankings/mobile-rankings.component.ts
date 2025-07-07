@@ -2,10 +2,11 @@ import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-  SocketService,
+  AdminSocketService,
   PlayerRanking,
   GameState,
-} from '../services/socket.service';
+} from '../services/admin.socket.service';
+import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -36,7 +37,8 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService,
+    private adminSocketService: AdminSocketService,
+    private playerSocketService: PlayerSocketService,
   ) {}
 
   ngOnInit(): void {
@@ -90,7 +92,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
         if (this.isGameOver()) {
           // Emit gameEnded to backend as soon as final rankings screen is shown
-          this.socketService.emitGameEnded();
+          this.adminSocketService.emitGameEnded();
         }
 
         if (!this.isGameOver()) {
@@ -99,15 +101,15 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       }),
     );
 
-    // Subscribe to rankings from SocketService
+    // Subscribe to rankings from AdminSocketService
     this.subscriptions.push(
-      this.socketService.gameState$
+      this.adminSocketService.gameState$
         .pipe(map((gameState) => gameState.playerRankings))
         .subscribe((rankings) => {
           this.rankings.set(rankings);
 
           // Find current player's rank based on socket ID
-          const socketId = this.socketService.getSocketId();
+          const socketId = this.adminSocketService.getSocketId();
           if (socketId) {
             const currentPlayerRanking = rankings.find(
               (r) => r.playerId === socketId,
@@ -120,7 +122,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.push(
-      this.socketService.gameState$
+      this.adminSocketService.gameState$
         .pipe(map((gameState) => gameState.data))
         .subscribe((targetNumber) => {
           this.targetNumber.set(targetNumber);
@@ -188,12 +190,12 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
   onLeaveLobby(): void {
     console.log('PhoneRankings: User clicked leave lobby');
-    this.socketService.leaveLobby();
+    this.playerSocketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }
 
   getPlayerPoints(): number {
-    const socketId = this.socketService.getSocketId();
+    const socketId = this.adminSocketService.getSocketId();
     if (!socketId) return 0;
 
     const playerRanking = this.rankings().find((p) => p.playerId === socketId);
