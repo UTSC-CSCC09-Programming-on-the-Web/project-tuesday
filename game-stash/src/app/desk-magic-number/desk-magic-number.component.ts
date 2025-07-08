@@ -118,6 +118,6 @@ export class DeskMagicNumberComponent implements OnInit {
         this.stopCountdown();
         this.moveToNextRound();
       }
-    }, 1000);
+    }, 1000); //1000
   }
 }

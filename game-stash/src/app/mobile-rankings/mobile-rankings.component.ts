@@ -121,9 +121,10 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         }),
     );
 
+    // Subscribe to targetNumber from from PlayerSocketService
     this.subscriptions.push(
-      this.adminSocketService.gameState$
-        .pipe(map((gameState) => gameState.data))
+      this.playerSocketService.playerState$
+        .pipe(map((playerState) => playerState.data))
         .subscribe((targetNumber) => {
           this.targetNumber.set(targetNumber);
         }),

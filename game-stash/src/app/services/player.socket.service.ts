@@ -3,11 +3,12 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
 import { SERVER_ADDRESS, GameResults } from './socket.service.constants';
 
+// unsure what to do with this yet
 interface PlayerState {
-  // unsure what to do with this yet
   selectedGame: string;
   data: number;
   ranking: number;
+  rankings: string[];
 }
 @Injectable({
   providedIn: 'root',
@@ -30,6 +31,7 @@ export class PlayerSocketService {
     selectedGame: '',
     data: 0,
     ranking: -1,
+    rankings: [],
   });
   playerState$ = this.playerStateSubject.asObservable();
 
@@ -99,42 +101,7 @@ export class PlayerSocketService {
 
       switch (arg.gameId) {
         case 'Magic Number':
-          // REACT TO THE GAME RESULTS AS THE PLAYER HERE----------
-
-          //shouldnt have to recalculate, broadcast the result from admin instead
-          /*
-          const answerNumber = arg.targetNumber || 50; // Use server-provided target number, fallback to 50
-          this.updatePlayerState({ data: answerNumber });
-
-          let lowestDifference: number = 100;
-          const winners: string[] = [];
-          const responses = arg.responses;
-
-          // Calculate the difference between each player's response and the answer number
-          const playerDifferences: Record<string, number> = {};
-          for (const [player, response] of Object.entries(responses)) {
-            let difference = Math.abs(response - answerNumber);
-            playerDifferences[player] = difference;
-
-            if (difference < lowestDifference) {
-              lowestDifference = difference;
-            }
-          }
-
-          // Find all the winning players
-          for (const [player, difference] of Object.entries(
-            playerDifferences,
-          )) {
-            if (difference === lowestDifference) {
-              winners.push(player);
-            }
-          }
-
-          console.log('Answer number:', answerNumber);
-          console.log('Winners:', winners);
-
-          this.updateplayerRankings(responses, winners);
-            */
+            this.updatePlayerRankings(arg.rankings, (arg.targetNumber ?? 50));
           break;
         default:
           console.log('Unknown game ID:', arg.gameId);
@@ -148,6 +115,12 @@ export class PlayerSocketService {
     });
 
     console.log('PlayerSocketService: Socket connection initiated');
+  }
+
+  updatePlayerRankings(
+    rankings: string[], targetNumber: number) {
+    this.updatePlayerState({rankings: rankings})
+    this.updatePlayerState({data: targetNumber})
   }
 
   joinLobby(lobbyCode: string, playerName: string) {

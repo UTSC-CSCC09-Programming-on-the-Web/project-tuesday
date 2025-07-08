@@ -127,60 +127,14 @@ export class AdminSocketService {
     this.socket.on('gameResults', (arg: GameResults) => {
       switch (arg.gameId) {
         case 'Magic Number':
-          // REACT TO THE GAME RESULTS AS THE ADMIN HERE----------
+          console.log(arg.rankings, arg.winners)
+          this.updateRankings(arg.responses, arg.winners);
           break;
         default:
           console.log('Unknown game ID:', arg.gameId);
           break;
       }
     });
-
-    /*
-    this.socket.on('gameResults', (arg: GameResults) => {
-      console.log('AdminSocketService received gameResults for gameId:', arg.gameId);
-      console.log('AdminSocketService gameResults data:', arg);
-
-      switch (arg.gameId) {
-        case 'Magic Number':
-          const answerNumber = arg.targetNumber || 50; // Use server-provided target number, fallback to 50
-
-          this.updateState({ data: answerNumber });
-          let lowestDifference: number = 100;
-          const winners: string[] = [];
-          const responses = arg.responses;
-
-          // Calculate the difference between each player's response and the answer number
-          const playerDifferences: Record<string, number> = {};
-          for (const [player, response] of Object.entries(responses)) {
-            let difference = Math.abs(response - answerNumber);
-            playerDifferences[player] = difference;
-
-            if (difference < lowestDifference) {
-              lowestDifference = difference;
-            }
-          }
-
-          // Find all the winning players
-          for (const [player, difference] of Object.entries(
-            playerDifferences,
-          )) {
-            if (difference === lowestDifference) {
-              winners.push(player);
-            }
-          }
-
-          console.log('Answer number:', answerNumber);
-          console.log('Winners:', winners);
-
-          this.updateplayerRankings(responses, winners);
-          //EMIT THE RESULTS
-          break;
-        default:
-          console.log('Unknown game ID:', arg.gameId);
-          break;
-      }
-    });
-    */
   }
 
   getRandomInt(max: number) {
@@ -258,7 +212,7 @@ export class AdminSocketService {
   }
 
   // playerRankings management methods
-  private updateplayerRankings(
+  private updateRankings(
     responses: Record<string, number>,
     winners: string[],
   ) {

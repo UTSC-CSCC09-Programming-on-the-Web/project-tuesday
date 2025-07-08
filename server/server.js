@@ -49,10 +49,6 @@ io.on("connection", (socket) => {
     console.log(
       `Received gameResponse from ${arg.playerId} in lobby ${arg.lobbyCode}`,
     );
-    console.log(
-      `Current players in lobby:`,
-      Object.keys(lobbies[arg.lobbyCode].players),
-    );
 
     // Ensures admin is always ready, even if the admin's id somehow changes
     const adminId = lobbies[arg.lobbyCode].admin;
@@ -60,11 +56,6 @@ io.on("connection", (socket) => {
     lobbies[arg.lobbyCode].responses[arg.playerId] = arg.response;
     lobbies[arg.lobbyCode].players[adminId] = true;
 
-    console.log(
-      "sending gameResponseReceived to lobby:",
-      arg.lobbyCode,
-      arg.playerId,
-    );
     io.to(arg.lobbyCode).emit("gameResponseReceived", {
       playerId: arg.playerId,
     });
@@ -75,25 +66,47 @@ io.on("connection", (socket) => {
     );
     console.log(`All players responded: ${allResponded}`);
     console.log(`Player response status:`, lobbies[arg.lobbyCode].players);
+
+    // All players have responded. Calculate the winner and emit
     if (allResponded) {
-      let targetNumber = null;
+      
       if (arg.gameId === "Magic Number") {
-        targetNumber = Math.floor(Math.random() * 100) + 1; // Generate 1-100
-        console.log(
-          `Generated target number for Magic Number game: ${targetNumber}`,
-        );
+        const targetNumber= Math.floor(Math.random() * 100) + 1; // Generate 1-100
+
+        // Calculate the difference between each player's response and the answer number
+        let lowestDifference = 100;
+        const responses = lobbies[arg.lobbyCode].responses;
+        
+        const playerDifferences = {};
+        for (const [player, response] of Object.entries(responses)) {
+          let difference = Math.abs(response - targetNumber);
+          playerDifferences[player] = difference;
+
+          if (difference < lowestDifference) {
+            lowestDifference = difference;
+          }
+        }
+
+        // Calculate the rankings      
+        const rankings = Object.entries(playerDifferences)
+        .sort(([, a], [, b]) => a - b)  // Sort by value (ascending)
+        .map(([key, value]) => key);
+
+        // Calculate the winners
+        const winners = Object.entries(playerDifferences)
+        .filter(x => x === lowestDifference)
+        .map(([key, value]) => key);
+
+        let gameResult = {
+          winners: winners,
+          response: responses,
+          rankings: rankings,
+          gameId: "Magic Number",
+          targetNumber: targetNumber
+        }
+
+        io.to(arg.lobbyCode).emit("gameResults", gameResult)
       }
-
-      // FILL IN LOGIC TO DETERMINE THE WINNER HERE
-      // AND EMIT THE RESULTS TO EVERYONE, ADMIN AND PLAYERS
-
-      console.log(`Emitting gameResults to admin ${arg.lobbyCode}`);
-      io.to(arg.lobbyCode).emit("gameResultsAdmin", {
-        responses: lobbies[arg.lobbyCode].responses,
-        rankings: "", //fill this in
-        gameId: arg.gameId,
-        targetNumber: targetNumber,
-      });
 
       // Reset non-admin players status for next round (keep admin as true)
       Object.keys(lobbies[arg.lobbyCode].players).forEach((playerId) => {

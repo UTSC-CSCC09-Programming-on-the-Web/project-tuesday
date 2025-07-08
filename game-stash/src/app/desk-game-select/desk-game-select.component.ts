@@ -65,11 +65,14 @@ export class DeskGameSelectComponent {
 
   playGame(game: string) {
     if (game === 'Magic Number') {
+      this.selectedGame = 'Magic Number';
+      /*
       if (this.players.length < 2) {
         alert('At least 2 players are required to start the game.');
       } else {
-        this.selectedGame = 'Magic Number';
+        
       }
+      */
     } else {
       console.error('Game not implemented:', game);
     }
