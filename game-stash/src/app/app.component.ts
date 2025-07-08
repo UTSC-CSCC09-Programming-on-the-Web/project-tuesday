@@ -13,6 +13,5 @@ export class AppComponent {
   message = 'Loading...';
 
   constructor() {
-    console.log('app component view');
   }
 }

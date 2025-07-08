@@ -11,7 +11,6 @@ export class DeviceRedirectComponent {
   check = false;
 
   constructor(private router: Router) {
-    console.log('default component view');
   }
 
   mobileCheck(): void {

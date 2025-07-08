@@ -94,12 +94,12 @@ io.on("connection", (socket) => {
 
         // Calculate the winners
         const winners = Object.entries(playerDifferences)
-        .filter(x => x === lowestDifference)
+        .filter(([key, value]) => value === lowestDifference)
         .map(([key, value]) => key);
 
         let gameResult = {
           winners: winners,
-          response: responses,
+          responses: responses,
           rankings: rankings,
           gameId: "Magic Number",
           targetNumber: targetNumber

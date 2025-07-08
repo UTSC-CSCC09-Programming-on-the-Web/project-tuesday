@@ -42,7 +42,6 @@ export class MobileJoinLobbyComponent implements OnDestroy {
     // Subscribe to join lobby events
     this.subscriptions.push(
       this.playerSocketService.joinLobbySuccess$.subscribe(() => {
-        console.log('Join lobby successful, navigating to mobile-lobby');
         this.isJoining.set(false); // Reset joining state
         this.router.navigate(['/mobile-lobby'], {
           queryParams: {

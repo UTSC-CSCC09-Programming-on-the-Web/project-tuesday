@@ -42,7 +42,6 @@ export class DeskCreateLobbyComponent {
 
   /* ID generator gotten from: https://stackoverflow.com/questions/1349404/generate-a-string-of-random-characters */
   makeId(length: number): string {
-    console.log('Generating ID of length:', length);
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     var charactersLength = characters.length;
@@ -55,8 +54,6 @@ export class DeskCreateLobbyComponent {
   createLobby() {
     // this.loading = true;
     this.lobbyCode = this.makeId(6);
-    console.log('Lobby created with code:', this.lobbyCode);
-    console.log('Creating lobby with name:', this.lobbyName);
 
     this.router.navigate(['/lobby'], {
       queryParams: { lobbyName: this.lobbyName, lobbyCode: this.lobbyCode },

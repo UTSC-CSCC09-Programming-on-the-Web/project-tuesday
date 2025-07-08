@@ -42,8 +42,6 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log('PhoneRankings: Component initialized');
-
     // Reset all signals to default values
     this.targetNumber.set(0);
     this.rankings.set([]);
@@ -55,9 +53,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     this.roundNumber.set(1);
     this.selectedGame.set('');
     this.guess.set(0);
-
-    console.log('PhoneRankings: All signals reset to defaults');
-
+    
     // Read all parameters from route
     this.subscriptions.push(
       this.route.queryParams.subscribe((params) => {
@@ -78,14 +74,6 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
         this.selectedGame.set(selectedGame);
         this.guess.set(guess ? parseInt(guess) : 0);
-
-        console.log('PhoneRankings: Loaded parameters', {
-          lobbyCode: this.lobbyCode(),
-          playerName: this.playerName(),
-          roundNumber: this.roundNumber(),
-          selectedGame: this.selectedGame(),
-          guess: this.guess(),
-        });
 
         // Determine if this is the final round
         this.isGameOver.set(this.roundNumber() >= 5);
@@ -137,17 +125,11 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   }
 
   private startCountdown(): void {
-    console.log(
-      'PhoneRankings: Starting countdown for round',
-      this.roundNumber(),
-    );
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
-      console.log('PhoneRankings: Countdown tick:', current);
       if (current > 1) {
         this.countdown.set(current - 1);
       } else {
-        console.log('PhoneRankings: Countdown finished, moving to next round');
         this.stopCountdown();
         this.moveToNextRound();
       }
@@ -162,14 +144,12 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
   private moveToNextRound(): void {
     // Reset round-specific parameters for next round
-    console.log('PhoneRankings: Resetting round-specific state');
     this.countdown.set(10);
     this.rankings.set([]);
     this.targetNumber.set(0);
     this.playerRank.set(0);
 
     const nextRound = this.roundNumber() + 1;
-    console.log('PhoneRankings: Moving to next round', nextRound);
     this.router.navigate(['/mobile-magic-number'], {
       queryParams: {
         lobbyCode: this.lobbyCode(),
@@ -190,7 +170,6 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   }
 
   onLeaveLobby(): void {
-    console.log('PhoneRankings: User clicked leave lobby');
     this.playerSocketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }

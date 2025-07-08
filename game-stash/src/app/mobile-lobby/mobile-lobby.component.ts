@@ -58,7 +58,6 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
         .pipe(map((playerState) => playerState.selectedGame))
         .subscribe((gameId) => {
           if (gameId) {
-            console.log('Received game start event:', gameId);
             this.selectedGame.set(gameId);
 
             this.navigateToGame(gameId);
@@ -68,8 +67,6 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
   }
 
   private navigateToGame(gameId: string): void {
-    console.log('PhoneLobby: Navigating to game:', gameId);
-
     this.router.navigate(['/mobile-magic-number'], {
       queryParams: {
         lobbyCode: this.lobbyCode(),
@@ -85,7 +82,6 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
   }
 
   onLeaveLobby(): void {
-    console.log('PhoneLobby: User clicked leave lobby');
     this.playerSocketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }

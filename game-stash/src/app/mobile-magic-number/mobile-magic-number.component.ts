@@ -55,8 +55,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log('PhoneGuessingGameComponent initialized');
-
     // Reset ALL component state for new navigation
     this.lobbyCode.set('');
     this.selectedGame.set('');
@@ -85,12 +83,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
         this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
         this.selectedGame.set(selectedGame);
 
-        console.log('PhoneGuessingGame: Loaded parameters', {
-          lobbyCode: this.lobbyCode(),
-          playerName: this.playerName(),
-          roundNumber: this.roundNumber(),
-          selectedGame: this.selectedGame(),
-        });
       }),
     );
   }
@@ -99,11 +91,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
     if (!this.isFormValid()) return;
 
     const guessValue = this.guess();
-    console.log('PhoneGuessingGame: onSubmitGuess called');
-    console.log('PhoneGuessingGame: guessInput value:', this.guessInput());
-    console.log('PhoneGuessingGame: computed guess value:', guessValue);
-    console.log('PhoneGuessingGame: isGuessValid:', this.isGuessValid());
-
     if (isNaN(guessValue)) {
       console.error('PhoneGuessingGame: Invalid guess value (NaN)');
       this.errorMessage.set('Please enter a valid number');
@@ -130,7 +117,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   }
 
   onLeaveLobby(): void {
-    console.log('PhoneGuessingGame: User clicked leave lobby');
     this.playerSocketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }

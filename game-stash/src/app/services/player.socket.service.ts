@@ -36,11 +36,9 @@ export class PlayerSocketService {
   playerState$ = this.playerStateSubject.asObservable();
 
   connectToSocket() {
-    console.log('PlayerSocketService: connectToSocketPhone called');
 
     // Disconnect any existing socket first to avoid conflicts
     if (this.socket) {
-      console.log('PlayerSocketService: Disconnecting existing socket');
       this.socket.disconnect();
       this.socket = null;
     }
@@ -101,6 +99,7 @@ export class PlayerSocketService {
 
       switch (arg.gameId) {
         case 'Magic Number':
+            
             this.updatePlayerRankings(arg.rankings, (arg.targetNumber ?? 50));
           break;
         default:

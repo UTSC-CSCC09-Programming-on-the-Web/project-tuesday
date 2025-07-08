@@ -76,12 +76,10 @@ export class AdminSocketService {
     }
 
     this.socket.on('welcome', (res: any) => {
-      console.log(res.message);
     });
 
     // Create a new lobby
     this.socket.on('connect', () => {
-      console.log('Creating lobby with lobbyCode: ', this.lobbyCode);
       this.socket.emit('createLobby', {
         lobbyCode: this.lobbyCode,
         admin: this.socket.id,
@@ -116,19 +114,15 @@ export class AdminSocketService {
       );
     });
 
-    this.socket.on('gameResultsAdmin', (arg: any) => {
-      const gameId = arg.gameId;
-      switch (gameId) {
-        case 'Magic Number':
-          const targetNumber = Math.floor(Math.random() * 100) + 1; // Generate 1-100
-      }
-    });
-
     this.socket.on('gameResults', (arg: GameResults) => {
       switch (arg.gameId) {
         case 'Magic Number':
-          console.log(arg.rankings, arg.winners)
-          this.updateRankings(arg.responses, arg.winners);
+          
+          this.updateState({ data: arg.targetNumber });
+          
+          console.log("GOING INTO UPDATE RANKINGS=--------", arg.response, " and ", arg.winners)
+          console.log(arg)
+          this.updateRankings(arg.response, arg.winners);
           break;
         default:
           console.log('Unknown game ID:', arg.gameId);
@@ -219,6 +213,7 @@ export class AdminSocketService {
     const currentRankings = this.gameStateSubject.value.playerRankings;
     const updatedRankings: PlayerRanking[] = [];
 
+     console.log("RESPONSES------------------------ ", responses)
     // Create or update rankings for each player
     for (const [playerId, guess] of Object.entries(responses)) {
       const isWinner = winners.includes(playerId);

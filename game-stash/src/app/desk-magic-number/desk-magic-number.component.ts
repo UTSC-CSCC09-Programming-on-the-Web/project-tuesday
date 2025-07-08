@@ -67,7 +67,6 @@ export class DeskMagicNumberComponent implements OnInit {
   }
 
   startGame() {
-    console.log('Starting game with players:', this.players);
     this.adminSocketService.startGame('Magic Number');
   }
 
@@ -104,20 +103,14 @@ export class DeskMagicNumberComponent implements OnInit {
   }
 
   private startCountdown(): void {
-    console.log(
-      'Magic Number: Starting countdown for round',
-      this.roundNumber(),
-    );
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
-      console.log('Magic Number: Countdown tick:', current);
       if (current > 1) {
         this.countdown.set(current - 1);
       } else {
-        console.log('Magic Number: Countdown finished, moving to next round');
         this.stopCountdown();
         this.moveToNextRound();
       }
-    }, 1000); //1000
+    }, 1000);
   }
 }

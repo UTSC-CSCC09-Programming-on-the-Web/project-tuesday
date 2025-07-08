@@ -31,8 +31,6 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log('PhoneGuessingGameWaiting: Component initialized');
-
     // Reset all signals to default values
     this.lobbyCode.set('');
     this.playerName.set('');
@@ -64,14 +62,6 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
         this.selectedGame.set(selectedGame);
         this.guess.set(parseInt(guess));
 
-        console.log('PhoneGuessingGameWaiting: Loaded parameters', {
-          lobbyCode: this.lobbyCode(),
-          playerName: this.playerName(),
-          roundNumber: this.roundNumber(),
-          selectedGame: this.selectedGame(),
-          guess: this.guess(),
-        });
-
         this.setupSocketSubscriptions();
 
         // Emit game response when component initializes
@@ -85,20 +75,13 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
   }
 
   private submitGameResponse(): void {
-    console.log(
-      'PhoneGuessingGameWaiting: Submitting game response with guess:',
-      this.guess(),
-    );
     this.playerSocketService.submitGameResponse('Magic Number', this.guess());
   }
 
   private setupSocketSubscriptions(): void {
     // Subscribe to game round complete event to detect when all players have submitted
     this.subscriptions.push(
-      this.adminSocketService.gameRoundComplete$.subscribe(() => {
-        console.log(
-          'PhoneGuessingGameWaiting: Game round complete, all players submitted',
-        );
+      this.playerSocketService.gameRoundComplete$.subscribe(() => {
         this.allSubmitted.set(true);
         this.navigateToRankings();
       }),
@@ -106,7 +89,6 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
   }
 
   private navigateToRankings(): void {
-    console.log('PhoneGuessingGameWaiting: Navigating to rankings screen');
     this.router.navigate(['/mobile-rankings'], {
       queryParams: {
         lobbyCode: this.lobbyCode(),
@@ -119,7 +101,6 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
   }
 
   onLeaveLobby(): void {
-    console.log('PhoneGuessingGameWaiting: User clicked leave lobby');
     this.playerSocketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }
