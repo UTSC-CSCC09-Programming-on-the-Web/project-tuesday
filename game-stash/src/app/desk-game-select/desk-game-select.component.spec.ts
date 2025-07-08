@@ -8,9 +8,8 @@ describe('DeskGameSelectComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeskGameSelectComponent]
-    })
-    .compileComponents();
+      imports: [DeskGameSelectComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DeskGameSelectComponent);
     component = fixture.componentInstance;

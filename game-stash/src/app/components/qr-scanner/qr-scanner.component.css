@@ -157,8 +157,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .camera-controls {
@@ -187,7 +191,7 @@
   .qr-scanner-modal {
     padding: 10px;
   }
-  
+
   .qr-scanner-content {
     padding: 16px;
   }

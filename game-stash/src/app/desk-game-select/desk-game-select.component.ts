@@ -3,10 +3,11 @@ import { DeskMagicNumberComponent } from '../desk-magic-number/desk-magic-number
 import { io } from 'socket.io-client';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { SocketService } from '../services/socket.service';
+import { AdminSocketService } from '../services/admin.socket.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import {MatListModule} from '@angular/material/list';
+import { MatListModule } from '@angular/material/list';
 import { DeskLoadBalancingComponent } from "../desk-load-balancing/desk-load-balancing.component";
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-desk-game-select',
@@ -18,15 +19,13 @@ import { DeskLoadBalancingComponent } from "../desk-load-balancing/desk-load-bal
     DeskLoadBalancingComponent
 ],
   templateUrl: './desk-game-select.component.html',
-  styleUrl: './desk-game-select.component.css'
+  styleUrl: './desk-game-select.component.css',
 })
-
 export class DeskGameSelectComponent {
-
-  constructor (
+  constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService,
+    private adminSocketService: AdminSocketService,
   ) {}
 
   players: string[] = [];
@@ -43,22 +42,26 @@ export class DeskGameSelectComponent {
   selectedGame: string = '';
 
   ngOnInit() {
-    this.route.queryParams.subscribe(value => {
-      this.socketService.setLobby(value['lobbyName'], value['lobbyCode']);
-      this.lobbyName = this.socketService.getLobbyName();
-      this.lobbyCode = this.socketService.getLobbyCode();
+    this.route.queryParams.subscribe((value) => {
+      this.adminSocketService.setLobby(value['lobbyName'], value['lobbyCode']);
+      this.lobbyName = this.adminSocketService.getLobbyName();
+      this.lobbyCode = this.adminSocketService.getLobbyCode();
     });
 
-    this.socketService.connectToSocket();
+    this.adminSocketService.connectToSocket();
 
-    this.socketService.players$.subscribe(players => {
-      this.players = players;
-    });
-
+    this.adminSocketService.gameState$
+      .pipe(map((gameState) => gameState.players))
+      .subscribe((players) => (this.players = players));
   }
 
   openNewTab() {
-    const url = this.router.serializeUrl( this.router.createUrlTree(['/player', this.socketService.getLobbyCode()]));
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree([
+        '/player',
+        this.adminSocketService.getLobbyCode(),
+      ]),
+    );
     window.open(url, '_blank');
   }
 
@@ -66,8 +69,7 @@ export class DeskGameSelectComponent {
     if (game === 'Magic Number') {
       if (this.players.length < 2) {
         alert('At least 2 players are required to start the game.');
-      }
-      else {
+      } else {
         this.selectedGame = 'Magic Number';
       }
     } else if (game === 'Load Balancing'){

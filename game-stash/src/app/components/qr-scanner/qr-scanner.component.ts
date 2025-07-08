@@ -1,4 +1,10 @@
-import { Component, Output, EventEmitter, signal, computed } from '@angular/core';
+import {
+  Component,
+  Output,
+  EventEmitter,
+  signal,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
@@ -8,7 +14,7 @@ import { BarcodeFormat } from '@zxing/library';
   standalone: true,
   imports: [CommonModule, ZXingScannerModule],
   templateUrl: './qr-scanner.component.html',
-  styleUrls: ['./qr-scanner.component.css']
+  styleUrls: ['./qr-scanner.component.css'],
 })
 export class QrScannerComponent {
   @Output() codeScanned = new EventEmitter<string>();
@@ -27,20 +33,22 @@ export class QrScannerComponent {
     this.availableDevices.set(devices);
     if (devices.length > 0 && !this.currentDevice()) {
       // Prefer back camera on mobile
-      const backCamera = devices.find(device => 
-        device.label.toLowerCase().includes('back') || 
-        device.label.toLowerCase().includes('rear')
+      const backCamera = devices.find(
+        (device) =>
+          device.label.toLowerCase().includes('back') ||
+          device.label.toLowerCase().includes('rear'),
       );
       this.currentDevice.set(backCamera || devices[0]);
     }
   }
 
   onCodeResult(result: any): void {
-    const resultString = typeof result === 'string' ? result : result?.text || '';
-    
+    const resultString =
+      typeof result === 'string' ? result : result?.text || '';
+
     if (resultString && resultString.trim()) {
       const cleanCode = resultString.trim().toUpperCase();
-      
+
       // Check if it's a valid 6-character lobby code
       if (/^[A-Z0-9]{6}$/.test(cleanCode)) {
         this.codeScanned.emit(cleanCode);
@@ -65,9 +73,11 @@ export class QrScannerComponent {
   switchCamera(): void {
     const devices = this.availableDevices();
     const current = this.currentDevice();
-    
+
     if (devices.length > 1) {
-      const currentIndex = devices.findIndex(device => device.deviceId === current?.deviceId);
+      const currentIndex = devices.findIndex(
+        (device) => device.deviceId === current?.deviceId,
+      );
       const nextIndex = (currentIndex + 1) % devices.length;
       this.currentDevice.set(devices[nextIndex]);
     }

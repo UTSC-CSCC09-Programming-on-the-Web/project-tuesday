@@ -1,14 +1,19 @@
 @if (!isRoundOver()) {
   <header class="rankings-header">
-    <h1 class="player-list">
-        Magic Number: Round {{ roundNumber() }}
-    </h1>
+    <h1 class="player-list">Magic Number: Round {{ roundNumber() }}</h1>
   </header>
   <div class="player-list">
     <h2>Waiting for players to answer...</h2>
     <ul class="game-list">
-      <li class="player-item player-unresponse" *ngFor="let player of unresponded">{{ player }}</li>
-      <li class="player-item player-response" *ngFor="let player of responded">{{ player }}</li>
+      <li
+        class="player-item player-unresponse"
+        *ngFor="let player of unresponded"
+      >
+        {{ player }}
+      </li>
+      <li class="player-item player-response" *ngFor="let player of responded">
+        {{ player }}
+      </li>
     </ul>
   </div>
 } @else {
@@ -21,12 +26,17 @@
           Round {{ roundNumber() }} Results
         }
       </h1>
-      <p class="target-info">Target Number: <span class="target-number">{{ targetNumber() }}</span></p>
-        <!-- Round Winner Display -->
+      <p class="target-info">
+        Target Number: <span class="target-number">{{ targetNumber() }}</span>
+      </p>
+      <!-- Round Winner Display -->
       @if (!isGameOver()) {
         <div class="round-winner-display">
           @if (getRoundWinners().length === 1) {
-            <p class="winner-text">Round Winner: <span class="winner-name">{{ getRoundWinners()[0] }}</span></p>
+            <p class="winner-text">
+              Round Winner:
+              <span class="winner-name">{{ getRoundWinners()[0] }}</span>
+            </p>
           } @else {
             <p class="winner-text">Round Winners:</p>
             <div class="multiple-winners">
@@ -39,13 +49,15 @@
       }
       <div class="all-rankings">
         <h3>All Players</h3>
-        <div class="rankings-list">        @for (player of rankings(); track player.name) {
+        <div class="rankings-list">
+          @for (player of rankings(); track player.name) {
             <div class="ranking-item" [class.winner]="player.rank === 1">
               <div class="rank-position">
                 <span class="rank-number">{{ player.rank }}</span>
-              </div><div class="player-details">
+              </div>
+              <div class="player-details">
                 <span class="player-name">{{ player.name }}</span>
-                <span class="player-guess">Guess: {{ player.guess }}</span>
+                <span class="player-guess">Guess: {{ player.data }}</span>
               </div>
               <div class="player-points">{{ player.points }}</div>
             </div>

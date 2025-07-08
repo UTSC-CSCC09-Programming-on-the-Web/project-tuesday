@@ -4,7 +4,8 @@
   --secondary-color: #764ba2;
   --success-color: #48bb78;
   --error-color: #f56565;
-  --card-background: rgba(255, 255, 255, 0.1);  --border-color: rgba(255, 255, 255, 0.3);
+  --card-background: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.3);
   --border-radius: 12px;
 }
 
@@ -13,9 +14,13 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
   color: white;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -139,7 +144,8 @@
   font-weight: 600;
   border: none;
   border-radius: var(--border-radius);
-  background: linear-gradient(45deg, var(--success-color), #40c057);  color: white;
+  background: linear-gradient(45deg, var(--success-color), #40c057);
+  color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -172,8 +178,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Footer Styles */
@@ -209,20 +219,20 @@
   .game-container {
     padding: 15px;
   }
-  
+
   .game-header h1 {
     font-size: 2rem;
   }
-  
+
   .instruction h2 {
     font-size: 1.5rem;
   }
-  
+
   .guess-input {
     padding: 15px;
     font-size: 1.5rem;
   }
-  
+
   .submit-btn {
     padding: 15px 25px;
     font-size: 1.1rem;

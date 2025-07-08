@@ -1,17 +1,18 @@
 import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
-import { SocketService } from '../services/socket.service';
-import {MatListModule} from '@angular/material/list';
+import {
+  AdminSocketService,
+  PlayerRanking,
+  GameState,
+} from '../services/admin.socket.service';
+import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
-import { PlayerRanking } from '../mobile-rankings/mobile-rankings.component';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-desk-magic-number',
-  imports: [
-    MatListModule,
-    CommonModule,
-  ],
+  imports: [MatListModule, CommonModule],
   templateUrl: './desk-magic-number.component.html',
-  styleUrl: './desk-magic-number.component.css'
+  styleUrl: './desk-magic-number.component.css',
 })
 export class DeskMagicNumberComponent implements OnInit {
   players: string[] = [];
@@ -29,50 +30,44 @@ export class DeskMagicNumberComponent implements OnInit {
 
   private countdownInterval?: number;
 
-  constructor( private socketService: SocketService) {}
+  constructor(private adminSocketService: AdminSocketService) {}
 
   getRoundWinners(): string[] {
     return this.rankings()
-      .filter(player => player.isRoundWinner)
-      .map(player => player.name);
+      .filter((player) => player.isRoundWinner)
+      .map((player) => player.name);
   }
 
   ngOnInit(): void {
-    this.socketService.players$.subscribe(players => {
-      this.players = players;
-    });
+    this.adminSocketService.gameState$
+      .pipe(map((gameState) => gameState.players))
+      .subscribe((players) => (this.players = players));
 
-    this.socketService.responded$.subscribe(responded => {
-      this.responded = responded;
-      this.unresponded = this.players.filter(player => !responded.includes(player));
-      if (this.unresponded.length === 0)
-        this.roundEnd();
-    });
+    this.adminSocketService.gameState$
+      .pipe(map((gameState) => gameState.responded))
+      .subscribe((responded) => {
+        this.responded = responded;
+        this.unresponded = this.players.filter(
+          (player) => !responded.includes(player),
+        );
+        if (this.unresponded.length === 0) this.roundEnd();
+      });
 
-    this.socketService.targetNumber$.subscribe(targetNumber => {
-      this.targetNumber.set(targetNumber);
-    });
+    this.adminSocketService.gameState$
+      .pipe(map((gameState) => gameState.data))
+      .subscribe((targetNumber) => {
+        this.targetNumber.set(targetNumber);
+      });
 
-    this.socketService.magicNumberRankings$.subscribe(rankings => {
-      // Convert MagicNumberRankings to PlayerRanking format for display
-      const playerRankings: PlayerRanking[] = rankings.map(ranking => ({
-        playerId: ranking.playerId,
-        name: ranking.name,
-        guess: ranking.guess,
-        points: ranking.points,
-        rank: ranking.rank,
-        isRoundWinner: ranking.isRoundWinner
-      }));
-
-      this.rankings.set(playerRankings);
-    })
+    this.adminSocketService.gameState$
+      .pipe(map((gameState) => gameState.playerRankings))
+      .subscribe((rankings) => this.rankings.set(rankings));
 
     this.startGame();
   }
 
   startGame() {
-    console.log("Starting game with players:", this.players);
-    this.socketService.startGame('Magic Number');
+    this.adminSocketService.startGame('Magic Number');
   }
 
   roundEnd() {
@@ -97,7 +92,7 @@ export class DeskMagicNumberComponent implements OnInit {
     this.targetNumber.set(0);
     this.roundNumber.set(this.roundNumber() + 1);
     this.responded = [];
-    this.socketService.setResponded([]);
+    this.adminSocketService.setResponded([]);
     this.unresponded = this.players.slice();
   }
 
@@ -108,18 +103,14 @@ export class DeskMagicNumberComponent implements OnInit {
   }
 
   private startCountdown(): void {
-    console.log('Magic Number: Starting countdown for round', this.roundNumber());
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
-      console.log('Magic Number: Countdown tick:', current);
       if (current > 1) {
         this.countdown.set(current - 1);
       } else {
-        console.log('Magic Number: Countdown finished, moving to next round');
         this.stopCountdown();
         this.moveToNextRound();
       }
     }, 1000);
   }
-
 }

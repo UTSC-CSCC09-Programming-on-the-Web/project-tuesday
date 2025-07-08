@@ -1,8 +1,16 @@
-import { Component, signal, computed, OnInit, OnDestroy, input } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  OnInit,
+  OnDestroy,
+  input,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SocketService } from '../services/socket.service';
+import { AdminSocketService } from '../services/admin.socket.service';
+import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -10,9 +18,8 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './mobile-magic-number.component.html',
-  styleUrls: ['./mobile-magic-number.component.css']
+  styleUrls: ['./mobile-magic-number.component.css'],
 })
-
 export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   // Signals to store data from route parameters
   lobbyCode = signal('');
@@ -43,12 +50,11 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService
-  ) { }
-  
-  ngOnInit(): void {
-    console.log('PhoneGuessingGameComponent initialized');
+    private adminSocketService: AdminSocketService,
+    private playerSocketService: PlayerSocketService,
+  ) {}
 
+  ngOnInit(): void {
     // Reset ALL component state for new navigation
     this.lobbyCode.set('');
     this.selectedGame.set('');
@@ -60,7 +66,7 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
 
     // Read all parameters from route
     this.subscriptions.push(
-      this.route.queryParams.subscribe(params => {
+      this.route.queryParams.subscribe((params) => {
         const lobbyCode = params['lobbyCode'];
         const playerName = params['playerName'];
         const roundNumber = params['roundNumber'];
@@ -77,25 +83,14 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
         this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
         this.selectedGame.set(selectedGame);
 
-        console.log('PhoneGuessingGame: Loaded parameters', {
-          lobbyCode: this.lobbyCode(),
-          playerName: this.playerName(),
-          roundNumber: this.roundNumber(),
-          selectedGame: this.selectedGame()
-        });
-      })
+      }),
     );
   }
-  
+
   onSubmitGuess(): void {
     if (!this.isFormValid()) return;
 
     const guessValue = this.guess();
-    console.log('PhoneGuessingGame: onSubmitGuess called');
-    console.log('PhoneGuessingGame: guessInput value:', this.guessInput());
-    console.log('PhoneGuessingGame: computed guess value:', guessValue);
-    console.log('PhoneGuessingGame: isGuessValid:', this.isGuessValid());
-
     if (isNaN(guessValue)) {
       console.error('PhoneGuessingGame: Invalid guess value (NaN)');
       this.errorMessage.set('Please enter a valid number');
@@ -105,7 +100,10 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    console.log('PhoneGuessingGame: Set isSubmitting to true, navigating to waiting screen with guess:', guessValue);
+    console.log(
+      'PhoneGuessingGame: Set isSubmitting to true, navigating to waiting screen with guess:',
+      guessValue,
+    );
 
     this.router.navigate(['/mobile-magic-number-waiting'], {
       queryParams: {
@@ -113,14 +111,13 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
         playerName: this.playerName(),
         roundNumber: this.roundNumber(),
         selectedGame: this.selectedGame(),
-        guess: guessValue
-      }
+        guess: guessValue,
+      },
     });
   }
 
   onLeaveLobby(): void {
-    console.log('PhoneGuessingGame: User clicked leave lobby');
-    this.socketService.leaveLobby();
+    this.playerSocketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }
 
@@ -133,6 +130,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

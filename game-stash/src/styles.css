@@ -1,14 +1,21 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
 
 :host {
   --primary-color: #667eea;
   --secondary-color: #764ba2;
   --success-color: #48bb78;
   --error-color: #f56565;
-  --card-background: rgba(255, 255, 255, 0.1);  --border-color: rgba(255, 255, 255, 0.3);
+  --card-background: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.3);
   --border-radius: 12px;
 }
 

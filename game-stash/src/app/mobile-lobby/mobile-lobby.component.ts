@@ -1,17 +1,20 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SocketService } from '../services/socket.service';
-import { Subscription } from 'rxjs';
+import {
+  AdminSocketService,
+  GameState,
+} from '../services/admin.socket.service';
+import { PlayerSocketService } from '../services/player.socket.service';
+import { Subscription, map } from 'rxjs';
 
 @Component({
   selector: 'app-mobile-lobby',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './mobile-lobby.component.html',
-  styleUrls: ['./mobile-lobby.component.css']
+  styleUrls: ['./mobile-lobby.component.css'],
 })
-
 export class MobileLobbyComponent implements OnInit, OnDestroy {
   lobbyCode = signal('');
   playerName = signal('');
@@ -23,13 +26,14 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private socketService: SocketService
-  ) { }
+    private adminSocketService: AdminSocketService,
+    private playerSocketService: PlayerSocketService,
+  ) {}
 
   ngOnInit(): void {
     // Get lobby details from query parameters
     this.subscriptions.push(
-      this.route.queryParams.subscribe(params => {
+      this.route.queryParams.subscribe((params) => {
         const lobbyCode = params['lobbyCode'];
         const playerName = params['playerName'];
 
@@ -43,27 +47,26 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
         this.playerName.set(playerName);
 
         this.setupSocketSubscriptions();
-      })
+      }),
     );
   }
 
   private setupSocketSubscriptions(): void {
     // Subscribe to selected game for navigation
     this.subscriptions.push(
-      this.socketService.selectedGame$.subscribe(gameId => {
-        if (gameId) {
-          console.log("Received game start event:", gameId);
-          this.selectedGame.set(gameId);
+      this.playerSocketService.playerState$
+        .pipe(map((playerState) => playerState.selectedGame))
+        .subscribe((gameId) => {
+          if (gameId) {
+            this.selectedGame.set(gameId);
 
-          this.navigateToGame(gameId);
-        }
-      })
+            this.navigateToGame(gameId);
+          }
+        }),
     );
   }
 
   private navigateToGame(gameId: string): void {
-    console.log('PhoneLobby: Navigating to game:', gameId);
-
     if (gameId === 'Load Balancing')
       this.router.navigate(['/mobile-load-balancing'], {
         queryParams: {
@@ -79,18 +82,17 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
           lobbyCode: this.lobbyCode(),
           playerName: this.playerName(),
           selectedGame: gameId,
-          roundNumber: 1
-        }
+          roundNumber: 1,
+        },
       });
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   onLeaveLobby(): void {
-    console.log('PhoneLobby: User clicked leave lobby');
-    this.socketService.leaveLobby();
+    this.playerSocketService.leaveLobby();
     this.router.navigate(['/mobile-join-lobby']);
   }
 }
