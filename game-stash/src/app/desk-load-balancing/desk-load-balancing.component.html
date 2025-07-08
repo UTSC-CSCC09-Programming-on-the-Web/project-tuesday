@@ -16,16 +16,15 @@
       <h1>
           Final Results
       </h1>
-      <p class="target-info">Target Number: <span class="target-number">{{ "placeholder" }}</span></p>
       <div class="all-rankings">
-        <h3>All Players</h3>
+        <h3>Load Balancing</h3>
         <div class="rankings-list">        @for (player of players; track player) {
             <div class="ranking-item" [class.winner]="players.indexOf(player) === 0">
               <div class="rank-position">
                 <span class="rank-number">{{ players.indexOf(player) }}</span>
               </div><div class="player-details">
                 <span class="player-name">{{ player }}</span>
-                <span class="player-guess">Score: {{ points[players.indexOf(player)] }}</span>
+                <span class="player-guess">Score: {{ results[players.indexOf(player)] }}</span>
               </div>
               <!-- <div class="player-points">{{ player.points }}</div> -->
             </div>
@@ -33,14 +32,12 @@
         </div>
       </div>
     </header>
-    <!-- <footer class="rankings-footer">
-      @if (isGameOver()) {
+    <footer class="rankings-footer">
         <div class="final-actions">
           <button (click)="gameOverEmit()" class="stay-btn">
             Back to Game Select
           </button>
         </div>
-      }
-    </footer> -->
+    </footer>
   </div>
 }

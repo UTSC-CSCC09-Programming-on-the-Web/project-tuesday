@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
 
-const SERVER_ADDRESS = "https://3c84-142-188-64-168.ngrok-free.app";
+const SERVER_ADDRESS = "https://4d7ee1f940b5.ngrok-free.app";
 
 interface GameResults {
   gameId: string;
@@ -177,6 +177,14 @@ export class SocketService {
   useEffect(event: string, callback: (data: any) => void) {
     if (this.socket) {
       this.socket.on(event, (arg: any) => { callback(arg) });
+    } else {
+      console.error("Socket not initialized. Call connectToSocket() first.");
+    }
+  }
+
+  removeEffect(event: string) {
+    if (this.socket) {
+      this.socket.off(event);
     } else {
       console.error("Socket not initialized. Call connectToSocket() first.");
     }

@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
-import { Engine, Runner, Render, World, Constraint, MouseConstraint, Bodies, Mouse, Events, Body} from 'matter-js'
+import Matter, { Engine, Runner, Render, World, Constraint, MouseConstraint, Bodies, Mouse, Events, Body} from 'matter-js'
 import { SocketService } from '../services/socket.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -19,16 +19,23 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
   @ViewChild('gameWrapper') wrapper!: ElementRef;
 
-  width: number = 600;
-  height: number = 800;
+  width: number = 350;
+  height: number = 500;
 
   engine: Engine = Engine.create();
   render: Render | undefined;
 
   points: number = 0;
   bodies: Matter.Body[] = [];
+  platform: Matter.Body | undefined;
 
   subscriptions: Subscription[] = [];
+
+  gyroscope: number[] = [0, 0, 0];
+  permissionGranted: boolean = false;
+
+  rotation: number = 0;
+  old: number = 0;
 
   get score(): number {
     return this.points;
@@ -41,6 +48,23 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
   ) {}
 
   ngAfterViewInit() {
+    document.querySelector('#permission')!.addEventListener('click', () => {
+      if (
+        typeof (DeviceMotionEvent as any).requestPermission === 'function'
+      ) {
+        (DeviceMotionEvent as any).requestPermission().then((response: any) => {
+          alert(response);
+          this.permissionGranted = response === 'granted';
+          if (this.permissionGranted) {
+            window.addEventListener('deviceorientation', event => {
+              this.old = this.rotation;
+              this.rotation = Math.floor(event.gamma || 0);
+            });
+          }
+        }).catch((error: any) => alert(error));
+      }
+    });
+
     this.subscriptions.push(
       this.route.queryParams.subscribe(params => {
         const lobbyCode = params['lobbyCode'];
@@ -80,10 +104,8 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
       }
     });
 
-    const ground = Bodies.rectangle(this.width / 2, this.height - 20, this.width - 10, 60, {
-        isStatic: false,
-        frictionAir: 1,
-        density: 100,
+    this.platform = Bodies.rectangle(this.width / 2, this.height - 20, this.width - 10, 20, {
+        isStatic: true,
     });
 
     const mouse = Mouse.create(this.render.canvas);
@@ -97,9 +119,9 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
     this.render.mouse = mouse;
 
-    this.engine.gravity.y = 0; // Set gravity to 0.5 for a more dynamic effect
+    //this.engine.gravity.y = 0; // Set gravity to 0.5 for a more dynamic effect
 
-    World.add(this.engine.world, [ground, mouseConstraint]);
+    World.add(this.engine.world, [this.platform, mouseConstraint]);
     const runner = Runner.create();
     Runner.run(runner, this.engine);
     Render.run(this.render);
@@ -114,7 +136,11 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
     this.socketService.playerEmit("playerStart", {});
 
-    Events.on(this.engine, "afterUpdate", () => {
+    Events.on(this.engine, "afterUpdate", () => {;
+      console.log("Platform angle set to:", this.rotation, this.platform);
+      if (this.permissionGranted) {
+        Body.rotate(this.platform!, (this.rotation - this.old) * Math.PI / 180);
+      }
       this.bodies.forEach(body => {
         if (body.position.y > this.height || body.position.x < 0 || body.position.x > this.width) {
           // Remove bodies that fall below the screen
@@ -150,6 +176,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
       if (this.engine) {
         Engine.clear(this.engine);
       }
+      this.socketService.removeEffect("spawnBox");
       this.router.navigate(['/mobile-rankings'], {
         queryParams: {
           lobbyCode: this.lobbyCode(),

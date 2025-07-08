@@ -166,7 +166,7 @@ server.listen(3000, () => {
 // PostgreSQL Database endpoint connection --------------------------------
 
 var corsOptions = {
-  origin: "http://localhost:4200" // This must match the frontend's URL
+  origin: "*" // This must match the frontend's URL
 };
 
 app.use(cors(corsOptions));

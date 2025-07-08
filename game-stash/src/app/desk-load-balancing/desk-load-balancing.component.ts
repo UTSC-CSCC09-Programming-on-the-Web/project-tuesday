@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
 import { SocketService } from '../services/socket.service';
 import { CommonModule } from '@angular/common';
 
@@ -16,10 +16,14 @@ export class DeskLoadBalancingComponent implements OnInit {
   players: string[] = [];
   points: number[] = [];
 
+  results: number[] = [];
+
   interval: any | undefined;
   timeout: any | undefined;
 
   isGameOver = signal(false);
+
+  @Output() gameOver = new EventEmitter<string>();
 
   constructor(private socketService: SocketService) {}
 
@@ -30,6 +34,10 @@ export class DeskLoadBalancingComponent implements OnInit {
       this.points = Array(players.length).fill(0);
     });
     this.startGame();
+  }
+
+  gameOverEmit() {
+    this.gameOver.emit('Magic Number');
   }
 
   startGame() {
@@ -61,8 +69,10 @@ export class DeskLoadBalancingComponent implements OnInit {
         gameId: "Load Balancing",
         lobbyCode: this.socketService.getLobbyCode()
       });
+      this.socketService.removeEffect("scoreUpdate");
       console.log("Game ended");
       this.isGameOver.set(true);
+      this.results = [...this.points];
     }, 30000);
 
     this.socketService.useEffect("scoreUpdate", (data) => {
