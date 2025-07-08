@@ -33,17 +33,17 @@ io.on("connection", (socket) => {
   });
 
   // Admin requests to start the game specified by arg
-  socket.on("startGame", (arg) => {
-    if (lobbies[arg.lobbyCode]) {
-      lobbies[arg.lobbyCode].gameStarted = true;
-    }
-    console.log(
-      `Lobby: ${arg.lobbyCode} has requested to start the game: ${arg.gameId}`,
-    );
-    io.to(arg.lobbyCode).emit("startGamePlayer", {
-      gameId: arg.gameId,
-    });
-  });
+  // socket.on("startGame", (arg) => {
+  //   if (lobbies[arg.lobbyCode]) {
+  //     lobbies[arg.lobbyCode].gameStarted = true;
+  //   }
+  //   console.log(
+  //     `Lobby: ${arg.lobbyCode} has requested to start the game: ${arg.gameId}`,
+  //   );
+  //   io.to(arg.lobbyCode).emit("startGamePlayer", {
+  //     gameId: arg.gameId,
+  //   });
+  // });
 
   // Catch a game response from a player
   socket.on("gameResponse", (arg) => {
@@ -201,6 +201,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on('startGame', (arg) => {
+    console.log(`Received startGame request from ${socket.id} for lobby ${arg.lobbyCode} with gameId ${arg.gameId}`);
     if (lobbies[arg.lobbyCode]) {
       lobbies[arg.lobbyCode].gameStarted = true;
     }

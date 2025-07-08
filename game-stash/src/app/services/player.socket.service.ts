@@ -35,6 +35,31 @@ export class PlayerSocketService {
   });
   playerState$ = this.playerStateSubject.asObservable();
 
+  playerEmit(event: string, data: any) {
+    console.log('SocketService: playerEmit called with event:', event, 'and data:', data);
+    this.socket.emit(event, {
+      data,
+      playerId: this.socket.id,
+      lobbyCode: this.lobbyCode,
+    });
+  }
+
+  useEffect(event: string, callback: (data: any) => void) {
+    if (this.socket) {
+      this.socket.on(event, (arg: any) => { callback(arg) });
+    } else {
+      console.error("Socket not initialized. Call connectToSocket() first.");
+    }
+  }
+
+  removeEffect(event: string) {
+    if (this.socket) {
+      this.socket.off(event);
+    } else {
+      console.error("Socket not initialized. Call connectToSocket() first.");
+    }
+  }
+
   connectToSocket() {
 
     // Disconnect any existing socket first to avoid conflicts
@@ -99,7 +124,7 @@ export class PlayerSocketService {
 
       switch (arg.gameId) {
         case 'Magic Number':
-            
+
             this.updatePlayerRankings(arg.rankings, (arg.targetNumber ?? 50));
           break;
         default:

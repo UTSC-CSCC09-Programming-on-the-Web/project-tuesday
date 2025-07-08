@@ -48,13 +48,34 @@ export class AdminSocketService {
 
   constructor() {}
 
+  lobbyEmit(event: string, data: any) {
+    data.lobbyCode = this.lobbyCode; // Ensure lobbyCode is included in the data
+    this.socket.emit(event, data);
+  }
+
+  useEffect(event: string, callback: (data: any) => void) {
+    if (this.socket) {
+      this.socket.on(event, (arg: any) => { callback(arg) });
+    } else {
+      console.error("Socket not initialized. Call connectToSocket() first.");
+    }
+  }
+
+  removeEffect(event: string) {
+    if (this.socket) {
+      this.socket.off(event);
+    } else {
+      console.error("Socket not initialized. Call connectToSocket() first.");
+    }
+  }
+
   startGame(gameId: string) {
-    if (gameId === 'Magic Number') {
+    // if (gameId === 'Magic Number') {
       this.socket.emit('startGame', {
         gameId: gameId,
         lobbyCode: this.lobbyCode,
       });
-    }
+    // }
   }
 
   endGame(gameId: string) {
@@ -117,9 +138,9 @@ export class AdminSocketService {
     this.socket.on('gameResults', (arg: GameResults) => {
       switch (arg.gameId) {
         case 'Magic Number':
-          
+
           this.updateState({ data: arg.targetNumber });
-          
+
           console.log("GOING INTO UPDATE RANKINGS=--------", arg.response, " and ", arg.winners)
           console.log(arg)
           this.updateRankings(arg.response, arg.winners);

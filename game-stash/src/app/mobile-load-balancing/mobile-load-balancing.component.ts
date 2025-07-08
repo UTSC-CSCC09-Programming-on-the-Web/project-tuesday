@@ -1,8 +1,8 @@
 import { AfterViewInit, Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
 import Matter, { Engine, Runner, Render, World, Constraint, MouseConstraint, Bodies, Mouse, Events, Body} from 'matter-js'
-import { SocketService } from '../services/socket.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { PlayerSocketService } from '../services/player.socket.service';
 
 @Component({
   selector: 'app-mobile-load-balancing',
@@ -42,7 +42,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
   }
 
   constructor(
-    private socketService: SocketService,
+    private socketService: PlayerSocketService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}

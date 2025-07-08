@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
-import { SocketService } from '../services/socket.service';
 import { CommonModule } from '@angular/common';
+import { AdminSocketService } from '../services/admin.socket.service';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-desk-load-balancing',
@@ -25,14 +26,15 @@ export class DeskLoadBalancingComponent implements OnInit {
 
   @Output() gameOver = new EventEmitter<string>();
 
-  constructor(private socketService: SocketService) {}
+  constructor(private socketService: AdminSocketService) {}
 
 
   ngOnInit() {
-    this.socketService.players$.subscribe(players => {
-      this.players = players;
-      this.points = Array(players.length).fill(0);
-    });
+    this.socketService.gameState$.pipe(map((gameState) => gameState.players))
+      .subscribe((players) => {
+        this.players = players;
+        this.points = Array(players.length).fill(0);
+      });
     this.startGame();
   }
 
