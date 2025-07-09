@@ -1,15 +1,52 @@
-@if (!isGameOver()) {
+@if (!(status() === 'Game Over')) {
   <header class="rankings-header">
     <h1 class="player-list">
-        Load Balancing: Balance the Blocks on your Screen
+        Load Balancing
     </h1>
   </header>
-  <div class="player-list">
-    <h2>Waiting for players to answer...</h2>
-    <ul class="game-list">
-      <li class="player-item player-response" *ngFor="let player of players">{{ player }}</li>
-    </ul>
-  </div>
+  @if (status() === 'Waiting for players') {
+    <div class="player-list">
+      <h2>Waiting for players to give permission...</h2>
+      <ul class="game-list">
+        <li
+          class="player-item player-unresponse"
+          *ngFor="let player of unresponded"
+        >
+          {{ player }}
+        </li>
+        <li class="player-item player-response" *ngFor="let player of responded">
+          {{ player }}
+        </li>
+      </ul>
+    </div>
+  } @else {
+    @if (status() === 'Game Countdown') {
+      <header class="rankings-header">
+        <div class="countdown-display">
+          <p class="countdown-text">Game Starts in...</p>
+          <div class="countdown-div">
+            <span class="countdown-number">{{ countdown() }}</span>
+          </div>
+        </div>
+      </header>
+    } @else {
+      <div class="all-rankings">
+        <span class="countdown-number">{{ countdown() }}</span>
+        <div class="rankings-list">        @for (player of players(); track player) {
+          <div class="ranking-item" [class.winner]="players().indexOf(player) === 0">
+            <div class="rank-position">
+              <span class="rank-number">{{ players().indexOf(player) }}</span>
+            </div><div class="player-details">
+              <span class="player-name">{{ player }}</span>
+              <span class="player-guess">Score: {{ points[players().indexOf(player)] }}</span>
+            </div>
+            <!-- <div class="player-points">{{ player.points }}</div> -->
+          </div>
+        }
+      </div>
+    </div>
+    }
+  }
 } @else {
   <div class="rankings-container">
     <header class="rankings-header">
@@ -18,13 +55,13 @@
       </h1>
       <div class="all-rankings">
         <h3>Load Balancing</h3>
-        <div class="rankings-list">        @for (player of players; track player) {
-            <div class="ranking-item" [class.winner]="players.indexOf(player) === 0">
+        <div class="rankings-list">        @for (player of players(); track player) {
+            <div class="ranking-item" [class.winner]="players().indexOf(player) === 0">
               <div class="rank-position">
-                <span class="rank-number">{{ players.indexOf(player) }}</span>
+                <span class="rank-number">{{ players().indexOf(player) }}</span>
               </div><div class="player-details">
                 <span class="player-name">{{ player }}</span>
-                <span class="player-guess">Score: {{ results[players.indexOf(player)] }}</span>
+                <span class="player-guess">Score: {{ results[players().indexOf(player)] }}</span>
               </div>
               <!-- <div class="player-points">{{ player.points }}</div> -->
             </div>

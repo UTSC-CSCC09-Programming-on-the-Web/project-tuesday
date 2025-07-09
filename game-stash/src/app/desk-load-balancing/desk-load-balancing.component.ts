@@ -14,15 +14,19 @@ export class DeskLoadBalancingComponent implements OnInit {
   width: number = 600;
   height: number = 800;
 
-  players: string[] = [];
+  players = signal([] as string[]);
   points: number[] = [];
+  responded: string[] = [];
+  unresponded: string[] = [];
 
   results: number[] = [];
 
   interval: any | undefined;
   timeout: any | undefined;
+  private countdownInterval?: number;
 
-  isGameOver = signal(false);
+  status = signal('');
+  countdown = signal(10);
 
   @Output() gameOver = new EventEmitter<string>();
 
@@ -30,12 +34,30 @@ export class DeskLoadBalancingComponent implements OnInit {
 
 
   ngOnInit() {
+    this.status.set('Waiting for players');
+    console.log(this.status());
+    this.socketService.gameState$.pipe(map((gameState) => gameState.responded))
+      .subscribe((responded) => {
+        this.responded = responded;
+        this.unresponded = this.players().filter((player) => !responded.includes(player));
+      });
     this.socketService.gameState$.pipe(map((gameState) => gameState.players))
       .subscribe((players) => {
-        this.players = players;
+        this.players.set(players);
         this.points = Array(players.length).fill(0);
       });
-    this.startGame();
+    this.socketService.setResponded([]);
+    this.socketService.startGame("Load Balancing");
+    this.socketService.useEffect("playerStart", (data) => {
+      this.socketService.setResponded([...this.responded, data.playerId]);
+      console.log(`Player ${data.playerId} started the game in lobby`);
+      console.log()
+      if (this.responded.length === this.players().length) {
+        console.log("All players have started the game, starting the game logic");
+        this.status.set('Game Countdown');
+        this.startCountdown(this.startGame.bind(this));
+      }
+    });
   }
 
   gameOverEmit() {
@@ -43,7 +65,7 @@ export class DeskLoadBalancingComponent implements OnInit {
   }
 
   startGame() {
-    this.socketService.startGame("Load Balancing");
+    this.status.set('Game Started');
     this.interval = setInterval(() => {
       // Example of a game action after 5 seconds
       console.log("Game action executed after 5 seconds");
@@ -65,7 +87,8 @@ export class DeskLoadBalancingComponent implements OnInit {
       console.log(typeof this.interval, this.interval);
     }, 2000);
 
-    this.timeout = setTimeout(() => {
+    this.countdown.set(30);
+    this.startCountdown((() => {
       clearInterval(this.interval);
       this.socketService.lobbyEmit("gameEnded", {
         gameId: "Load Balancing",
@@ -73,18 +96,37 @@ export class DeskLoadBalancingComponent implements OnInit {
       });
       this.socketService.removeEffect("scoreUpdate");
       console.log("Game ended");
-      this.isGameOver.set(true);
+      this.status.set('Game Over');
       this.results = [...this.points];
-    }, 30000);
+    }).bind(this));
 
     this.socketService.useEffect("scoreUpdate", (data) => {
       console.log("Score update received:", data);
-      const playerIndex = this.players.indexOf(data.playerId);
+      const playerIndex = this.players().indexOf(data.playerId);
       if (playerIndex !== -1) {
         this.points[playerIndex] = data.points;
       }
       console.log("Updated points:", this.points);
     });
+  }
+
+  private stopCountdown(): void {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+  }
+
+  private startCountdown(callback: () => void): void {
+    console.log(this.countdownInterval);
+    this.countdownInterval = window.setInterval(() => {
+      const current = this.countdown();
+      if (current > 0) {
+        this.countdown.set(current - 1);
+      } else {
+        this.stopCountdown();
+        callback();
+      }
+    }, 1000);
   }
 
   ngOnDestroy() {

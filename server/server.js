@@ -201,7 +201,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on('startGame', (arg) => {
-    console.log(`Received startGame request from ${socket.id} for lobby ${arg.lobbyCode} with gameId ${arg.gameId}`);
     if (lobbies[arg.lobbyCode]) {
       lobbies[arg.lobbyCode].gameStarted = true;
     }
@@ -216,6 +215,10 @@ io.on("connection", (socket) => {
 
   socket.on('playerStart', (arg) => {
     loadBalancing(socket);
+    io.to(arg.lobbyCode).emit('playerStart', {
+      playerId: socket.id,
+      gameId: arg.gameId
+    });
     console.log(`Player ${socket.id} has started the game in lobby ${arg.lobbyCode}`);
   });
 

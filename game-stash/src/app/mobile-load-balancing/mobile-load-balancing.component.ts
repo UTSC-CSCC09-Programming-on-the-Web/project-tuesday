@@ -61,7 +61,11 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
               this.rotation = Math.floor(event.gamma || 0);
             });
           }
+          this.runGame();
         }).catch((error: any) => alert(error));
+      } else {
+        this.permissionGranted = true;
+        this.runGame();
       }
     });
 
@@ -92,6 +96,12 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
       })
     );
 
+
+
+
+  }
+
+  runGame() {
     console.log(this.wrapper);
     this.render = Render.create({
       element: this.wrapper.nativeElement,
@@ -125,19 +135,12 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     const runner = Runner.create();
     Runner.run(runner, this.engine);
     Render.run(this.render);
-
-    this.runGame();
-
-  }
-
-  runGame() {
     // This method can be used to start the game logic or handle user interactions
     console.log("Game started");
 
     this.socketService.playerEmit("playerStart", {});
 
     Events.on(this.engine, "afterUpdate", () => {;
-      console.log("Platform angle set to:", this.rotation, this.platform);
       if (this.permissionGranted) {
         Body.rotate(this.platform!, (this.rotation - this.old) * Math.PI / 180);
       }
