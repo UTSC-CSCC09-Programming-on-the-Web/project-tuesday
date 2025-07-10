@@ -59,8 +59,7 @@
       <button 
         type="submit" 
         [disabled]="loginForm.invalid || isLoading" 
-        class="submit-btn">
-        <span *ngIf="isLoading" class="loading-spinner"></span>
+        class="leave-btn submit-btn">
         {{ isLoading ? 'Signing In...' : 'Sign In' }}
       </button>
     </form>
@@ -126,8 +125,7 @@
       <button 
         type="submit" 
         [disabled]="registerForm.invalid || isLoading" 
-        class="submit-btn">
-        <span *ngIf="isLoading" class="loading-spinner"></span>
+        class="leave-btn submit-btn">
         {{ isLoading ? 'Creating Account...' : 'Create Account' }}
       </button>
     </form>
@@ -148,8 +146,7 @@
         type="button" 
         (click)="onSetupSubscription()" 
         [disabled]="isProcessingPayment" 
-        class="submit-btn payment-btn">
-        <span *ngIf="isProcessingPayment" class="loading-spinner"></span>
+        class="leave-btn submit-btn payment-btn">
         {{ isProcessingPayment ? 'Processing Payment...' : 'Complete Subscription Setup' }}
       </button>
 

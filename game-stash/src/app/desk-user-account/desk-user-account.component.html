@@ -2,8 +2,8 @@
   <div class="account-card">
     <!-- Back button -->
     <div class="back-button-container" *ngIf="user">
-      <button type="button" (click)="goBack()" class="back-button">
-        ← {{ getBackButtonText() }}
+      <button type="button" (click)="goBack()" class="leave-btn content">
+        {{ getBackButtonText() }}
       </button>
     </div>
     
@@ -63,16 +63,14 @@
             type="button" 
             (click)="updatePaymentMethod()" 
             [disabled]="isProcessingPayment" 
-            class="btn-primary">
-            <span *ngIf="isProcessingPayment" class="loading-spinner"></span>
-            {{ isProcessingPayment ? 'Processing...' : 'Update Payment Method' }}
+            class="leave-btn content">
+            {{ isProcessingPayment ? 'Processing...' : 'Update' }}
           </button>
           <button 
             type="button" 
             (click)="cancelSubscription()" 
             [disabled]="isLoading" 
-            class="btn-danger">
-            <span *ngIf="isLoading" class="loading-spinner"></span>
+            class="leave-btn content logout">
             Cancel Subscription
           </button>
         </div>

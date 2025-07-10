@@ -7,13 +7,13 @@ import { Subscription } from 'rxjs';
 declare var Stripe: any;
 
 @Component({
-  selector: 'app-user-account',
+  selector: 'app-desk-user-account',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './user-account.component.html',
-  styleUrls: ['./user-account.component.css']
+  templateUrl: './desk-user-account.component.html',
+  styleUrls: ['./desk-user-account.component.css']
 })
-export class UserAccountComponent implements OnInit, OnDestroy {
+export class DeskUserAccountComponent implements OnInit, OnDestroy {
   user: User | null = null;
   isLoading = false;
   errorMessage = '';
@@ -269,7 +269,6 @@ export class UserAccountComponent implements OnInit, OnDestroy {
 
   getBackButtonText(): string {
     const shouldShowLobby = this.cameFromMenu && this.authService.hasActiveSubscription();
-    console.log('getBackButtonText() - shouldShowLobby:', shouldShowLobby, 'cameFromMenu:', this.cameFromMenu, 'hasActiveSubscription:', this.authService.hasActiveSubscription());
     
     // Return appropriate text based on navigation context and subscription status
     if (shouldShowLobby) {

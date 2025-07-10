@@ -15,17 +15,6 @@
   text-align: center;
 }
 
-/* Special styling for logout button to make it more distinct */
-.leave-btn.logout {
-  background: rgba(220, 53, 69, 0.2);
-  border-color: rgba(220, 53, 69, 0.4);
-}
-
-.leave-btn.logout:hover {
-  background: rgba(220, 53, 69, 0.3);
-  border-color: rgba(220, 53, 69, 0.6);
-}
-
 /* Responsive design */
 @media (max-width: 768px) {
   .button-column {

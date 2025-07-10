@@ -3,11 +3,11 @@ import { DeskCreateLobbyComponent } from './desk-create-lobby/desk-create-lobby.
 import { DeskGameSelectComponent } from './desk-game-select/desk-game-select.component';
 import { DeviceRedirectComponent } from './device-redirect/device-redirect.component';
 import { DeskLoginComponent } from './desk-login/desk-login.component';
-import { UserAccountComponent } from './user-account/user-account.component';
+import { DeskUserAccountComponent } from './desk-user-account/desk-user-account.component';
 
 export const routes: Routes = [
   { path: 'desk-login', component: DeskLoginComponent },
-  { path: 'user-account', component: UserAccountComponent },
+  { path: 'user-account', component: DeskUserAccountComponent },
   { path: 'lobby', component: DeskGameSelectComponent },
   { path: 'player/:lobbyCode', redirectTo: '/mobile-join-lobby', pathMatch: 'full' },
   { path: 'create-lobby', component: DeskCreateLobbyComponent },

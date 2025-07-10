@@ -1,3 +1,16 @@
+@import url('../desk-game-select/desk-game-select.component.css');
+@import url('../../styles.css');
+
+:host {
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --success-color: #48bb78;
+  --error-color: #f56565;
+  --card-background: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.3);
+  --border-radius: 12px;
+}
+
 .account-container {
   display: flex;
   justify-content: center;
@@ -13,36 +26,58 @@
   margin-bottom: 20px;
 }
 
-.back-button {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: #6c757d;
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Override for buttons in user account to match create-lobby */
+.leave-btn.content {
+  min-width: 200px;
+  text-align: center;
 }
 
-.back-button:hover {
-  background: #5a6268;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+/* Override any imported button column styles */
+.payment-form .action-buttons {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+/* Ensure buttons don't inherit column styling */
+.payment-form .action-buttons .leave-btn {
+  flex: 1;
+  max-width: 250px;
+  min-width: 180px;
+  text-align: center;
+  width: auto !important;
+  display: inline-flex !important;
+}
+
+/* Nuclear option: completely override any inherited column styles */
+.account-card .payment-form .action-buttons {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 15px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
 }
 
 .account-card {
-  background: white;
-  border-radius: 12px;
+  background: var(--card-background);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   padding: 40px;
   width: 100%;
   max-width: 600px;
+  backdrop-filter: blur(10px);
+  color: white;
 }
 
 h1 {
-  color: #333;
+  color: white;
   margin-bottom: 30px;
   text-align: center;
   font-size: 2.2rem;
@@ -50,16 +85,16 @@ h1 {
 }
 
 h2 {
-  color: #333;
+  color: white;
   margin-bottom: 20px;
   font-size: 1.4rem;
   font-weight: 600;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   padding-bottom: 10px;
 }
 
 h3 {
-  color: #333;
+  color: white;
   margin-bottom: 15px;
   font-size: 1.2rem;
   font-weight: 600;
@@ -97,17 +132,18 @@ h3 {
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
 }
 
 .info-item label {
   font-weight: 600;
-  color: #555;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .info-item span {
-  color: #333;
+  color: white;
 }
 
 .status-active {
@@ -138,8 +174,9 @@ h3 {
 }
 
 .subscription-active {
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
+  background: #67c27c;
+  border: 1px solid #67c27c;
+  color: white;
 }
 
 .subscription-warning {
@@ -148,8 +185,8 @@ h3 {
 }
 
 .subscription-inactive {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background: #f77878;
+  border: 1px solid #f77878;
 }
 
 .subscription-text {
@@ -159,7 +196,8 @@ h3 {
 }
 
 .payment-form {
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 25px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -173,7 +211,7 @@ h3 {
   display: block;
   margin-bottom: 6px;
   font-weight: 600;
-  color: #333;
+  color: white;
 }
 
 .stripe-card-element {
@@ -189,84 +227,27 @@ h3 {
 }
 
 .action-buttons {
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
   gap: 15px;
-  flex-wrap: wrap;
-}
-
-.btn-primary,
-.btn-secondary,
-.btn-danger {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-width: 140px;
+  width: 100%;
+  flex-wrap: nowrap;
 }
 
-.btn-primary {
-  background: #667eea;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #5a6fd8;
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #5a6268;
-  transform: translateY(-1px);
-}
-
-.btn-danger {
-  background: #dc3545;
-  color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #c82333;
-  transform: translateY(-1px);
-}
-
-.btn-primary:disabled,
-.btn-secondary:disabled,
-.btn-danger:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.loading-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.action-buttons .leave-btn {
+  flex: 1;
+  max-width: 250px;
+  min-width: 180px;
+  text-align: center;
+  width: auto !important;
 }
 
 .payment-security {
   text-align: center;
   margin-top: 15px;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .payment-security small {
@@ -298,5 +279,16 @@ h3 {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+  
+  /* Stack action buttons vertically on mobile */
+  .action-buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .action-buttons .leave-btn {
+    width: 100%;
+    max-width: none;
   }
 }
