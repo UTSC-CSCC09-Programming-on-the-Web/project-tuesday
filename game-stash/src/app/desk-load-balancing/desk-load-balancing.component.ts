@@ -11,8 +11,8 @@ import { map } from 'rxjs';
 })
 export class DeskLoadBalancingComponent implements OnInit {
 
-  width: number = 600;
-  height: number = 800;
+  width: number = 350;
+  height: number = 500;
 
   players = signal([] as string[]);
   points: number[] = [];
@@ -74,7 +74,6 @@ export class DeskLoadBalancingComponent implements OnInit {
       y: y,
       size: size
     });
-    console.log(typeof this.interval, this.interval);
 }
 
   startGame() {
