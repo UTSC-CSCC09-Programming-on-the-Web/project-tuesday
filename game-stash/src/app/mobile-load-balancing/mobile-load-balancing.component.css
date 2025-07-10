@@ -8,6 +8,10 @@
   --border-radius: 12px;
 }
 
+.game-wrapper{
+  border:rgba(255, 255, 255, 0.5) 1px solid;
+}
+
 .waiting-container {
   height: 100vh;
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);

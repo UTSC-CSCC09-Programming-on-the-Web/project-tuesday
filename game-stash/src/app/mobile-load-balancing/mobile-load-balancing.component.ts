@@ -36,6 +36,8 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
   rotation: number = 0;
   old: number = 0;
+  //linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  colours: string[] = ["#667eea", "#6c6ae4", "#7260dd", "#7856d7", "#764ba2"]
 
   get score(): number {
     return this.points;
@@ -53,8 +55,9 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
         typeof (DeviceMotionEvent as any).requestPermission === 'function'
       ) {
         (DeviceMotionEvent as any).requestPermission().then((response: any) => {
-          alert(response);
+          // alert(response);
           this.permissionGranted = response === 'granted';
+
           if (this.permissionGranted) {
             window.addEventListener('deviceorientation', event => {
               this.old = this.rotation;
@@ -110,7 +113,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
         width: this.width,
         height: this.height,
         wireframes: false,
-        background: 'lightblue',
+        background: 'transparent',
       }
     });
 
@@ -166,9 +169,29 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
     this.socketService.useEffect("spawnBox", (data) => {
       console.log(data);
-      const box = Bodies.circle(data.x, data.y, data.size / 2);
-      this.bodies.push(box);
+      const box = Bodies.circle(data.x, data.y, data.size / 2, {
+        isStatic: true,
+        render: {
+          fillStyle: 'rgba(255, 255, 255, 0.1)',
+          strokeStyle: 'rgba(255, 255, 255, 0.8)',
+          lineWidth: 2
+        },
+        collisionFilter: {
+          category: 0x0002,
+          mask: 0x0000
+        }
+      });
       World.add(this.engine.world, box);
+      setTimeout(() => {
+        World.remove(this.engine.world, box);
+        const newBox = Bodies.circle(data.x, data.y, data.size / 2, {render: {
+          fillStyle: this.colours[Math.round(Math.random() * this.colours.length)],
+          strokeStyle: 'rgba(255, 255, 255, 0.8)',
+          lineWidth: 2
+        }});
+        this.bodies.push(newBox);
+        World.add(this.engine.world, newBox);
+      }, 1000);
     });
 
     this.socketService.useEffect("gameEnded", (data) => {

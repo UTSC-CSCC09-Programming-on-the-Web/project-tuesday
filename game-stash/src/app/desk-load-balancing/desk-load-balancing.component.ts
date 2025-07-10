@@ -64,28 +64,27 @@ export class DeskLoadBalancingComponent implements OnInit {
     this.gameOver.emit('Magic Number');
   }
 
+  spawnBox(){
+    const size = Math.random() * 50 + 20;
+    const x = Math.random() * (this.width - 2 * size) + size;
+    const y = 50;
+
+    this.socketService.lobbyEmit("spawnBox", {
+      x: x,
+      y: y,
+      size: size
+    });
+    console.log(typeof this.interval, this.interval);
+}
+
   startGame() {
     this.status.set('Game Started');
-    this.interval = setInterval(() => {
-      // Example of a game action after 5 seconds
-      console.log("Game action executed after 5 seconds");
+    this.interval = setInterval(this.spawnBox.bind(this), 2000);
 
-      const size = Math.random() * 50 + 20;
-      const x = Math.random() * (this.width - size) + size / 2;
-      const y = Math.random() * 100;
-
-
-      // const box = Bodies.rectangle(x, y, size, size);
-      // this.bodies.push(box);
-      // World.add(this.engine.world, box);
-
-      this.socketService.lobbyEmit("spawnBox", {
-        x: x,
-        y: y,
-        size: size
-      });
-      console.log(typeof this.interval, this.interval);
-    }, 2000);
+    this.timeout = setTimeout(() => {
+      clearInterval(this.interval);
+      this.interval = setInterval(this.spawnBox.bind(this), 1000);
+    }, 15000);
 
     this.countdown.set(30);
     this.startCountdown((() => {
