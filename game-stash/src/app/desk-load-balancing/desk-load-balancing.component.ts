@@ -106,6 +106,12 @@ export class DeskLoadBalancingComponent implements OnInit {
         this.points[playerIndex] = data.points;
       }
       console.log("Updated points:", this.points);
+      this.players.set(this.players().sort((a,b) => {
+        const aPoints = this.points[this.players().indexOf(a)] || 0;
+        const bPoints = this.points[this.players().indexOf(b)] || 0;
+        return bPoints - aPoints; // Sort in descending order
+      }))
+      this.points.sort((a,b) => b - a);
     });
   }
 

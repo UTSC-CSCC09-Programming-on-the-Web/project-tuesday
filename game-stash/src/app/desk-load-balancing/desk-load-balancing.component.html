@@ -30,19 +30,21 @@
         </div>
       </header>
     } @else {
-      <div class="all-rankings">
-        <span class="countdown-number">{{ countdown() }}</span>
-        <div class="rankings-list">        @for (player of players(); track player) {
-          <div class="ranking-item" [class.winner]="players().indexOf(player) === 0">
-            <div class="rank-position">
-              <span class="rank-number">{{ players().indexOf(player) }}</span>
-            </div><div class="player-details">
-              <span class="player-name">{{ player }}</span>
-              <span class="player-guess">Score: {{ points[players().indexOf(player)] }}</span>
+      <div class="rankings-container">
+        <div class="all-rankings">
+          <span class="countdown-number">{{ countdown() }}</span>
+          <div class="rankings-list">        @for (player of players(); track player) {
+            <div class="ranking-item" [class.winner]="players().indexOf(player) === 0">
+              <div class="rank-position">
+                <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
+              </div><div class="player-details">
+                <span class="player-name">{{ player }}</span>
+                <span class="player-guess">Score: {{ points[players().indexOf(player)] }}</span>
+              </div>
+              <!-- <div class="player-points">{{ player.points }}</div> -->
             </div>
-            <!-- <div class="player-points">{{ player.points }}</div> -->
-          </div>
-        }
+          }
+        </div>
       </div>
     </div>
     }
@@ -58,7 +60,7 @@
         <div class="rankings-list">        @for (player of players(); track player) {
             <div class="ranking-item" [class.winner]="players().indexOf(player) === 0">
               <div class="rank-position">
-                <span class="rank-number">{{ players().indexOf(player) }}</span>
+                <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
               </div><div class="player-details">
                 <span class="player-name">{{ player }}</span>
                 <span class="player-guess">Score: {{ results[players().indexOf(player)] }}</span>
