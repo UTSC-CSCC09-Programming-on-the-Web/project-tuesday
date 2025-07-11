@@ -2,8 +2,12 @@ import { Routes } from '@angular/router';
 import { DeskCreateLobbyComponent } from './desk-create-lobby/desk-create-lobby.component';
 import { DeskGameSelectComponent } from './desk-game-select/desk-game-select.component';
 import { DeviceRedirectComponent } from './device-redirect/device-redirect.component';
+import { DeskLoginComponent } from './desk-login/desk-login.component';
+import { DeskUserAccountComponent } from './desk-user-account/desk-user-account.component';
 
 export const routes: Routes = [
+  { path: 'desk-login', component: DeskLoginComponent },
+  { path: 'user-account', component: DeskUserAccountComponent },
   { path: 'lobby', component: DeskGameSelectComponent },
   {
     path: 'player/:lobbyCode',
@@ -11,6 +15,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   { path: 'create-lobby', component: DeskCreateLobbyComponent },
+  { path: 'desk-create-lobby', component: DeskCreateLobbyComponent },
   {
     path: 'mobile-join-lobby',
     loadComponent: () =>

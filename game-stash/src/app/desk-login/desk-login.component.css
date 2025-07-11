@@ -1,0 +1,253 @@
+@import url('../desk-game-select/desk-game-select.component.css');
+@import url('../../styles.css');
+
+:host {
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --success-color: #48bb78;
+  --error-color: #f56565;
+  --card-background: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.3);
+  --border-radius: 12px;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.login-card {
+  background: var(--card-background);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 40px;
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+
+h1 {
+  color: white;
+  margin-bottom: 30px;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.mode-toggle {
+  display: flex;
+  margin-bottom: 30px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid var(--border-color);
+}
+
+.mode-toggle button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mode-toggle button.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.mode-toggle button:hover:not(.active):not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mode-toggle button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-form, .payment-form {
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: white;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input:disabled {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+.stripe-card-element {
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  transition: border-color 0.3s ease;
+}
+
+.stripe-card-element:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.field-error {
+  color: #ff6b6b;
+  font-size: 14px;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+.error-message {
+  background: rgba(220, 53, 69, 0.1);
+  color: #ff6b6b;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 2px solid rgba(220, 53, 69, 0.3);
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+}
+
+.success-message {
+  background: rgba(72, 187, 120, 0.1);
+  color: #68d391;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 2px solid rgba(72, 187, 120, 0.3);
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+}
+
+/* Override for leave-btn styling */
+.leave-btn.submit-btn {
+  background: var(--card-background);
+  color: white;
+  border: 2px solid var(--border-color);
+  backdrop-filter: blur(10px);
+}
+
+.leave-btn.submit-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.leave-btn.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.subscription-notice {
+  background: rgba(102, 126, 234, 0.1);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.subscription-notice p {
+  margin: 0;
+  color: #b3d7ff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.payment-form h3 {
+  color: white;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.payment-form p {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.payment-security {
+  text-align: center;
+  margin-top: 15px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.payment-security small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 10px;
+  }
+  
+  .login-card {
+    padding: 30px 20px;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+}

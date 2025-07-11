@@ -3,19 +3,98 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import { loadBalancing } from "./load_balancing.js";
+import dotenv from 'dotenv';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import session from 'express-session';
+import passport from 'passport';
+
+// Import custom modules
+import { initializeDatabase } from './database.js';
+import authRoutes from './routes/auth.js';
+import stripeRoutes from './routes/stripe.js';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // This must match the frontend's URL
-    credentials: true,
-  },
+    origin: process.env.FRONTEND_URL || "http://localhost:4200",
+    credentials: true
+  }
 });
+
 const PORT = process.env.PORT || 3000;
 
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable for Stripe
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use('/api/', limiter);
+
+// CORS configuration
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://localhost:4200",
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
+
+// Body parsing middleware
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' })); // Raw for Stripe webhooks
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Session configuration
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-session-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/stripe', stripeRoutes);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Simple route
+app.get("/", (req, res) => {
+  res.json({ message: "Game Stash API Server" });
+});
+
+// Initialize database
+initializeDatabase().catch(error => {
+  console.error('Failed to initialize database:', error);
+  process.exit(1);
+});
+
 // Socket.IO connection ---------------------------------------------------
-const lobbies = {}; // for storing lobby game state information =
+const lobbies = {}; // for storing lobby game state information
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
@@ -272,25 +351,6 @@ io.on("connection", (socket) => {
 });
 });
 
-server.listen(3000, () => {
+server.listen(PORT, () => {
   console.log(`Socket.IO server running on http://localhost:${PORT}`);
-});
-
-// PostgreSQL Database endpoint connection --------------------------------
-
-var corsOptions = {
-  origin: "*" // This must match the frontend's URL
-};
-
-app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// simple route
-app.get("/", (req, res) => {
-  res.json({ message: "hello from the backend!" });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
 });

@@ -1,2 +1,23 @@
-@import url("../desk-game-select/desk-game-select.component.css");
-@import url("../../styles.css");
+@import url('../desk-game-select/desk-game-select.component.css');
+@import url('../../styles.css');
+
+/* Button column styling */
+.button-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  width: 100%;
+}
+
+.button-column .leave-btn {
+  min-width: 200px;
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .button-column {
+    gap: 15px;
+  }
+}
