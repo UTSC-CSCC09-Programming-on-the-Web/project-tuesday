@@ -94,7 +94,17 @@ initializeDatabase().catch(error => {
 });
 
 // Socket.IO connection ---------------------------------------------------
-const lobbies = {}; // for storing lobby game state information
+const lobbies = {}; 
+// Following dictionary structure
+// lobby-code
+//     |
+//     |- players // bool on whether or not they have responded
+//     |
+//     |- responses // response value
+//     |
+//     |- score // player score
+//     |
+//     |- admin // id of admin socket
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
@@ -108,21 +118,9 @@ io.on("connection", (socket) => {
       admin: arg.admin, // Store the admin of the lobby
       players: {}, // Track who is in the lobby, as well as whether or not they have responded
       responses: {}, // Store player response messages
+      score: {},
     };
   });
-
-  // Admin requests to start the game specified by arg
-  // socket.on("startGame", (arg) => {
-  //   if (lobbies[arg.lobbyCode]) {
-  //     lobbies[arg.lobbyCode].gameStarted = true;
-  //   }
-  //   console.log(
-  //     `Lobby: ${arg.lobbyCode} has requested to start the game: ${arg.gameId}`,
-  //   );
-  //   io.to(arg.lobbyCode).emit("startGamePlayer", {
-  //     gameId: arg.gameId,
-  //   });
-  // });
 
   // Catch a game response from a player
   socket.on("gameResponse", (arg) => {
@@ -132,6 +130,7 @@ io.on("connection", (socket) => {
 
     // Ensures admin is always ready, even if the admin's id somehow changes
     const adminId = lobbies[arg.lobbyCode].admin;
+
     lobbies[arg.lobbyCode].players[arg.playerId] = true;
     lobbies[arg.lobbyCode].responses[arg.playerId] = arg.response;
     lobbies[arg.lobbyCode].players[adminId] = true;
@@ -139,6 +138,7 @@ io.on("connection", (socket) => {
     io.to(arg.lobbyCode).emit("gameResponseReceived", {
       playerId: arg.playerId,
     });
+    console.log("game response")
 
     // Check if all players have responded (admin is always true, so only real players need to respond)
     const allResponded = Object.values(lobbies[arg.lobbyCode].players).every(
@@ -151,6 +151,7 @@ io.on("connection", (socket) => {
     if (allResponded) {
       
       if (arg.gameId === "Magic Number") {
+        // Calculate GameResults object for admin
         const targetNumber= Math.floor(Math.random() * 100) + 1; // Generate 1-100
 
         // Calculate the difference between each player's response and the answer number
@@ -177,6 +178,15 @@ io.on("connection", (socket) => {
         .filter(([key, value]) => value === lowestDifference)
         .map(([key, value]) => key);
 
+        // Update score
+        for (let i=0; i<winners.length; i++) {
+          if (lobbies[arg.lobbyCode].score[winners[i]]) {
+            lobbies[arg.lobbyCode].score[winners[i]] += 1
+          } else {
+            lobbies[arg.lobbyCode].score[winners[i]] = 1
+          }
+        }
+
         let gameResult = {
           winners: winners,
           responses: responses,
@@ -185,7 +195,25 @@ io.on("connection", (socket) => {
           targetNumber: targetNumber
         }
 
-        io.to(arg.lobbyCode).emit("gameResults", gameResult)
+        io.to(adminId).emit("gameResults", gameResult)
+
+        // Calculate PlayerRanking
+        
+        for (const [key, value] of Object.entries(lobbies[arg.lobbyCode].players)) {
+          let playerId = key
+
+          const playerRanking = {
+            name: "John Doe", //needs to be replaced with player name on frontend
+            playerId: playerId,
+            points: lobbies[arg.lobbyCode].score[playerId] ?? 0,
+            rank: rankings.indexOf(playerId) + 1,
+            isRoundWinner: winners.includes(playerId),
+            response: lobbies[arg.lobbyCode].responses[playerId],
+            data: targetNumber
+          }
+
+          io.to(playerId).emit("gameResults", playerRanking)
+        }
       }
 
       // Reset non-admin players status for next round (keep admin as true)
@@ -301,48 +329,6 @@ io.on("connection", (socket) => {
     console.log(`Player ${socket.id} has started the game in lobby ${arg.lobbyCode}`);
   });
 
-  // Catch a game response from a player
-  socket.on('gameResponse', (arg) => {
-    console.log(`Received gameResponse from ${arg.playerId} in lobby ${arg.lobbyCode}`);
-    console.log(`Current players in lobby:`, Object.keys(lobbies[arg.lobbyCode].players));
-
-    // Ensures admin is always ready, even if the admin's id somehow changes
-    const adminId = lobbies[arg.lobbyCode].admin
-    lobbies[arg.lobbyCode].players[arg.playerId] = true;
-    lobbies[arg.lobbyCode].responses[arg.playerId] = arg.response;
-    lobbies[arg.lobbyCode].players[adminId] = true;
-
-    console.log('sending gameResponseReceived to lobby:', arg.lobbyCode, arg.playerId);
-    io.to(arg.lobbyCode).emit('gameResponseReceived', {
-      playerId: arg.playerId,
-    });
-
-    // Check if all players have responded (admin is always true, so only real players need to respond)
-    const allResponded = Object.values(lobbies[arg.lobbyCode].players).every(v => v === true);
-    console.log(`All players responded: ${allResponded}`);
-    console.log(`Player response status:`, lobbies[arg.lobbyCode].players);
-    if (allResponded) {
-      let targetNumber = null;
-      if (arg.gameId === 'Magic Number') {
-        targetNumber = Math.floor(Math.random() * 100) + 1; // Generate 1-100
-        console.log(`Generated target number for Magic Number game: ${targetNumber}`);
-      }
-
-      console.log(`Emitting gameResults to lobby ${arg.lobbyCode}`);
-      io.to(arg.lobbyCode).emit('gameResults', {
-        responses: lobbies[arg.lobbyCode].responses,
-        gameId: arg.gameId,
-        targetNumber: targetNumber
-      });
-      
-      // Reset non-admin players status for next round (keep admin as true)
-      Object.keys(lobbies[arg.lobbyCode].players).forEach(playerId => {
-        if (playerId !== adminId) {
-          lobbies[arg.lobbyCode].players[playerId] = false;
-        }
-      });
-    }
-  });
   socket.on('gameEnded', (arg) => {
     if (lobbies[arg.lobbyCode]) {
         lobbies[arg.lobbyCode].gameStarted = false;

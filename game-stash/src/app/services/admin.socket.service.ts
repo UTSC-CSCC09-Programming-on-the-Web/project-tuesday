@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
-import { SERVER_ADDRESS, GameResults } from './socket.service.constants';
+import { SERVER_ADDRESS, GameResults, PlayerRanking } from './socket.service.constants';
 
 export interface GameState {
   players: string[];
@@ -12,15 +12,7 @@ export interface GameState {
   data: number; //implicit value for different games
 }
 
-export interface PlayerRanking {
-  name: string;
-  playerId: string;
-  points: number;
-  rank: number;
-  isRoundWinner: boolean;
 
-  data: number; //variable field used differently by different games
-}
 
 @Injectable({
   providedIn: 'root',
@@ -138,12 +130,12 @@ export class AdminSocketService {
     this.socket.on('gameResults', (arg: GameResults) => {
       switch (arg.gameId) {
         case 'Magic Number':
-
+        
           this.updateState({ data: arg.targetNumber });
 
-          console.log("GOING INTO UPDATE RANKINGS=--------", arg.response, " and ", arg.winners)
+          console.log("GOING INTO UPDATE RANKINGS=--------", arg.responses, " and ", arg.winners)
           console.log(arg)
-          this.updateRankings(arg.response, arg.winners);
+          this.updateRankings(arg.responses, arg.winners);
           break;
         default:
           console.log('Unknown game ID:', arg.gameId);
@@ -231,6 +223,7 @@ export class AdminSocketService {
     responses: Record<string, number>,
     winners: string[],
   ) {
+    console.log("UPDATE RANKINGS CALLED-------------------")
     const currentRankings = this.gameStateSubject.value.playerRankings;
     const updatedRankings: PlayerRanking[] = [];
 
@@ -245,18 +238,20 @@ export class AdminSocketService {
       );
 
       if (existingRanking) {
+        console.log("UPDATING EXISTING RANKING--------------------------")
         existingRanking.points += isWinner ? 1 : 0;
         existingRanking.isRoundWinner = isWinner;
         updatedRankings.push({ ...existingRanking });
       } else {
+        console.log("MAKING NEW RANKING--------------------------")
         const newRanking: PlayerRanking = {
           name: this.getPlayerName(playerId),
           playerId: playerId,
           points: isWinner ? 1 : 0,
           rank: 0, // Will be calculated below
           isRoundWinner: isWinner,
-
-          data: guess, //guess?
+          response: responses[playerId].toString(),
+          data: guess, // guess
         };
         updatedRankings.push(newRanking);
       }
@@ -317,7 +312,7 @@ export class AdminSocketService {
         points: 0,
         rank: 0, // Will be calculated below
         isRoundWinner: false,
-
+        response: "",
         data: 0, //Magic NUmber guess?
       };
 

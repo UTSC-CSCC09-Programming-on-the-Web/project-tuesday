@@ -57,9 +57,9 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
       this.playerSocketService.playerState$
         .pipe(map((playerState) => playerState.selectedGame))
         .subscribe((gameId) => {
+          console.log("DETECTED SOCKET SUBSCRIPTION CHANGE --------- ", gameId)
           if (gameId) {
             this.selectedGame.set(gameId);
-
             this.navigateToGame(gameId);
           }
         }),

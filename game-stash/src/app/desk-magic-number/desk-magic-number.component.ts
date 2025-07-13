@@ -1,12 +1,12 @@
 import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
 import {
   AdminSocketService,
-  PlayerRanking,
   GameState,
 } from '../services/admin.socket.service';
 import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
 import { map } from 'rxjs/operators';
+import { PlayerRanking } from '../services/socket.service.constants';
 
 @Component({
   selector: 'app-desk-magic-number',
@@ -61,7 +61,10 @@ export class DeskMagicNumberComponent implements OnInit {
 
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.playerRankings))
-      .subscribe((rankings) => this.rankings.set(rankings));
+      .subscribe((rankings) => {
+        this.rankings.set(rankings)
+        console.log()
+        });
 
     this.startGame();
   }

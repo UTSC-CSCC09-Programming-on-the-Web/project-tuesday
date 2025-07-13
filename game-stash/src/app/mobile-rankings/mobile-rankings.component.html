@@ -11,6 +11,7 @@
       Target Number: <span class="target-number">{{ targetNumber() }}</span>
     </p>
     <!-- Round Winner Display -->
+     <!--
     @if (!isGameOver()) {
       <div class="round-winner-display">
         @if (getRoundWinners().length === 1) {
@@ -28,6 +29,7 @@
         }
       </div>
     }
+      -->
 
     @if (!isGameOver()) {
       <div class="countdown-display">
@@ -48,7 +50,7 @@
       >
         <div class="rank-badge">
           <span class="rank-text"
-            >{{ playerRank() }}{{ getRankSuffix(playerRank()) }} Place</span
+            >{{ getPlayerRank() }}{{ getPlayerRank() }} Place</span
           >
         </div>
         <h2>{{ playerName() }}</h2>
@@ -58,6 +60,7 @@
       </div>
     </div>
 
+    <!--
     <div class="all-rankings">
       <h3>All Players</h3>
       <div class="rankings-list">
@@ -79,6 +82,7 @@
         }
       </div>
     </div>
+    -->
   </main>
   <footer class="rankings-footer">
     @if (isGameOver()) {

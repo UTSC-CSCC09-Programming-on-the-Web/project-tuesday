@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
 import { SERVER_ADDRESS, GameResults } from './socket.service.constants';
+import { PlayerRanking } from './socket.service.constants';
 
 // unsure what to do with this yet
 interface PlayerState {
   selectedGame: string;
   data: number;
-  ranking: number;
-  rankings: string[];
+  ranking: PlayerRanking;
 }
 @Injectable({
   providedIn: 'root',
@@ -29,9 +29,16 @@ export class PlayerSocketService {
 
   private playerStateSubject = new BehaviorSubject<PlayerState>({
     selectedGame: '',
-    data: 0,
-    ranking: -1,
-    rankings: [],
+    data: -1,
+    ranking: {
+      name: "",
+      playerId: "",
+      points: 0,
+      rank: -1,
+      isRoundWinner: false,
+      response: "",
+      data: -1, //variable field used differently by different games
+    },
   });
   playerState$ = this.playerStateSubject.asObservable();
 
@@ -115,20 +122,22 @@ export class PlayerSocketService {
       this.updatePlayerState({ selectedGame: arg.gameId });
     });
 
-    this.socket.on('gameResults', (arg: GameResults) => {
+    this.socket.on('gameResults', (arg: PlayerRanking) => {
       console.log(
         'MobileSocketService received gameResults for gameId:',
-        arg.gameId,
+        this.playerStateSubject.value.selectedGame,
       );
       console.log('MobileSocketService gameResults data:', arg);
 
-      switch (arg.gameId) {
+      switch (this.playerStateSubject.value.selectedGame) {
         case 'Magic Number':
 
-            this.updatePlayerRankings(arg.rankings, (arg.targetNumber ?? 50));
+          const newPlayerRanking = arg;
+          newPlayerRanking.name = this.playerName
+            this.updatePlayerRankings(newPlayerRanking);
           break;
         default:
-          console.log('Unknown game ID:', arg.gameId);
+          console.log('Unknown game ID:', this.playerStateSubject.value.selectedGame);
           break;
       }
 
@@ -142,9 +151,23 @@ export class PlayerSocketService {
   }
 
   updatePlayerRankings(
-    rankings: string[], targetNumber: number) {
-    this.updatePlayerState({rankings: rankings})
-    this.updatePlayerState({data: targetNumber})
+    arg: PlayerRanking) {
+
+  
+
+    /*name: string;
+  playerId: string;
+  points: number;
+  rank: number;
+  isRoundWinner: boolean;
+
+  data: number; //variable field used differently by different games
+    */
+
+
+    this.updatePlayerState({
+      ranking: arg, 
+      data: arg.data})
   }
 
   joinLobby(lobbyCode: string, playerName: string) {

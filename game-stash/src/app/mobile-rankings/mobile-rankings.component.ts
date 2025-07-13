@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   AdminSocketService,
-  PlayerRanking,
   GameState,
 } from '../services/admin.socket.service';
+import { PlayerRanking } from '../services/socket.service.constants';
 import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -19,7 +19,15 @@ import { map } from 'rxjs/operators';
 })
 export class MobileRankingsComponent implements OnInit, OnDestroy {
   targetNumber = signal(0);
-  rankings = signal<PlayerRanking[]>([]);
+  ranking = signal<PlayerRanking>({
+      name: "",
+      playerId: "",
+      points: 0,
+      rank: -1,
+      isRoundWinner: false,
+      response: "",
+      data: -1, //variable field used differently by different games
+      });
   playerRank = signal(0);
   isGameOver = signal(false);
   countdown = signal(10);
@@ -44,7 +52,15 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Reset all signals to default values
     this.targetNumber.set(0);
-    this.rankings.set([]);
+    this.ranking.set({
+      name: "",
+      playerId: "",
+      points: 0,
+      rank: -1,
+      isRoundWinner: false,
+      response: "",
+      data: -1, //variable field used differently by different games
+      });
     this.playerRank.set(0);
     this.isGameOver.set(false);
     this.countdown.set(10);
@@ -91,22 +107,12 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
     // Subscribe to rankings from AdminSocketService
     this.subscriptions.push(
-      this.adminSocketService.gameState$
-        .pipe(map((gameState) => gameState.playerRankings))
-        .subscribe((rankings) => {
-          this.rankings.set(rankings);
-
-          // Find current player's rank based on socket ID
-          const socketId = this.adminSocketService.getSocketId();
-          if (socketId) {
-            const currentPlayerRanking = rankings.find(
-              (r) => r.playerId === socketId,
-            );
-            if (currentPlayerRanking) {
-              this.playerRank.set(currentPlayerRanking.rank);
-            }
-          }
-        }),
+      this.playerSocketService.playerState$
+      .pipe(map((playerState) => playerState.ranking))
+      .subscribe((ranking) => {
+        this.ranking.set(ranking)
+        })
+        
     );
 
     // Subscribe to targetNumber from from PlayerSocketService
@@ -145,7 +151,15 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   private moveToNextRound(): void {
     // Reset round-specific parameters for next round
     this.countdown.set(10);
-    this.rankings.set([]);
+    this.ranking.set({
+      name: "",
+      playerId: "",
+      points: 0,
+      rank: -1,
+      isRoundWinner: false,
+      response: "",
+      data: -1, //variable field used differently by different games
+      });
     this.targetNumber.set(0);
     this.playerRank.set(0);
 
@@ -178,14 +192,11 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     const socketId = this.adminSocketService.getSocketId();
     if (!socketId) return 0;
 
-    const playerRanking = this.rankings().find((p) => p.playerId === socketId);
-    return playerRanking ? playerRanking.points : 0;
+    return this.ranking().points
   }
 
-  getRoundWinners(): string[] {
-    return this.rankings()
-      .filter((player) => player.isRoundWinner)
-      .map((player) => player.name);
+  getPlayerRank(): number {
+    return this.ranking().rank
   }
 
   getRankSuffix(rank: number): string {
