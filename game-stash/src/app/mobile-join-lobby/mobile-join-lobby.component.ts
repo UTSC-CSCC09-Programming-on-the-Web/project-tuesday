@@ -2,7 +2,6 @@ import { Component, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { QrScannerComponent } from '../components/qr-scanner/qr-scanner.component';
 import { AdminSocketService } from '../services/admin.socket.service';
 import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription, map } from 'rxjs';
@@ -10,7 +9,7 @@ import { Subscription, map } from 'rxjs';
 @Component({
   selector: 'app-mobile-join-lobby',
   standalone: true,
-  imports: [CommonModule, FormsModule, QrScannerComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './mobile-join-lobby.component.html',
   styleUrls: ['./mobile-join-lobby.component.css'],
 })
@@ -19,7 +18,6 @@ export class MobileJoinLobbyComponent implements OnDestroy {
   lobbyCode = signal('');
   isJoining = signal(false);
   errorMessage = signal('');
-  showQrScanner = signal(false);
 
   players = signal<string[]>([]);
 
@@ -83,24 +81,6 @@ export class MobileJoinLobbyComponent implements OnDestroy {
         this.errorMessage.set('Connection timeout. Please try again.');
       }
     }, 5000);
-  }
-
-  onShowQrScanner(): void {
-    this.showQrScanner.set(true);
-  }
-
-  onQrCodeScanned(code: string): void {
-    this.lobbyCode.set(code.toUpperCase());
-    this.showQrScanner.set(false);
-
-    // Auto-join if player name is valid
-    if (this.isPlayerNameValid()) {
-      this.onJoinLobby();
-    }
-  }
-
-  onQrScannerClosed(): void {
-    this.showQrScanner.set(false);
   }
 
   formatLobbyCode(event: any): void {
