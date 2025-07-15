@@ -25,15 +25,6 @@ import { Subscription } from 'rxjs';
   styleUrl: './desk-create-lobby.component.css',
 })
 export class DeskCreateLobbyComponent implements OnInit, OnDestroy {
-  /*
-  Checklist for creating a new lobby:
-  - button to create a new lobby
-  - input field for lobby name
-  - leads to loading screen
-  - new lobby code
-  - display that says enter the code in your phone
-  - component for displaying cu
-  */
 
   lobbyName: string = '';
   lobbyCode: string = '';
@@ -48,21 +39,22 @@ export class DeskCreateLobbyComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // NO-AUTH BRANCH: Skip authentication checks
     // Subscribe to current user
     this.userSubscription = this.authService.currentUser$.subscribe(user => {
       this.user = user;
       
-      // If user is not authenticated, redirect to login
-      if (!user) {
-        this.router.navigate(['/desk-login']);
-        return;
-      }
+      // COMMENTED OUT FOR NO-AUTH BRANCH: If user is not authenticated, redirect to login
+      // if (!user) {
+      //   this.router.navigate(['/desk-login']);
+      //   return;
+      // }
       
-      // If user doesn't have active subscription, redirect to account page
-      if (!this.authService.hasActiveSubscription()) {
-        this.router.navigate(['/user-account']);
-        return;
-      }
+      // COMMENTED OUT FOR NO-AUTH BRANCH: If user doesn't have active subscription, redirect to account page
+      // if (!this.authService.hasActiveSubscription()) {
+      //   this.router.navigate(['/user-account']);
+      //   return;
+      // }
     });
   }
 
@@ -73,11 +65,13 @@ export class DeskCreateLobbyComponent implements OnInit, OnDestroy {
   }
 
   goToUserAccount(): void {
-    this.router.navigate(['/user-account'], { queryParams: { from: 'menu' } });
+    // NO-AUTH BRANCH: Comment out user account navigation
+    // this.router.navigate(['/user-account'], { queryParams: { from: 'menu' } });
   }
 
   logout(): void {
-    this.authService.logout();
+    // NO-AUTH BRANCH: Comment out logout functionality
+    // this.authService.logout();
   }
 
   /* ID generator gotten from: https://stackoverflow.com/questions/1349404/generate-a-string-of-random-characters */

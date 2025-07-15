@@ -38,10 +38,9 @@ export class DeviceRedirectComponent {
     } else {
       console.log('Desktop device detected');
       // Add any desktop-specific logic here
-      // route to desktop view
-      this.router.navigate(['/create-lobby']);
-      alert(navigator.userAgent);
-
+      // NO-AUTH BRANCH: route directly to desk-create-lobby
+      this.router.navigate(['/desk-create-lobby']);
+      // alert(navigator.userAgent); // Commenting out alert for cleaner UX
     }
   }
 }

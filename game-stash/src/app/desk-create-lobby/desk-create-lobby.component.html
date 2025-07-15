@@ -3,14 +3,15 @@
     <div class="lobby-header col-12">
       <h1>Game Stash</h1>
     </div>
-    <div class="button-column" *ngIf="user">
+    <div class="button-column">
       <button class="leave-btn content" (click)="createLobby()">Start a Lobby</button>
-      <button type="button" (click)="goToUserAccount()" class="leave-btn content">
+      <!-- NO-AUTH BRANCH: Comment out user account and logout buttons -->
+      <!-- <button type="button" (click)="goToUserAccount()" class="leave-btn content">
         My Account
       </button>
       <button type="button" (click)="logout()" class="leave-btn content logout">
         Logout
-      </button>
+      </button> -->
     </div>
   </div>
   <div class="loading" *ngIf="loading">
