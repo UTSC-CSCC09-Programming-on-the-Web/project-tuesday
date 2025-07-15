@@ -42,6 +42,8 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   private countdownInterval?: number;
   private subscriptions: Subscription[] = [];
 
+  private maxRounds: number = 3;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -92,7 +94,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         this.guess.set(guess ? parseInt(guess) : 0);
 
         // Determine if this is the final round
-        this.isGameOver.set(this.roundNumber() >= 5);
+        this.isGameOver.set(this.roundNumber() >= this.maxRounds);
 
         if (this.isGameOver()) {
           // Emit gameEnded to backend as soon as final rankings screen is shown
@@ -137,7 +139,12 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         this.countdown.set(current - 1);
       } else {
         this.stopCountdown();
-        this.moveToNextRound();
+        if (this.roundNumber() === this.maxRounds) {
+          this.finishRound();
+        } else {
+          this.moveToNextRound();
+        }
+        
       }
     }, 1000);
   }
@@ -146,6 +153,19 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
     }
+  }
+
+  private finishRound(): void {
+
+     const nextRound = this.roundNumber() + 1;
+    this.router.navigate(['/mobile-magic-number'], {
+      queryParams: {
+        lobbyCode: this.lobbyCode(),
+        playerName: this.playerName(),
+        roundNumber: nextRound,
+        selectedGame: this.selectedGame() || 'Magic Number',
+      },
+    });
   }
 
   private moveToNextRound(): void {
