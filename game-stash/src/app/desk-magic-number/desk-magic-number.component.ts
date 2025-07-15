@@ -74,7 +74,7 @@ export class DeskMagicNumberComponent implements OnInit {
   }
 
   roundEnd() {
-    this.isGameOver.set(this.roundNumber() >= 5);
+    this.isGameOver.set(this.roundNumber() >= 3);
     this.isRoundOver.set(true);
     if (!this.isGameOver()) {
       this.startCountdown();
@@ -90,7 +90,6 @@ export class DeskMagicNumberComponent implements OnInit {
 
   moveToNextRound() {
     this.isRoundOver.set(false);
-    this.countdown.set(10);
     this.rankings.set([]);
     this.targetNumber.set(0);
     this.roundNumber.set(this.roundNumber() + 1);
@@ -101,16 +100,22 @@ export class DeskMagicNumberComponent implements OnInit {
 
   private stopCountdown(): void {
     if (this.countdownInterval) {
+      // this is being called
       clearInterval(this.countdownInterval);
+      this.countdownInterval = undefined;
     }
   }
 
   private startCountdown(): void {
+    this.countdown.set(10)
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
+      console.log("CURRENT VALUE:    ", current)
       if (current > 1) {
         this.countdown.set(current - 1);
-      } else {
+      } else if (current === 1 ){
+        console.log("COUTNDOWN STOP REQUESTED")
+        this.countdown.set(current - 1);
         this.stopCountdown();
         this.moveToNextRound();
       }
