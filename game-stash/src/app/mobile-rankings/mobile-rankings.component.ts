@@ -102,7 +102,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         }
 
         if (!this.isGameOver()) {
-          this.startCountdown();
+          
         }
       }),
     );
@@ -133,7 +133,9 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   }
 
   private startCountdown(): void {
+    
     this.countdownInterval = window.setInterval(() => {
+      console.log("tick")
       const current = this.countdown();
       if (current > 1) {
         this.countdown.set(current - 1);
@@ -152,6 +154,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   private stopCountdown(): void {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
+      this.countdownInterval = undefined;
     }
   }
 

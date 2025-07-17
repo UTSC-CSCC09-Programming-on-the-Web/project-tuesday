@@ -51,26 +51,28 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     document.querySelector('#permission')!.addEventListener('click', () => {
-      if (
-        typeof (DeviceMotionEvent as any).requestPermission === 'function'
-      ) {
-        (DeviceMotionEvent as any).requestPermission().then((response: any) => {
-          // alert(response);
-          this.permissionGranted = response === 'granted';
+  this.socketService.playerEmit("ping", "permission clicked for device motion");
 
-          if (this.permissionGranted) {
-            window.addEventListener('deviceorientation', event => {
-              this.old = this.rotation;
-              this.rotation = Math.floor(event.gamma || 0);
-            });
-          }
-          this.runGame();
-        }).catch((error: any) => alert(error));
-      } else {
-        this.permissionGranted = true;
-        this.runGame();
+  // Check if iOS-style permission request is needed
+  if (
+    typeof DeviceMotionEvent !== 'undefined' &&
+    typeof (DeviceMotionEvent as any).requestPermission === 'function'
+  ) {
+    (DeviceMotionEvent as any).requestPermission().then((response: any) => {
+      this.socketService.playerEmit("ping", "permission granted!");
+      this.permissionGranted = response === 'granted';
+      if (this.permissionGranted) {
+        this.startMotionListener();
       }
-    });
+      this.runGame();
+    }).catch((error: any) => alert(error));
+  } else {
+    // seems like for Android some older browsers don't ask you for permission lol
+    this.permissionGranted = true;
+    this.startMotionListener();
+    this.runGame();
+  }
+});
 
     this.subscriptions.push(
       this.route.queryParams.subscribe(params => {
@@ -98,10 +100,6 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
         });
       })
     );
-
-
-
-
   }
 
   runGame() {
@@ -226,6 +224,14 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     //   // World.add(this.engine.world, box);
     // }, 3000);
   }
+
+  startMotionListener() {
+  window.addEventListener('deviceorientation', event => {
+    this.socketService.playerEmit("ping", "Hello from the frontend!");
+    this.old = this.rotation;
+    this.rotation = Math.floor(event.gamma || 0);
+  });
+}
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());

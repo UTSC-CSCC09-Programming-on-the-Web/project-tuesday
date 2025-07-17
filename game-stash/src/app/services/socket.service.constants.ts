@@ -1,4 +1,4 @@
-export const SERVER_ADDRESS = 'http://localhost:3000/';
+export const SERVER_ADDRESS = 'https://6d08a20f821e.ngrok-free.app';
 
 export interface GameResults {
   winners: Array<string>
