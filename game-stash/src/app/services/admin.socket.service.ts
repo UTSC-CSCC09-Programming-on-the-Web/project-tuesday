@@ -244,6 +244,7 @@ export class AdminSocketService {
         console.log("UPDATING EXISTING RANKING--------------------------")
         existingRanking.points += isWinner ? 1 : 0;
         existingRanking.isRoundWinner = isWinner;
+        existingRanking.data = guess;
         updatedRankings.push({ ...existingRanking });
       } else {
         console.log("MAKING NEW RANKING--------------------------")
