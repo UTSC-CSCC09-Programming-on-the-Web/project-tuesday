@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatListModule } from '@angular/material/list';
 import { DeskLoadBalancingComponent } from "../desk-load-balancing/desk-load-balancing.component";
 import { map } from 'rxjs';
+import { Player } from '../services/socket.service.constants';
 
 @Component({
   selector: 'app-desk-game-select',
@@ -28,7 +29,7 @@ export class DeskGameSelectComponent {
     private adminSocketService: AdminSocketService,
   ) {}
 
-  players: string[] = [];
+  players: Player[] = [];
   lobbyName: string = '';
   lobbyCode: string = '';
 
@@ -52,7 +53,10 @@ export class DeskGameSelectComponent {
 
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.players))
-      .subscribe((players) => (this.players = players));
+      .subscribe((players) => {
+        console.log('Players in lobby:', players);
+        this.players = players
+      });
   }
 
   openNewTab() {

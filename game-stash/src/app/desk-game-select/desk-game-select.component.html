@@ -9,7 +9,7 @@
     <div class="player-list player-info">
       <h2>Players</h2>
       <ul class="game-list">
-        <li class="player-item" *ngFor="let player of players">{{ player }}</li>
+        <li class="player-item" *ngFor="let player of players">{{ player.name }}</li>
       </ul>
       <button class="leave-btn" color="primary" (click)="openNewTab()">
         Add Player
@@ -17,7 +17,7 @@
     </div>
   </div>
   <div class="col-6">
-    <div [ngSwitch]="selectedGame">
+    <div class="form-card" [ngSwitch]="selectedGame">
       <div *ngSwitchCase="''">
         <div class="player-info">
           <h2>Select a Game</h2>

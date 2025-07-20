@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminSocketService } from '../services/admin.socket.service';
 import { map } from 'rxjs';
+import { Player } from '../services/socket.service.constants';
 
 @Component({
   selector: 'app-desk-load-balancing',
@@ -14,10 +15,10 @@ export class DeskLoadBalancingComponent implements OnInit {
   width: number = 350;
   height: number = 500;
 
-  players = signal([] as string[]);
+  players = signal([] as Player[]);
   points: number[] = [];
-  responded: string[] = [];
-  unresponded: string[] = [];
+  responded: Player[] = [];
+  unresponded: Player[] = [];
 
   results: number[] = [];
 

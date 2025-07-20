@@ -20,8 +20,10 @@ import { map } from 'rxjs/operators';
 export class MobileRankingsComponent implements OnInit, OnDestroy {
   targetNumber = signal(0);
   ranking = signal<PlayerRanking>({
-      name: "",
-      playerId: "",
+      player: {
+        name: "",
+        playerId: "",
+      },
       points: 0,
       rank: -1,
       isRoundWinner: false,
@@ -55,8 +57,10 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     // Reset all signals to default values
     this.targetNumber.set(0);
     this.ranking.set({
-      name: "",
-      playerId: "",
+      player: {
+        name: "",
+        playerId: "",
+      },
       points: 0,
       rank: -1,
       isRoundWinner: false,
@@ -71,7 +75,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     this.roundNumber.set(1);
     this.selectedGame.set('');
     this.guess.set(0);
-    
+
     // Read all parameters from route
     this.subscriptions.push(
       this.route.queryParams.subscribe((params) => {
@@ -102,7 +106,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         }
 
         if (!this.isGameOver()) {
-          
+          this.startCountdown();
         }
       }),
     );
@@ -114,7 +118,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       .subscribe((ranking) => {
         this.ranking.set(ranking)
         })
-        
+
     );
 
     // Subscribe to targetNumber from from PlayerSocketService
@@ -133,7 +137,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   }
 
   private startCountdown(): void {
-    
+
     this.countdownInterval = window.setInterval(() => {
       console.log("tick")
       const current = this.countdown();
@@ -146,7 +150,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         } else {
           this.moveToNextRound();
         }
-        
+
       }
     }, 1000);
   }
@@ -175,8 +179,10 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     // Reset round-specific parameters for next round
     this.countdown.set(10);
     this.ranking.set({
-      name: "",
-      playerId: "",
+      player: {
+        name: "",
+        playerId: ""
+      },
       points: 0,
       rank: -1,
       isRoundWinner: false,

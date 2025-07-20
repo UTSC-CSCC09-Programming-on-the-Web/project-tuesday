@@ -31,8 +31,10 @@ export class PlayerSocketService {
     selectedGame: '',
     data: -1,
     ranking: {
-      name: "",
-      playerId: "",
+      player: {
+        name: "",
+        playerId: "",
+      },
       points: 0,
       rank: -1,
       isRoundWinner: false,
@@ -99,6 +101,7 @@ export class PlayerSocketService {
       this.socket.emit('joinLobby', {
         lobbyCode: this.lobbyCode,
         client: this.socket.id,
+        playerName: this.playerName,
       });
     });
 
@@ -133,7 +136,7 @@ export class PlayerSocketService {
         case 'Magic Number':
 
           const newPlayerRanking = arg;
-          newPlayerRanking.name = this.playerName
+          newPlayerRanking.player.name = this.playerName
             this.updatePlayerRankings(newPlayerRanking);
           break;
         default:
@@ -153,7 +156,7 @@ export class PlayerSocketService {
   updatePlayerRankings(
     arg: PlayerRanking) {
 
-  
+
 
     /*name: string;
   playerId: string;
@@ -166,7 +169,7 @@ export class PlayerSocketService {
 
 
     this.updatePlayerState({
-      ranking: arg, 
+      ranking: arg,
       data: arg.data})
   }
 

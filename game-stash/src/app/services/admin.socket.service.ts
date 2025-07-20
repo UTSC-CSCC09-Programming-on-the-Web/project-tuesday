@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
-import { SERVER_ADDRESS, GameResults, PlayerRanking } from './socket.service.constants';
+import { SERVER_ADDRESS, GameResults, PlayerRanking, Player } from './socket.service.constants';
 
 export interface GameState {
-  players: string[];
-  responded: string[];
+  players: Player[];
+  responded: Player[];
   selectedGame: string;
   playerRankings: PlayerRanking[];
 
@@ -102,7 +102,9 @@ export class AdminSocketService {
     // If a user leaves the lobby, update the UI accordingly
     this.socket.on('userJoinedLobby', (arg: any) => {
       const userId = arg.user;
-      this.addPlayer(userId);
+      const playerName = arg.playerName;
+      console.log('user joined lobby:', userId, playerName);
+      this.addPlayer({name: playerName, playerId: userId});
     });
 
     // If a user leaves the lobby, update the UI accordingly
@@ -115,14 +117,15 @@ export class AdminSocketService {
     this.socket.on('gameResponseReceived', (arg: any) => {
       const currentResponses = this.gameStateSubject.value.responded;
       console.log(currentResponses, arg.playerId);
-      if (!currentResponses.includes(arg.playerId)) {
+      if (!currentResponses.find(res => res.playerId === arg.playerId)) {
         console.log('Adding player response:', arg.playerId);
-        currentResponses.push(arg.playerId);
+        currentResponses.push({name: this.getPlayerName(arg.playerId), playerId: arg.playerId});
         this.setResponded(currentResponses);
       }
       console.log(
         'player with id:',
         arg.playerId,
+        this.getPlayerName(arg.playerId),
         'has submitted their response',
       );
     });
@@ -130,7 +133,7 @@ export class AdminSocketService {
     this.socket.on('gameResults', (arg: GameResults) => {
       switch (arg.gameId) {
         case 'Magic Number':
-        
+
           this.updateState({ data: arg.targetNumber });
 
           console.log("GOING INTO UPDATE RANKINGS=--------", arg.responses, " and ", arg.winners)
@@ -148,33 +151,33 @@ export class AdminSocketService {
     return Math.floor(Math.random() * max);
   }
 
-  get players(): string[] {
+  get players(): Player[] {
     return this.gameStateSubject.value.players;
   }
 
-  setPlayers(players: string[]) {
+  setPlayers(players: Player[]) {
     this.updateState({ players: players });
   }
 
-  addPlayer(player: string) {
+  addPlayer(player: Player) {
     const updated = [...this.gameStateSubject.value.players, player];
     this.updateState({ players: updated });
-    this.addMagicNumberPlayer(player, this.getPlayerName(player));
+    this.addMagicNumberPlayer(player);
   }
 
   removePlayer(player: string) {
     const updated = this.gameStateSubject.value.players.filter(
-      (p) => p !== player,
+      (p) => p.playerId !== player,
     );
     this.updateState({ players: updated });
     this.removeMagicNumberPlayer(player);
   }
 
-  get responded(): string[] {
+  get responded(): Player[] {
     return this.gameStateSubject.value.responded;
   }
 
-  setResponded(responded: string[]) {
+  setResponded(responded: Player[]) {
     this.updateState({ responded: responded });
   }
 
@@ -234,7 +237,7 @@ export class AdminSocketService {
 
       // Find existing ranking or create new one
       let existingRanking = currentRankings.find(
-        (r) => r.playerId === playerId,
+        (r) => r.player.playerId === playerId,
       );
 
       if (existingRanking) {
@@ -245,8 +248,10 @@ export class AdminSocketService {
       } else {
         console.log("MAKING NEW RANKING--------------------------")
         const newRanking: PlayerRanking = {
-          name: this.getPlayerName(playerId),
-          playerId: playerId,
+          player: {
+            name: this.getPlayerName(playerId),
+            playerId: playerId,
+          },
           points: isWinner ? 1 : 0,
           rank: 0, // Will be calculated below
           isRoundWinner: isWinner,
@@ -287,9 +292,8 @@ export class AdminSocketService {
   }
 
   private getPlayerName(playerId: string): string {
-    // TODO: Implement player name lookup
-    // For now, return a shortened version of playerId
-    return playerId.substring(0, 8) + '...';
+    const player = this.gameStateSubject.value.players.find((p) => p.playerId === playerId)?.name || '';
+    return player;
   }
 
   // Public methods for playerRankings management
@@ -301,14 +305,13 @@ export class AdminSocketService {
     this.updateState({ playerRankings: [] });
   }
 
-  addMagicNumberPlayer(playerId: string, playerName: string) {
+  addMagicNumberPlayer(player: Player) {
     const currentRankings = this.gameStateSubject.value.playerRankings;
-    const existingPlayer = currentRankings.find((r) => r.playerId === playerId);
+    const existingPlayer = currentRankings.find((r) => r.player.playerId === player.playerId);
 
     if (!existingPlayer) {
       const newRanking: PlayerRanking = {
-        name: playerName,
-        playerId: playerId,
+        player: player,
         points: 0,
         rank: 0, // Will be calculated below
         isRoundWinner: false,
@@ -341,7 +344,7 @@ export class AdminSocketService {
   removeMagicNumberPlayer(playerId: string) {
     const currentRankings = this.gameStateSubject.value.playerRankings;
     const updatedRankings = currentRankings.filter(
-      (r) => r.playerId !== playerId,
+      (r) => r.player.playerId !== playerId,
     );
 
     // Recalculate Olympic-style ranks

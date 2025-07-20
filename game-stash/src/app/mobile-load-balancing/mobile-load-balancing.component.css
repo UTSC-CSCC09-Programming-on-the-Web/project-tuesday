@@ -12,6 +12,17 @@
   border:rgba(255, 255, 255, 0.5) 1px solid;
 }
 
+.form-card {
+  background: var(--card-background);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+
 .waiting-container {
   height: 100vh;
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);

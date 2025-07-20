@@ -1,4 +1,4 @@
-export const SERVER_ADDRESS = 'https://6d08a20f821e.ngrok-free.app';
+export const SERVER_ADDRESS = 'http://localhost:3000';
 
 export interface GameResults {
   winners: Array<string>
@@ -9,11 +9,15 @@ export interface GameResults {
 }
 
 export interface PlayerRanking {
-  name: string;
-  playerId: string;
+  player: Player;
   points: number;
   rank: number;
   isRoundWinner: boolean;
   response: string;
   data: number; //variable field used differently by different games
+}
+
+export interface Player {
+  name: string;
+  playerId: string;
 }

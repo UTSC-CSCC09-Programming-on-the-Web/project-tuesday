@@ -6,7 +6,7 @@ import {
 import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
 import { map } from 'rxjs/operators';
-import { PlayerRanking } from '../services/socket.service.constants';
+import { Player, PlayerRanking } from '../services/socket.service.constants';
 
 @Component({
   selector: 'app-desk-magic-number',
@@ -15,9 +15,9 @@ import { PlayerRanking } from '../services/socket.service.constants';
   styleUrl: './desk-magic-number.component.css',
 })
 export class DeskMagicNumberComponent implements OnInit {
-  players: string[] = [];
-  responded: string[] = [];
-  unresponded: string[] = [];
+  players: Player[] = [];
+  responded: Player[] = [];
+  unresponded: Player[] = [];
 
   rankings = signal<PlayerRanking[]>([]);
   isRoundOver = signal(false);
@@ -35,7 +35,7 @@ export class DeskMagicNumberComponent implements OnInit {
   getRoundWinners(): string[] {
     return this.rankings()
       .filter((player) => player.isRoundWinner)
-      .map((player) => player.name);
+      .map((player) => player.player.name);
   }
 
   ngOnInit(): void {
@@ -46,9 +46,10 @@ export class DeskMagicNumberComponent implements OnInit {
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.responded))
       .subscribe((responded) => {
+        console.log('Responded players:', responded);
         this.responded = responded;
         this.unresponded = this.players.filter(
-          (player) => !responded.includes(player),
+          (player) => !responded.find(res => res.playerId === player.playerId),
         );
         if (this.unresponded.length === 0) this.roundEnd();
       });

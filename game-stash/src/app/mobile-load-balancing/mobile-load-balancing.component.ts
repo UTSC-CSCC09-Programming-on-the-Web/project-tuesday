@@ -3,10 +3,11 @@ import Matter, { Engine, Runner, Render, World, Constraint, MouseConstraint, Bod
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PlayerSocketService } from '../services/player.socket.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-mobile-load-balancing',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './mobile-load-balancing.component.html',
   styleUrl: './mobile-load-balancing.component.css'
 })
@@ -136,7 +137,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     const runner = Runner.create();
     Runner.run(runner, this.engine);
     Render.run(this.render);
-    // This method can be used to start the game logic or handle user interactions
+
     console.log("Game started");
 
     this.socketService.playerEmit("playerStart", {});
@@ -147,7 +148,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
       }
       this.bodies.forEach(body => {
         if (body.position.y > this.height || body.position.x < 0 || body.position.x > this.width) {
-          // Remove bodies that fall below the screen
+
           World.remove(this.engine.world, body);
           this.bodies = this.bodies.filter(b => b !== body);
           console.log("Body removed:", body, this.bodies.length);
