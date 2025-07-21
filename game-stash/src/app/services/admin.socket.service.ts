@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
-import { SERVER_ADDRESS, GameResults, PlayerRanking, Player } from './socket.service.constants';
+import { SERVER_ADDRESS, GameResults, PlayerRanking, Player, GlobalRanking } from './socket.service.constants';
 
 export interface GameState {
   players: Player[];
   responded: Player[];
   selectedGame: string;
   playerRankings: PlayerRanking[];
+  globalRankings: GlobalRanking;
 
   data: number; //implicit value for different games
 }
@@ -28,7 +29,7 @@ export class AdminSocketService {
     responded: [],
     selectedGame: '',
     playerRankings: [],
-
+    globalRankings: {},
     data: 0,
   });
 
@@ -161,7 +162,9 @@ export class AdminSocketService {
 
   addPlayer(player: Player) {
     const updated = [...this.gameStateSubject.value.players, player];
-    this.updateState({ players: updated });
+    const globalRank = this.gameStateSubject.value.globalRankings;
+    globalRank[player.playerId] = { playerId: player.playerId, points: 0 };
+    this.updateState({ players: updated, globalRankings: globalRank });
     this.addMagicNumberPlayer(player);
   }
 
@@ -169,7 +172,9 @@ export class AdminSocketService {
     const updated = this.gameStateSubject.value.players.filter(
       (p) => p.playerId !== player,
     );
-    this.updateState({ players: updated });
+    const globalRank = this.gameStateSubject.value.globalRankings;
+    delete globalRank[player];
+    this.updateState({ players: updated, globalRankings: globalRank });
     this.removeMagicNumberPlayer(player);
   }
 
@@ -229,11 +234,16 @@ export class AdminSocketService {
     console.log("UPDATE RANKINGS CALLED-------------------")
     const currentRankings = this.gameStateSubject.value.playerRankings;
     const updatedRankings: PlayerRanking[] = [];
+    const globalRank = this.gameStateSubject.value.globalRankings;
 
      console.log("RESPONSES------------------------ ", responses)
     // Create or update rankings for each player
     for (const [playerId, guess] of Object.entries(responses)) {
       const isWinner = winners.includes(playerId);
+
+      if (isWinner) {
+        globalRank[playerId] = { playerId, points: 1 };
+      }
 
       // Find existing ranking or create new one
       let existingRanking = currentRankings.find(
@@ -288,7 +298,7 @@ export class AdminSocketService {
       }
     }
 
-    this.updateState({ playerRankings: updatedRankings });
+    this.updateState({ playerRankings: updatedRankings, globalRankings: globalRank });
     console.log('Updated Magic Number Rankings:', updatedRankings);
   }
 
@@ -304,6 +314,10 @@ export class AdminSocketService {
 
   clearplayerRankings() {
     this.updateState({ playerRankings: [] });
+  }
+
+  getGlobalRankings(): GlobalRanking {
+    return this.gameStateSubject.value.globalRankings;
   }
 
   addMagicNumberPlayer(player: Player) {

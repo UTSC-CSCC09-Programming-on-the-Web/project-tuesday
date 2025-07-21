@@ -21,3 +21,12 @@ export interface Player {
   name: string;
   playerId: string;
 }
+
+export interface GlobalRanking {
+  [playerId: string]: GlobalRank;
+}
+
+export interface GlobalRank {
+  playerId: string;
+  points: number;
+}
