@@ -344,6 +344,16 @@ io.on("connection", (socket) => {
     }
     socket.to(arg.lobbyCode).emit("gameEnded");
 });
+
+  socket.on('gameReset', (arg) => {
+    console.log(`Resetting game state for lobby ${socket.id}`);
+    if (lobbies[arg.lobbyCode] && lobbies[arg.lobbyCode].admin === socket.id) {
+      console.log(`Resetting game state for lobby ${socket.id}`);
+      lobbies[arg.lobbyCode].gameStarted = false;
+      lobbies[arg.lobbyCode].responses = {};
+    }
+    socket.to(arg.lobbyCode).emit("gameReset");
+  });
 });
 
 server.listen(PORT, () => {

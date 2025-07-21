@@ -12,10 +12,10 @@
           class="player-item player-unresponse"
           *ngFor="let player of unresponded"
         >
-          {{ player }}
+          {{ player.name }}
         </li>
         <li class="player-item player-response" *ngFor="let player of responded">
-          {{ player }}
+          {{ player.name }}
         </li>
       </ul>
     </div>
@@ -38,7 +38,7 @@
               <div class="rank-position">
                 <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
               </div><div class="player-details">
-                <span class="player-name">{{ player }}</span>
+                <span class="player-name">{{ player.name }}</span>
                 <span class="player-guess">Score: {{ points[players().indexOf(player)] }}</span>
               </div>
               <!-- <div class="player-points">{{ player.points }}</div> -->
@@ -62,7 +62,7 @@
               <div class="rank-position">
                 <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
               </div><div class="player-details">
-                <span class="player-name">{{ player }}</span>
+                <span class="player-name">{{ player.name }}</span>
                 <span class="player-guess">Score: {{ results[players().indexOf(player)] }}</span>
               </div>
               <!-- <div class="player-points">{{ player.points }}</div> -->

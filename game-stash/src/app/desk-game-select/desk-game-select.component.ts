@@ -69,6 +69,11 @@ export class DeskGameSelectComponent {
     window.open(url, '_blank');
   }
 
+  resetGame() {
+    this.selectedGame = '';
+    this.adminSocketService.resetGameState();
+  }
+
   playGame(game: string) {
     if (game === 'Magic Number') {
       if (this.players.length < 2) {

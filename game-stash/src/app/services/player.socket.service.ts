@@ -119,6 +119,10 @@ export class PlayerSocketService {
       this.joinLobbyDeniedSubject.next(data);
     });
 
+    this.socket.on('gameReset', (data: any) => {
+      this.resetState();
+    })
+
     // Listen for game start event
     this.socket.on('startGamePlayer', (arg: any) => {
       console.log('PlayerSocketService: received ping to start ', arg.gameId);
@@ -221,6 +225,24 @@ export class PlayerSocketService {
       this.socket.disconnect();
       this.socket = null;
     }
+  }
+
+  private resetState() {
+    this.updatePlayerState({
+      selectedGame: '',
+      data: -1,
+      ranking: {
+        player: {
+          name: "",
+          playerId: "",
+        },
+        points: 0,
+        rank: -1,
+        isRoundWinner: false,
+        response: "",
+        data: -1, //variable field used differently by different games
+      },
+    });
   }
 
   // update the player state

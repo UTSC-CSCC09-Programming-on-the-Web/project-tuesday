@@ -50,9 +50,8 @@ export class DeskLoadBalancingComponent implements OnInit {
     this.socketService.setResponded([]);
     this.socketService.startGame("Load Balancing");
     this.socketService.useEffect("playerStart", (data) => {
-      this.socketService.setResponded([...this.responded, data.playerId]);
+      this.socketService.setResponded([...this.responded, this.players().find(player => player.playerId === data.playerId)!]);
       console.log(`Player ${data.playerId} started the game in lobby`);
-      console.log()
       if (this.responded.length === this.players().length) {
         console.log("All players have started the game, starting the game logic");
         this.status.set('Game Countdown');
@@ -101,7 +100,8 @@ export class DeskLoadBalancingComponent implements OnInit {
 
     this.socketService.useEffect("scoreUpdate", (data) => {
       console.log("Score update received:", data);
-      const playerIndex = this.players().indexOf(data.playerId);
+      const player = this.players().find(player => player.playerId === data.playerId) || { name: 'Unknown Player', playerId: data.playerId };
+      const playerIndex = this.players().indexOf(player);
       if (playerIndex !== -1) {
         this.points[playerIndex] = data.points;
       }
@@ -141,6 +141,8 @@ export class DeskLoadBalancingComponent implements OnInit {
     if (this.timeout) {
       clearTimeout(this.timeout);
     }
+    this.socketService.removeEffect("playerStart");
+    this.socketService.removeEffect("scoreUpdate");
     console.log("DeskLoadBalancingComponent destroyed");
   }
 }

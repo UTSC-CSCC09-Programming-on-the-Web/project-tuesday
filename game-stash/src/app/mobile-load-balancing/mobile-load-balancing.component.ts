@@ -242,6 +242,8 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     if (this.engine) {
       Engine.clear(this.engine);
     }
+    this.socketService.removeEffect("spawnBox");
+    this.socketService.removeEffect("gameEnded");
     console.log("MobileLoadBalancingComponent destroyed");
   }
 }

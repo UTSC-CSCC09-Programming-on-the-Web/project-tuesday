@@ -71,9 +71,9 @@ export class AdminSocketService {
   }
 
   endGame(gameId: string) {
-    if (gameId === 'Magic Number') {
+    // if (gameId === 'Magic Number') {
       this.setResponded([]);
-    }
+    // }
   }
 
   connectToSocket() {
@@ -379,5 +379,18 @@ export class AdminSocketService {
       ...this.gameStateSubject.value,
       ...patch,
     });
+  }
+
+  resetGameState() {
+    this.updateState({
+      responded: [],
+      selectedGame: '',
+      playerRankings: [],
+      data: 0,
+    });
+    this.socket.emit('gameReset', {
+      lobbyCode: this.lobbyCode,
+    });
+    console.log('Game state reset', this.gameStateSubject.value);
   }
 }
