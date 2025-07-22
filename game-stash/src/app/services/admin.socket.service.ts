@@ -132,9 +132,9 @@ export class AdminSocketService {
         case 'Magic Number':
         
           this.updateState({ data: arg.targetNumber });
-
-          console.log("GOING INTO UPDATE RANKINGS=--------", arg.responses, " and ", arg.winners)
-          console.log(arg)
+          this.updateRankings(arg.responses, arg.winners);
+          break;
+        case 'Throw and Catch':
           this.updateRankings(arg.responses, arg.winners);
           break;
         default:

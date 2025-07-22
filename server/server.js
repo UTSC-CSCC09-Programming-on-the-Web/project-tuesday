@@ -317,13 +317,24 @@ io.on("connection", (socket) => {
     if (lobbies[arg.lobbyCode]) {
       lobbies[arg.lobbyCode].gameStarted = true;
     }
-    if (arg.gameId === 'Load Balancing')
+
+    if (arg.gameId === 'Magic Number') {
+      io.to(arg.lobbyCode).emit('startGamePlayer', {
+        gameId: arg.gameId
+      })
+    }
+    else if (arg.gameId === 'Load Balancing') {
       loadBalancing(socket);
+      io.to(arg.lobbyCode).emit('startGamePlayer', {
+        gameId: arg.gameId
+      })
+    } else if (arg.gameId === 'Throw and Catch') {
+      io.to(arg.lobbyCode).emit('startGamePlayer', {
+        gameId: arg.gameId
+      })
+    }
 
     console.log(`Lobby: ${arg.lobbyCode} has requested to start the game: ${arg.gameId}`);
-    io.to(arg.lobbyCode).emit('startGamePlayer', {
-      gameId: arg.gameId
-    })
   });
 
   socket.on('playerStart', (arg) => {
@@ -335,12 +346,93 @@ io.on("connection", (socket) => {
     console.log(`Player ${socket.id} has started the game in lobby ${arg.lobbyCode}`);
   });
 
+  // For mobile throw and catch, indicate that the player is ready to play
+  socket.on('playerReady', (arg) => {
+    lobbies[arg.lobbyCode].players[socket.id] = true;
+
+    const allResponded = Object.values(lobbies[arg.lobbyCode].players).every(
+      (v) => v === true,
+    );
+
+    // query the first player to throw a ball
+    if (allResponded) {
+      console.log("all players ready !!!")
+      socket.to(lobbies[arg.lobbyCode].admin).emit("playersReady");
+    }
+  })
+
+  // player has thrown the ball, forward data to the frontend
+  socket.on('playerThrowData', (arg) => {
+    // set player as having thrown the ball
+    lobbies[arg.lobbyCode].players[arg.playerId] = false;
+
+    // alert the frontend that the player has thrown the ball
+    socket.to(lobbies[arg.lobbyCode].admin).emit("playerThrowData", {
+      playerId: arg.playerId,
+      throwData: arg.force,
+    });
+  })
+
+  // frontend is asking for the next player to throw, forward query
+  socket.on('queryNextPlayerThrow', (arg) => {
+    // update values
+    if (arg.previousPlayerId) {
+      lobbies[arg.lobbyCode].responses[arg.previousPlayerId] = arg.throwDistance;
+    }
+    const nextPlayer = Object.entries(lobbies[arg.lobbyCode].responses).find(([playerId, hasResponded]) => hasResponded === true)?.[0];
+    // everyone has thrown the ball, so end the game
+    if (nextPlayer === undefined) {
+      if (lobbies[arg.lobbyCode]) {
+        lobbies[arg.lobbyCode].gameStarted = false;
+      }
+
+        // Calculate the rankings      
+        const rankings = Object.entries(lobbies[arg.lobbyCode].responses)
+        .sort(([, a], [, b]) => a - b)  // Sort by value (ascending)
+        .map(([key, value]) => key);
+
+        const lowestDifference = rankings[0]
+        // Calculate the winners
+        const winners = Object.entries(lobbies[arg.lobbyCode].responses)
+        .filter(([key, value]) => value === lowestDifference)
+        .map(([key, value]) => key);
+
+        // Update score
+        for (let i=0; i<winners.length; i++) {
+          if (lobbies[arg.lobbyCode].score[winners[i]]) {
+            lobbies[arg.lobbyCode].score[winners[i]] += 1
+          } else {
+            lobbies[arg.lobbyCode].score[winners[i]] = 1
+          }
+        }
+
+      let gameResult = {
+          winners: winners,
+          responses: lobbies[arg.lobbyCode].responses,
+          rankings: rankings,
+          gameId: "Throw and Catch",
+          targetNumber: -1 // not neccessary for this game
+        }
+
+      socket.to(arg.lobbyCode).emit("gameResults", gameResult);
+    } else {
+      socket.to(nextPlayer).emit("queryPlayerThrow", {
+          playerId: nextPlayer,
+        });
+    }
+    
+  });
+
   socket.on('gameEnded', (arg) => {
     if (lobbies[arg.lobbyCode]) {
         lobbies[arg.lobbyCode].gameStarted = false;
     }
     socket.to(arg.lobbyCode).emit("gameEnded");
-});
+  });
+
+  socket.on('ping', (msg) => {
+    console.log(msg.data)
+  })
 });
 
 server.listen(PORT, () => {

@@ -63,7 +63,6 @@ export class DeskMagicNumberComponent implements OnInit {
       .pipe(map((gameState) => gameState.playerRankings))
       .subscribe((rankings) => {
         this.rankings.set(rankings)
-        console.log()
         });
 
     this.startGame();
