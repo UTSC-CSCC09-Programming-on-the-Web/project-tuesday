@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { DeskMagicNumberComponent } from '../desk-magic-number/desk-magic-number.component';
-import { io } from 'socket.io-client';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AdminSocketService } from '../services/admin.socket.service';
@@ -53,10 +52,10 @@ export class DeskGameSelectComponent {
     this.adminSocketService.connectToSocket();
 
     this.adminSocketService.gameState$
-      .pipe(map((gameState) => gameState.players))
+      .pipe(map((gameState) => gameState.playerRankings))
       .subscribe((players) => {
         console.log('Players in lobby:', players);
-        this.players = players
+        this.players = players.map((player) => player.player);
       });
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.globalRankings))

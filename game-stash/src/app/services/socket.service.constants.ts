@@ -13,8 +13,7 @@ export interface PlayerRanking {
   points: number;
   rank: number;
   isRoundWinner: boolean;
-  response: string;
-  data: number; //variable field used differently by different games
+  data: number | undefined; //variable field used differently by different games
 }
 
 export interface Player {

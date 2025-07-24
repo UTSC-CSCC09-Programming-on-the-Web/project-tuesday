@@ -131,18 +131,19 @@ io.on("connection", (socket) => {
   // Catch a game response from a player
   socket.on("gameResponse", (arg) => {
     console.log(
-      `Received gameResponse from ${arg.playerId} in lobby ${arg.lobbyCode}`,
+      `Received gameResponse from ${arg.playerId} in lobby ${arg.lobbyCode}`, arg
     );
 
     // Ensures admin is always ready, even if the admin's id somehow changes
     const adminId = lobbies[arg.lobbyCode].admin;
 
     lobbies[arg.lobbyCode].players[arg.playerId] = true;
-    lobbies[arg.lobbyCode].responses[arg.playerId] = arg.response;
+    lobbies[arg.lobbyCode].responses[arg.playerId] = arg.data.data;
     lobbies[arg.lobbyCode].players[adminId] = true;
 
     io.to(arg.lobbyCode).emit("gameResponseReceived", {
       playerId: arg.playerId,
+      data: arg.data.data,
     });
     console.log("game response")
 
@@ -156,7 +157,7 @@ io.on("connection", (socket) => {
     // All players have responded. Calculate the winner and emit
     if (allResponded) {
       
-      if (arg.gameId === "Magic Number") {
+      if (arg.data.gameId === "Magic Number") {
         // Calculate GameResults object for admin
         const targetNumber= Math.floor(Math.random() * 100) + 1; // Generate 1-100
 
@@ -201,13 +202,14 @@ io.on("connection", (socket) => {
           targetNumber: targetNumber
         }
 
+        console.log(`Game results for lobby ${arg.lobbyCode}:`, gameResult);
         io.to(adminId).emit("gameResults", gameResult)
 
         // Calculate PlayerRanking
         
         for (const [key, value] of Object.entries(lobbies[arg.lobbyCode].players)) {
-          let playerId = key
-
+          let playerId = key;
+          if (playerId === adminId) continue; // Skip admin
           const playerRanking = {
             player: {
               name: "John Doe", //needs to be replaced with player name on frontend
@@ -219,7 +221,7 @@ io.on("connection", (socket) => {
             response: lobbies[arg.lobbyCode].responses[playerId],
             data: targetNumber
           }
-
+          console.log(`Player ${playerId} has score ${lobbies[arg.lobbyCode].score[playerId]}`);
           io.to(playerId).emit("gameResults", playerRanking)
         }
       }
@@ -343,7 +345,33 @@ io.on("connection", (socket) => {
         lobbies[arg.lobbyCode].gameStarted = false;
     }
     socket.to(arg.lobbyCode).emit("gameEnded");
-});
+    if (arg.gameId === 'Load Balancing') {
+      console.log(`Game ended for lobby ${arg.lobbyCode}`);
+      socket.removeAllListeners("spawnBox");
+      socket.removeAllListeners("scoreUpdate");
+
+      for (const [key, value] of Object.entries(lobbies[arg.lobbyCode].players)) {
+          let playerId = key
+
+          const playerRanking = {
+            player: {
+              name: "John Doe", //needs to be replaced with player name on frontend
+              playerId: playerId,
+            },
+            points: 1,
+            rank: 0,
+            isRoundWinner: true,
+            response: arg.points[arg.players.findIndex((player) => player.playerId === playerId)] || 0,
+            data: 0
+          }
+          console.log(`Player ${playerId} has score ${arg.points[arg.players.findIndex((player) => player.playerId === playerId)]}`);
+          console.log(`Sending game results to player ${playerId} in lobby ${arg.lobbyCode}`, playerRanking);
+
+          io.to(playerId).emit("gameResults", playerRanking)
+        }
+    }
+  });
+
 
   socket.on('gameReset', (arg) => {
     console.log(`Resetting game state for lobby ${socket.id}`);
@@ -353,6 +381,12 @@ io.on("connection", (socket) => {
       lobbies[arg.lobbyCode].responses = {};
     }
     socket.to(arg.lobbyCode).emit("gameReset");
+  });
+
+  socket.on('countdownTick', (arg) => {
+    if (lobbies[arg.lobbyCode]) {
+      socket.to(arg.lobbyCode).emit('countdownTick', arg.countdown);
+    }
   });
 });
 

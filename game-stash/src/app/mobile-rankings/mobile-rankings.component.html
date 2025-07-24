@@ -7,9 +7,11 @@
         Round {{ roundNumber() }} Results
       }
     </h1>
-    <p class="target-info">
-      Target Number: <span class="target-number">{{ targetNumber() }}</span>
-    </p>
+    @if (selectedGame() === 'Magic Number') {
+      <p class="target-info">
+        Target Number: <span class="target-number">{{ targetNumber() }}</span>
+      </p>
+    }
     <!-- Round Winner Display -->
      <!--
     @if (!isGameOver()) {

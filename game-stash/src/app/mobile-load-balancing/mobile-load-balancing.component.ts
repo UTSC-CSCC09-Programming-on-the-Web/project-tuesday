@@ -201,7 +201,9 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
       if (this.engine) {
         Engine.clear(this.engine);
       }
+
       this.socketService.removeEffect("spawnBox");
+      this.socketService.removeEffect("gameEnded");
       this.router.navigate(['/mobile-rankings'], {
         queryParams: {
           lobbyCode: this.lobbyCode(),

@@ -48,10 +48,10 @@
           <div class="rankings-list">        @for (player of players; track player) {
               <div class="ranking-item" [class.winner]="players.indexOf(player) === 0">
                 <div class="rank-position">
-                  <span class="rank-number">{{ players.indexOf(player) + 1 }}</span>
+                  <span class="rank-number">{{ rankings[player.playerId].points }}</span>
                 </div><div class="player-details">
                   <span class="player-name">{{ player.name }}</span>
-                  <span class="player-guess">Rounds Won: {{ rankings[player.playerId].points }}</span>
+                  <!-- <span class="player-guess">Rounds Won: {{ rankings[player.playerId].points }}</span> -->
                 </div>
                 <!-- <div class="player-points">{{ player.points }}</div> -->
               </div>

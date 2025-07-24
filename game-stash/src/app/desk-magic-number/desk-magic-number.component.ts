@@ -40,38 +40,28 @@ export class DeskMagicNumberComponent implements OnInit {
 
   ngOnInit(): void {
     this.adminSocketService.gameState$
-      .pipe(map((gameState) => gameState.players))
-      .subscribe((players) => (this.players = players));
-
-    this.adminSocketService.gameState$
-      .pipe(map((gameState) => gameState.responded))
-      .subscribe((responded) => {
-        console.log('Responded players:', responded);
-        this.responded = responded;
+      .pipe(map((gameState) => gameState.playerRankings))
+      .subscribe((players) => {
+        this.rankings.set(players);
+        this.players = players.map(player => player.player);
+        this.responded = players.filter(players => players.data !== undefined).map(player => player.player);
         this.unresponded = this.players.filter(
-          (player) => !responded.find(res => res.playerId === player.playerId),
+          (player) => !this.responded.find(res => res.playerId === player.playerId),
         );
-        if (this.unresponded.length === 0) this.roundEnd();
+        if (this.unresponded.length === 0 && !this.isRoundOver()) this.roundEnd();
       });
 
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.data))
       .subscribe((targetNumber) => {
-        this.targetNumber.set(targetNumber);
+        console.log('Target number updated:', targetNumber);
+        this.targetNumber.set(targetNumber || 0);
       });
 
-    this.adminSocketService.gameState$
-      .pipe(map((gameState) => gameState.playerRankings))
-      .subscribe((rankings) => {
-        this.rankings.set(rankings)
-        console.log()
-        });
-
-    this.startGame();
-  }
-
-  startGame() {
-    this.adminSocketService.startGame('Magic Number');
+    // Start the game
+    this.adminSocketService.lobbyEmit('startGame', {
+      gameId: 'Magic Number'
+    });
   }
 
   roundEnd() {
@@ -95,31 +85,29 @@ export class DeskMagicNumberComponent implements OnInit {
     this.targetNumber.set(0);
     this.roundNumber.set(this.roundNumber() + 1);
     this.responded = [];
-    this.adminSocketService.setResponded([]);
     this.unresponded = this.players.slice();
+
+    this.adminSocketService.resetRoundState();
   }
 
   private stopCountdown(): void {
-    if (this.countdownInterval) {
-      // this is being called
-      clearInterval(this.countdownInterval);
-      this.countdownInterval = undefined;
-    }
+    console.log('Stopping countdown', this.countdownInterval);
+    clearInterval(this.countdownInterval);
   }
 
   private startCountdown(): void {
-    this.countdown.set(10)
+    this.countdown.set(10);
+    console.log("starting countdown", this.countdownInterval);
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
-      console.log("CURRENT VALUE:    ", current)
-      if (current > 1) {
+      if (current > 0) {
         this.countdown.set(current - 1);
-      } else if (current === 1 ){
-        console.log("COUTNDOWN STOP REQUESTED")
-        this.countdown.set(current - 1);
+      } else {
+        console.log('Countdown finished, moving to next round');
         this.stopCountdown();
         this.moveToNextRound();
       }
+      this.adminSocketService.lobbyEmit('countdownTick', { countdown: this.countdown() });
     }, 1000);
   }
 }

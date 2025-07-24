@@ -65,17 +65,19 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
         this.setupSocketSubscriptions();
 
         // Emit game response when component initializes
-        this.submitGameResponse();
+        this.playerSocketService.playerEmit(
+          'gameResponse',
+          {
+            gameId: this.selectedGame(),
+            data: this.guess(),
+          }
+        );
       }),
     );
   }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
-  }
-
-  private submitGameResponse(): void {
-    this.playerSocketService.submitGameResponse('Magic Number', this.guess());
   }
 
   private setupSocketSubscriptions(): void {

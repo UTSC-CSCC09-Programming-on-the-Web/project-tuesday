@@ -38,8 +38,8 @@
               <div class="rank-position">
                 <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
               </div><div class="player-details">
-                <span class="player-name">{{ player.name }}</span>
-                <span class="player-guess">Score: {{ points[players().indexOf(player)] }}</span>
+                <span class="player-name">{{ player.player.name }}</span>
+                <span class="player-guess">Score: {{ player.points }}</span>
               </div>
               <!-- <div class="player-points">{{ player.points }}</div> -->
             </div>
@@ -62,8 +62,8 @@
               <div class="rank-position">
                 <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
               </div><div class="player-details">
-                <span class="player-name">{{ player.name }}</span>
-                <span class="player-guess">Score: {{ results[players().indexOf(player)] }}</span>
+                <span class="player-name">{{ player.player.name }}</span>
+                <span class="player-guess">Score: {{ player.points }}</span>
               </div>
               <!-- <div class="player-points">{{ player.points }}</div> -->
             </div>

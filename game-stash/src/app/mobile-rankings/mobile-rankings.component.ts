@@ -27,7 +27,6 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       points: 0,
       rank: -1,
       isRoundWinner: false,
-      response: "",
       data: -1, //variable field used differently by different games
       });
   playerRank = signal(0);
@@ -64,7 +63,6 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       points: 0,
       rank: -1,
       isRoundWinner: false,
-      response: "",
       data: -1, //variable field used differently by different games
       });
     this.playerRank.set(0);
@@ -102,7 +100,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
         if (this.isGameOver()) {
           // Emit gameEnded to backend as soon as final rankings screen is shown
-          this.adminSocketService.emitGameEnded();
+          this.adminSocketService.lobbyEmit("gameEnded", {});
         }
 
         if (!this.isGameOver()) {
@@ -138,21 +136,19 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
   private startCountdown(): void {
 
-    this.countdownInterval = window.setInterval(() => {
+    this.playerSocketService.useEffect('countdownTick', (tick) => {
       console.log("tick")
-      const current = this.countdown();
-      if (current > 1) {
-        this.countdown.set(current - 1);
+      if (tick > 0) {
+        this.countdown.set(tick);
       } else {
-        this.stopCountdown();
+        this.playerSocketService.removeEffect('countdownTick');
         if (this.roundNumber() === this.maxRounds) {
           this.finishRound();
         } else {
           this.moveToNextRound();
         }
-
       }
-    }, 1000);
+    });
   }
 
   private stopCountdown(): void {
@@ -177,18 +173,9 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
   private moveToNextRound(): void {
     // Reset round-specific parameters for next round
+    this.playerSocketService.resetState();
     this.countdown.set(10);
-    this.ranking.set({
-      player: {
-        name: "",
-        playerId: ""
-      },
-      points: 0,
-      rank: -1,
-      isRoundWinner: false,
-      response: "",
-      data: -1, //variable field used differently by different games
-      });
+
     this.targetNumber.set(0);
     this.playerRank.set(0);
 

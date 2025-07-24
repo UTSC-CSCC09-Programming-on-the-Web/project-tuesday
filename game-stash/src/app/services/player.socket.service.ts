@@ -5,10 +5,18 @@ import { SERVER_ADDRESS, GameResults } from './socket.service.constants';
 import { PlayerRanking } from './socket.service.constants';
 
 // unsure what to do with this yet
+// interface PlayerState {
+//   selectedGame: string;
+//   data: number;
+//   ranking: PlayerRanking;
+// }
+
 interface PlayerState {
   selectedGame: string;
-  data: number;
+  roundNumber: number;
+  finalRound: number;
   ranking: PlayerRanking;
+  data: number;
 }
 @Injectable({
   providedIn: 'root',
@@ -29,6 +37,8 @@ export class PlayerSocketService {
 
   private playerStateSubject = new BehaviorSubject<PlayerState>({
     selectedGame: '',
+    roundNumber: -1,
+    finalRound: -1,
     data: -1,
     ranking: {
       player: {
@@ -38,8 +48,7 @@ export class PlayerSocketService {
       points: 0,
       rank: -1,
       isRoundWinner: false,
-      response: "",
-      data: -1, //variable field used differently by different games
+      data: undefined, //variable field used differently by different games
     },
   });
   playerState$ = this.playerStateSubject.asObservable();
@@ -137,14 +146,17 @@ export class PlayerSocketService {
       console.log('MobileSocketService gameResults data:', arg);
 
       switch (this.playerStateSubject.value.selectedGame) {
-        case 'Magic Number':
+        // case 'Magic Number':
 
+        //   const newPlayerRanking = arg;
+        //   newPlayerRanking.player.name = this.playerName
+        //     this.updatePlayerRankings(newPlayerRanking);
+        //   break;
+        default:
           const newPlayerRanking = arg;
           newPlayerRanking.player.name = this.playerName
             this.updatePlayerRankings(newPlayerRanking);
-          break;
-        default:
-          console.log('Unknown game ID:', this.playerStateSubject.value.selectedGame);
+          // console.log('Unknown game ID:', this.playerStateSubject.value.selectedGame);
           break;
       }
 
@@ -227,21 +239,15 @@ export class PlayerSocketService {
     }
   }
 
-  private resetState() {
+  resetState() {
+    const ranking = this.playerStateSubject.value.ranking;
+    ranking.points = 0;
+    ranking.isRoundWinner = false;
+    ranking.data = undefined;
     this.updatePlayerState({
       selectedGame: '',
       data: -1,
-      ranking: {
-        player: {
-          name: "",
-          playerId: "",
-        },
-        points: 0,
-        rank: -1,
-        isRoundWinner: false,
-        response: "",
-        data: -1, //variable field used differently by different games
-      },
+      ranking: ranking
     });
   }
 
