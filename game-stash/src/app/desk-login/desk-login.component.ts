@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../services/auth.service';
+import { GoogleSignInService } from '../services/google-signin.service';
+import { environment } from '../../environments/environment';
 
 declare var Stripe: any;
 
@@ -28,10 +30,14 @@ export class DeskLoginComponent implements OnInit {
   isProcessingPayment = false;
   showPaymentForm = false;
   registeredUser: User | null = null;
+  
+  // Google Sign-In
+  isGoogleSignInLoaded = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private googleSignInService: GoogleSignInService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -48,13 +54,44 @@ export class DeskLoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Initialize Stripe with your actual test publishable key
-    this.stripe = Stripe('pk_test_51RgrGg2Xvu7GA77tKbkzt2SX1wI8dXX9zR9zG0fRj4fcTab2AA5RNf7liukYzBfXNGbupkqVgTgxdAOI7LGG36u500aioW0kL5');
-    this.elements = this.stripe.elements();
+    this.initializeStripe();
+    this.initializeGoogleSignIn();
     
-    // Check if user is already authenticated
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/desk-create-lobby']);
+    }
+  }
+
+  private initializeStripe(): void {
+    // Initialize Stripe with publishable key from environment
+    this.stripe = Stripe(environment.stripePublishableKey);
+    this.elements = this.stripe.elements();
+  }
+
+  private async initializeGoogleSignIn(): Promise<void> {
+    try {
+      await this.googleSignInService.initializeGoogleSignIn();
+      this.isGoogleSignInLoaded = true;
+      
+      setTimeout(() => {
+        this.renderGoogleSignInButtons();
+      }, 100);
+    } catch (error) {
+      console.error('Failed to initialize Google Sign-In:', error);
+    }
+  }
+
+  private renderGoogleSignInButtons(): void {
+    if (this.isLoginMode) {
+      const loginButton = document.getElementById('google-signin-button');
+      if (loginButton) {
+        this.googleSignInService.renderSignInButton('google-signin-button');
+      }
+    } else {
+      const registerButton = document.getElementById('google-signin-button-register');
+      if (registerButton) {
+        this.googleSignInService.renderSignInButton('google-signin-button-register');
+      }
     }
   }
 
@@ -74,6 +111,12 @@ export class DeskLoginComponent implements OnInit {
       this.errorMessage = '';
       this.successMessage = '';
       this.showPaymentForm = false;
+      
+      if (this.isGoogleSignInLoaded) {
+        setTimeout(() => {
+          this.renderGoogleSignInButtons();
+        }, 100);
+      }
     }
   }
 
@@ -103,7 +146,12 @@ export class DeskLoginComponent implements OnInit {
               this.router.navigate(['/user-account']);
             }
           } else {
-            this.errorMessage = response.message || 'Login failed';
+            // Handle specific Google OAuth message
+            if (response.authProvider === 'google') {
+              this.errorMessage = response.message || 'This account uses Google Sign-In. Please use the Google button below.';
+            } else {
+              this.errorMessage = response.message || 'Login failed';
+            }
           }
           this.isLoading = false;
         },

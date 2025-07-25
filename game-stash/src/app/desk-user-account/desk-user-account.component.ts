@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, User } from '../services/auth.service';
 import { Subscription } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 declare var Stripe: any;
 
@@ -37,8 +38,8 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Initialize Stripe with your actual test publishable key
-    this.stripe = Stripe('pk_test_51RgrGg2Xvu7GA77tKbkzt2SX1wI8dXX9zR9zG0fRj4fcTab2AA5RNf7liukYzBfXNGbupkqVgTgxdAOI7LGG36u500aioW0kL5'); // Replace with your real test key
+    // Initialize Stripe with publishable key from environment
+    this.stripe = Stripe(environment.stripePublishableKey);
     this.elements = this.stripe.elements();
     
     // Check if user came here from menu (lobby)

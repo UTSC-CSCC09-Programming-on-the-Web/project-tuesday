@@ -251,3 +251,87 @@ h1 {
     font-size: 1.8rem;
   }
 }
+
+/* Google Sign-In Styles */
+.oauth-section {
+  margin-top: 25px;
+}
+
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.oauth-divider::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.oauth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.oauth-divider span {
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0 15px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.google-signin-container {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.google-signin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  background: white;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.google-signin-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.google-signin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Override Google's default button styles when loaded */
+.google-signin-container > div {
+  width: 100%;
+}
+
+.google-signin-container iframe {
+  width: 100% !important;
+}

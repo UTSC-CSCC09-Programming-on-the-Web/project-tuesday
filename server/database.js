@@ -38,6 +38,8 @@ export async function initializeDatabase() {
         email VARCHAR(255) UNIQUE NOT NULL,
         username VARCHAR(255) NOT NULL,
         password_hash VARCHAR(255),
+        google_id VARCHAR(255) UNIQUE,
+        auth_provider VARCHAR(50) DEFAULT 'local',
         subscription_status VARCHAR(50) DEFAULT 'inactive',
         subscription_id VARCHAR(255),
         stripe_customer_id VARCHAR(255),
@@ -62,6 +64,8 @@ export async function initializeDatabase() {
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_users_subscription_id ON users(subscription_id);
+      CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+      CREATE INDEX IF NOT EXISTS idx_users_auth_provider ON users(auth_provider);
     `);
 
     client.release();
