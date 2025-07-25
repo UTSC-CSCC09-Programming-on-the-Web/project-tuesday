@@ -46,6 +46,7 @@ function formatUserResponse(user) {
     username: user.username,
     subscriptionStatus: user.subscription_status,
     subscriptionId: user.subscription_id,
+    authProvider: user.auth_provider,
     createdAt: user.created_at
   };
 }
@@ -92,8 +93,8 @@ router.post('/register', async (req, res) => {
     
     // Create user
     const result = await client.query(
-      'INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3) RETURNING *',
-      [email, username, passwordHash]
+      'INSERT INTO users (email, username, password_hash, auth_provider) VALUES ($1, $2, $3, $4) RETURNING *',
+      [email, username, passwordHash, 'local']
     );
     
     client.release();
@@ -140,6 +141,15 @@ router.post('/login', async (req, res) => {
     
     const user = result.rows[0];
     
+    // Check if user registered with Google OAuth
+    if (user.auth_provider === 'google' && !user.password_hash) {
+      return res.status(400).json({
+        success: false,
+        message: 'This account was created with Google. Please sign in with Google.',
+        authProvider: 'google'
+      });
+    }
+    
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     
@@ -180,6 +190,99 @@ router.post('/logout', (req, res) => {
     success: true,
     message: 'Logged out successfully'
   });
+});
+
+// Google OAuth ID token verification (modern approach)
+router.post('/google/verify', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    
+    if (!idToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID token is required'
+      });
+    }
+
+    const { OAuth2Client } = await import('google-auth-library');
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    
+    const ticket = await client.verifyIdToken({
+      idToken: idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    
+    const payload = ticket.getPayload();
+    const googleId = payload.sub;
+    const email = payload.email;
+    const name = payload.name;
+
+    const dbClient = await pool.connect();
+    
+    // Check if user exists with Google ID
+    let result = await dbClient.query(
+      'SELECT * FROM users WHERE google_id = $1',
+      [googleId]
+    );
+    
+    let user;
+    
+    if (result.rows.length > 0) {
+      // Update existing user
+      const updateResult = await dbClient.query(
+        `UPDATE users 
+         SET username = $1, updated_at = CURRENT_TIMESTAMP 
+         WHERE google_id = $2 
+         RETURNING *`,
+        [name, googleId]
+      );
+      user = updateResult.rows[0];
+    } else {
+      // Check if user exists with same email
+      result = await dbClient.query(
+        'SELECT * FROM users WHERE email = $1',
+        [email]
+      );
+      
+      if (result.rows.length > 0) {
+        // Link existing account
+        const updateResult = await dbClient.query(
+          `UPDATE users 
+           SET google_id = $1, auth_provider = 'google', updated_at = CURRENT_TIMESTAMP 
+           WHERE email = $2 
+           RETURNING *`,
+          [googleId, email]
+        );
+        user = updateResult.rows[0];
+      } else {
+        // Create new user
+        const insertResult = await dbClient.query(
+          `INSERT INTO users (email, username, google_id, auth_provider) 
+           VALUES ($1, $2, $3, 'google') 
+           RETURNING *`,
+          [email, name, googleId]
+        );
+        user = insertResult.rows[0];
+      }
+    }
+    
+    dbClient.release();
+    
+    const token = generateToken(user);
+    
+    res.json({
+      success: true,
+      user: formatUserResponse(user),
+      token
+    });
+    
+  } catch (error) {
+    console.error('Google token verification error:', error);
+    res.status(401).json({
+      success: false,
+      message: 'Invalid Google token'
+    });
+  }
 });
 
 export default router;

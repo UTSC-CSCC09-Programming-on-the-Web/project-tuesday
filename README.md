@@ -1,7 +1,7 @@
 
 ## Basic Flow
 ### Step 1: Start the Backend
-Go into ./server and run `node server.js` to start the backend (set up Postgres using the steps below if starting this app for the first time)
+Go into ./server and run `node server.js` to start the backend (if starting this app for the first time, set up Postgres using the steps below and make sure to create a server/.env file based off of the server/.env.example file. Ask Alton for any secrets you don't have)
 
 ### Step 2: Start the Frontend
 Go into ./game-stash and run `ng serve` to start the frontend
