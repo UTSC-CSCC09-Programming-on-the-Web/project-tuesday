@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: number;
@@ -10,6 +11,7 @@ export interface User {
   email: string;
   subscriptionStatus: 'active' | 'inactive' | 'past_due' | 'canceled';
   subscriptionId?: string;
+  authProvider?: 'local' | 'google';
   createdAt: string;
 }
 
@@ -18,6 +20,7 @@ export interface AuthResponse {
   user?: User;
   token?: string;
   message?: string;
+  authProvider?: string;
 }
 
 export interface SubscriptionResponse {
@@ -31,7 +34,7 @@ export interface SubscriptionResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = environment.apiUrl;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -65,6 +68,12 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, {
       email,
       password
+    });
+  }
+
+  verifyGoogleToken(idToken: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/google/verify`, {
+      idToken
     });
   }
 

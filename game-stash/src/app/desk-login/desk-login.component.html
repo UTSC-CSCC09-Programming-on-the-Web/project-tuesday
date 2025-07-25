@@ -62,6 +62,17 @@
         class="leave-btn submit-btn">
         {{ isLoading ? 'Signing In...' : 'Sign In' }}
       </button>
+
+      <!-- Google Sign-In Section -->
+      <div class="oauth-section">
+        <div class="oauth-divider">
+          <span>or</span>
+        </div>
+        
+        <!-- Google Sign-In Button (using Google Identity Services) -->
+        <div *ngIf="isGoogleSignInLoaded" id="google-signin-button" class="google-signin-container"></div>
+        
+      </div>
     </form>
 
     <!-- Register Form -->
@@ -128,6 +139,17 @@
         class="leave-btn submit-btn">
         {{ isLoading ? 'Creating Account...' : 'Create Account' }}
       </button>
+
+      <!-- Google Sign-In Section -->
+      <div class="oauth-section">
+        <div class="oauth-divider">
+          <span>or</span>
+        </div>
+        
+        <!-- Google Sign-In Button (using Google Identity Services) -->
+        <div *ngIf="isGoogleSignInLoaded" id="google-signin-button-register" class="google-signin-container"></div>
+        
+      </div>
     </form>
 
     <!-- Payment Form -->
