@@ -6,6 +6,7 @@ import { AdminSocketService } from '../services/admin.socket.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatListModule } from '@angular/material/list';
 import { DeskLoadBalancingComponent } from "../desk-load-balancing/desk-load-balancing.component";
+import { DeskThrowCatchComponent } from '../desk-throw-catch/desk-throw-catch.component';
 import { map } from 'rxjs';
 import { GlobalRanking, Player } from '../services/socket.service.constants';
 
@@ -16,7 +17,8 @@ import { GlobalRanking, Player } from '../services/socket.service.constants';
     CommonModule,
     MatFormFieldModule,
     MatListModule,
-    DeskLoadBalancingComponent
+    DeskLoadBalancingComponent,
+    DeskThrowCatchComponent
 ],
   templateUrl: './desk-game-select.component.html',
   styleUrl: './desk-game-select.component.css',
@@ -36,8 +38,7 @@ export class DeskGameSelectComponent {
   games: string[] = [
     'Magic Number',
     'Load Balancing',
-    'exampleGame2',
-    'exampleGame3',
+    'Throw and Catch',
   ];
 
   selectedGame: string = '';
@@ -95,7 +96,10 @@ export class DeskGameSelectComponent {
     } else if (game === 'Load Balancing'){
       this.adminSocketService.setRound(1, 1);
       this.selectedGame = 'Load Balancing';
-    } else {
+    } else if (game === 'Throw and Catch'){
+      this.selectedGame = 'Throw and Catch'
+    } 
+    else {
       console.error('Game not implemented:', game);
     }
   }

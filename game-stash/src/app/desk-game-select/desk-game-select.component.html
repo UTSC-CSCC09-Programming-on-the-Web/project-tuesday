@@ -38,6 +38,7 @@
       </div>
       <app-desk-magic-number *ngSwitchCase="'Magic Number'" (gameOver)="resetGame()"></app-desk-magic-number>
       <app-desk-load-balancing *ngSwitchCase="'Load Balancing'" (gameOver)="resetGame()"></app-desk-load-balancing>
+      <app-desk-throw-catch *ngSwitchCase="'Throw and Catch'" (gameOver)="resetGame()"></app-desk-throw-catch>
     </div>
   </div>
   @if (selectedGame === '') {

@@ -35,12 +35,8 @@ export const routes: Routes = [
     loadComponent: () => import('./mobile-load-balancing/mobile-load-balancing.component').then(m => m.MobileLoadBalancingComponent)
   },
   {
-    path: 'mobile-load-balancing',
-    loadComponent: () => import('./mobile-load-balancing/mobile-load-balancing.component').then(m => m.MobileLoadBalancingComponent)
-  },
-  {
-    path: 'mobile-load-balancing',
-    loadComponent: () => import('./mobile-load-balancing/mobile-load-balancing.component').then(m => m.MobileLoadBalancingComponent)
+    path: 'mobile-throw-and-catch',
+    loadComponent: () => import('./mobile-throw-catch/mobile-throw-catch.component').then(m => m.MobileThrowCatchComponent)
   },
   {
     path: 'mobile-magic-number',

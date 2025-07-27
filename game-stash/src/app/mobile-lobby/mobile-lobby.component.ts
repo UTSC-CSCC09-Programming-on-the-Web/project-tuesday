@@ -57,7 +57,6 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
       this.playerSocketService.playerState$
         .pipe(map((playerState) => playerState.selectedGame))
         .subscribe((gameId) => {
-          console.log("DETECTED SOCKET SUBSCRIPTION CHANGE --------- ", gameId)
           if (gameId) {
             this.selectedGame.set(gameId);
             this.navigateToGame(gameId);
@@ -85,6 +84,19 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
           roundNumber: 1,
         },
       });
+      else if (gameId === 'Throw and Catch') {
+        console.log("attempt to navigate to throw and catch")
+        this.router.navigate(['/mobile-throw-and-catch'], {
+        queryParams: {
+          lobbyCode: this.lobbyCode(),
+          playerName: this.playerName(),
+          selectedGame: gameId,
+          roundNumber: 1,
+        },
+      
+        
+        });
+      }
   }
 
   ngOnDestroy(): void {
