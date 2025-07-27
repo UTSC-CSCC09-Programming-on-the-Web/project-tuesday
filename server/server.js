@@ -219,10 +219,10 @@ io.on("connection", (socket) => {
             rank: rankings.indexOf(playerId) + 1,
             isRoundWinner: winners.includes(playerId),
             response: lobbies[arg.lobbyCode].responses[playerId],
-            data: targetNumber
+            data: responses[playerId]
           }
           console.log(`Player ${playerId} has score ${lobbies[arg.lobbyCode].score[playerId]}`);
-          io.to(playerId).emit("gameResults", playerRanking)
+          io.to(playerId).emit("gameResults", { ranking: playerRanking, data: targetNumber });
         }
       }
 
@@ -350,25 +350,53 @@ io.on("connection", (socket) => {
       socket.removeAllListeners("spawnBox");
       socket.removeAllListeners("scoreUpdate");
 
-      for (const [key, value] of Object.entries(lobbies[arg.lobbyCode].players)) {
-          let playerId = key
+      arg.players.sort((a, b) => {
+        return b.points - a.points; // Sort players by points in descending order
+      });
 
-          const playerRanking = {
-            player: {
-              name: "John Doe", //needs to be replaced with player name on frontend
-              playerId: playerId,
-            },
-            points: 1,
-            rank: 0,
-            isRoundWinner: true,
-            response: arg.points[arg.players.findIndex((player) => player.playerId === playerId)] || 0,
-            data: 0
-          }
-          console.log(`Player ${playerId} has score ${arg.points[arg.players.findIndex((player) => player.playerId === playerId)]}`);
-          console.log(`Sending game results to player ${playerId} in lobby ${arg.lobbyCode}`, playerRanking);
+      const max = arg.players[0].points || 0;
 
-          io.to(playerId).emit("gameResults", playerRanking)
+      const rankings  = arg.players.map((player) => (player.player.playerId));
+      const winners = arg.players.filter(player => player.points === max).map(player => (player.player.playerId));
+      const responses = lobbies[arg.lobbyCode].responses;
+
+      const winner = winners[0];
+
+      let gameResult = {
+        winners: winners,
+        responses: responses,
+        rankings: rankings,
+        gameId: "Load Balancing",
+        targetNumber: 0
+      }
+
+      const adminId = lobbies[arg.lobbyCode].admin;
+
+      io.to(adminId).emit("gameResults", gameResult)
+      
+      for (const [key, value] of Object.entries(lobbies[arg.lobbyCode]?.players)) {
+        let playerId = key
+        if (playerId === lobbies[arg.lobbyCode].admin) continue; // Skip admin
+        console.log("players", arg.players, playerId, arg.players.find((player) => {
+          console.log("player", player, player.player.playerId, playerId);
+          return player.player.playerId === playerId
+        }));
+        const rank = arg.players.findIndex((player) => player.player.playerId === playerId) + 1;
+        const score = arg.players.find((player) => player.player.playerId === playerId).points || 0;
+        const playerRanking = {
+          player: {
+            name: "John Doe", //needs to be replaced with player name on frontend
+            playerId: playerId,
+          },
+          points: 1,
+          rank: winners.find((winner) => winner === playerId) !== undefined ? 1 : rank,
+          isRoundWinner: winners.find((winner) => winner === playerId) !== undefined,
+          data: score,
         }
+        console.log(`Sending game results to player ${playerId} in lobby ${arg.lobbyCode}`, playerRanking);
+
+        io.to(playerId).emit("gameResults", { ranking: playerRanking, data: 0 });
+      }
     }
   });
 

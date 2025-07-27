@@ -56,9 +56,15 @@
           >
         </div>
         <h2>{{ playerName() }}</h2>
-        <p class="guess-info">
-          Your guess: <span class="guess-number">{{ guess() }}</span>
-        </p>
+        @if (selectedGame() === 'Magic Number') {
+          <p class="guess-info">
+            Your guess: <span class="guess-number">{{ ranking().data }}</span>
+          </p>
+        } @else {
+          <p class="guess-info">
+            Your score: <span class="guess-number">{{ ranking().data }}</span>
+          </p>
+        }
       </div>
     </div>
 
@@ -89,9 +95,6 @@
   <footer class="rankings-footer">
     @if (isGameOver()) {
       <div class="final-actions">
-        <button (click)="onStayInLobby()" class="stay-btn">
-          Stay in Lobby
-        </button>
         <button (click)="onLeaveLobby()" class="leave-btn">Leave Lobby</button>
       </div>
     }

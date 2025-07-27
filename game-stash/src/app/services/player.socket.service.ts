@@ -129,7 +129,7 @@ export class PlayerSocketService {
     });
 
     this.socket.on('gameReset', (data: any) => {
-      this.resetState();
+      this.resetGameState();
     })
 
     // Listen for game start event
@@ -138,7 +138,7 @@ export class PlayerSocketService {
       this.updatePlayerState({ selectedGame: arg.gameId });
     });
 
-    this.socket.on('gameResults', (arg: PlayerRanking) => {
+    this.socket.on('gameResults', (arg: { ranking: PlayerRanking, data: number | undefined}) => {
       console.log(
         'MobileSocketService received gameResults for gameId:',
         this.playerStateSubject.value.selectedGame,
@@ -153,9 +153,9 @@ export class PlayerSocketService {
         //     this.updatePlayerRankings(newPlayerRanking);
         //   break;
         default:
-          const newPlayerRanking = arg;
+          const newPlayerRanking = arg.ranking;
           newPlayerRanking.player.name = this.playerName
-            this.updatePlayerRankings(newPlayerRanking);
+            this.updatePlayerRankings({ ranking: newPlayerRanking, data: arg.data });
           // console.log('Unknown game ID:', this.playerStateSubject.value.selectedGame);
           break;
       }
@@ -170,7 +170,7 @@ export class PlayerSocketService {
   }
 
   updatePlayerRankings(
-    arg: PlayerRanking) {
+    arg: { ranking: PlayerRanking, data: number | undefined}) {
 
 
 
@@ -185,7 +185,7 @@ export class PlayerSocketService {
 
 
     this.updatePlayerState({
-      ranking: arg,
+      ranking: arg.ranking,
       data: arg.data})
   }
 
@@ -239,15 +239,21 @@ export class PlayerSocketService {
     }
   }
 
-  resetState() {
+  resetRoundState() {
     const ranking = this.playerStateSubject.value.ranking;
     ranking.points = 0;
     ranking.isRoundWinner = false;
     ranking.data = undefined;
     this.updatePlayerState({
-      selectedGame: '',
       data: -1,
       ranking: ranking
+    });
+  }
+
+  resetGameState() {
+    this.resetRoundState();
+    this.updatePlayerState({
+      selectedGame: '',
     });
   }
 

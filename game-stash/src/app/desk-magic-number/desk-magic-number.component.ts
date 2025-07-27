@@ -24,6 +24,7 @@ export class DeskMagicNumberComponent implements OnInit {
   isGameOver = signal(false);
   countdown = signal(10);
   roundNumber = signal(1);
+  finalRound = signal(3);
   targetNumber = signal(0);
 
   @Output() gameOver = new EventEmitter<string>();
@@ -58,6 +59,21 @@ export class DeskMagicNumberComponent implements OnInit {
         this.targetNumber.set(targetNumber || 0);
       });
 
+    this.adminSocketService.gameState$
+      .pipe(map((gameState) => gameState.roundNumber))
+      .subscribe((roundNumber) => {
+        console.log('Round number updated:', roundNumber);
+        this.roundNumber.set(roundNumber || 1);
+      });
+
+    this.adminSocketService.gameState$
+      .pipe(map((gameState) => gameState.finalRound))
+      .subscribe((finalRound) => {
+        console.log('Final round updated:', finalRound);
+        this.finalRound.set(finalRound || 3);
+      });
+
+
     // Start the game
     this.adminSocketService.lobbyEmit('startGame', {
       gameId: 'Magic Number'
@@ -65,7 +81,7 @@ export class DeskMagicNumberComponent implements OnInit {
   }
 
   roundEnd() {
-    this.isGameOver.set(this.roundNumber() >= 3);
+    this.isGameOver.set(this.roundNumber() >= this.finalRound());
     this.isRoundOver.set(true);
     if (!this.isGameOver()) {
       this.startCountdown();
@@ -83,11 +99,11 @@ export class DeskMagicNumberComponent implements OnInit {
     this.isRoundOver.set(false);
     this.rankings.set([]);
     this.targetNumber.set(0);
-    this.roundNumber.set(this.roundNumber() + 1);
     this.responded = [];
     this.unresponded = this.players.slice();
 
     this.adminSocketService.resetRoundState();
+    this.adminSocketService.setRound(this.roundNumber() + 1);
   }
 
   private stopCountdown(): void {

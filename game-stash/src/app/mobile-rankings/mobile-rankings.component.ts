@@ -116,7 +116,6 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       .subscribe((ranking) => {
         this.ranking.set(ranking)
         })
-
     );
 
     // Subscribe to targetNumber from from PlayerSocketService
@@ -126,6 +125,22 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         .subscribe((targetNumber) => {
           this.targetNumber.set(targetNumber);
         }),
+    );
+
+    this.subscriptions.push(
+      this.playerSocketService.playerState$
+      .pipe(map((playerState) => playerState.selectedGame))
+      .subscribe((selectedGame) => {
+        this.selectedGame.set(selectedGame);
+        if (selectedGame === ''){
+          this.router.navigate(['/mobile-lobby'], {
+            queryParams: {
+              lobbyCode: this.lobbyCode(),
+              playerName: this.playerName(),
+            },
+          });
+        }
+      }),
     );
   }
 
@@ -173,7 +188,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
   private moveToNextRound(): void {
     // Reset round-specific parameters for next round
-    this.playerSocketService.resetState();
+    this.playerSocketService.resetRoundState();
     this.countdown.set(10);
 
     this.targetNumber.set(0);
@@ -186,15 +201,6 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         playerName: this.playerName(),
         roundNumber: nextRound,
         selectedGame: this.selectedGame() || 'Magic Number',
-      },
-    });
-  }
-
-  onStayInLobby(): void {
-    this.router.navigate(['/mobile-lobby'], {
-      queryParams: {
-        lobbyCode: this.lobbyCode(),
-        playerName: this.playerName(),
       },
     });
   }

@@ -34,6 +34,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
   gyroscope: number[] = [0, 0, 0];
   permissionGranted: boolean = false;
+  gameOver: boolean  = false;
 
   rotation: number = 0;
   old: number = 0;
@@ -52,28 +53,28 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     document.querySelector('#permission')!.addEventListener('click', () => {
-  this.socketService.playerEmit("ping", "permission clicked for device motion");
+    this.socketService.playerEmit("ping", "permission clicked for device motion");
 
-  // Check if iOS-style permission request is needed
-  if (
-    typeof DeviceMotionEvent !== 'undefined' &&
-    typeof (DeviceMotionEvent as any).requestPermission === 'function'
-  ) {
-    (DeviceMotionEvent as any).requestPermission().then((response: any) => {
-      this.socketService.playerEmit("ping", "permission granted!");
-      this.permissionGranted = response === 'granted';
-      if (this.permissionGranted) {
-        this.startMotionListener();
-      }
+    // Check if iOS-style permission request is needed
+    if (
+      typeof DeviceMotionEvent !== 'undefined' &&
+      typeof (DeviceMotionEvent as any).requestPermission === 'function'
+    ) {
+      (DeviceMotionEvent as any).requestPermission().then((response: any) => {
+        this.socketService.playerEmit("ping", "permission granted!");
+        this.permissionGranted = response === 'granted';
+        if (this.permissionGranted) {
+          this.startMotionListener();
+        }
+        this.runGame();
+      }).catch((error: any) => alert(error));
+    } else {
+      // seems like for Android some older browsers don't ask you for permission lol
+      this.permissionGranted = true;
+      this.startMotionListener();
       this.runGame();
-    }).catch((error: any) => alert(error));
-  } else {
-    // seems like for Android some older browsers don't ask you for permission lol
-    this.permissionGranted = true;
-    this.startMotionListener();
-    this.runGame();
-  }
-});
+    }
+  });
 
     this.subscriptions.push(
       this.route.queryParams.subscribe(params => {
@@ -140,29 +141,36 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
     console.log("Game started");
 
-    this.socketService.playerEmit("playerStart", {});
-
-    Events.on(this.engine, "afterUpdate", () => {;
-      if (this.permissionGranted) {
-        Body.rotate(this.platform!, (this.rotation - this.old) * Math.PI / 180);
-      }
-      this.bodies.forEach(body => {
-        if (body.position.y > this.height || body.position.x < 0 || body.position.x > this.width) {
-
-          World.remove(this.engine.world, body);
-          this.bodies = this.bodies.filter(b => b !== body);
-          console.log("Body removed:", body, this.bodies.length);
-        } else {
-          Body.applyForce(body, body.position, {x: 0, y: body.mass * 0.0001});
-        }
+    this.socketService.playerEmit('gameResponse',
+      {
+        gameId: this.selectedGame(),
+        data: 0,
       });
-      const points = this.bodies.length;
-      if (points !== this.points) {
-        console.log("Points updated:", points);
-        this.points = points;
-        this.socketService.playerEmit("scoreUpdate", {
-          points: this.points
+
+    Events.on(this.engine, "afterUpdate", () => {
+      if (!this.gameOver) {
+        if (this.permissionGranted) {
+          Body.rotate(this.platform!, (this.rotation - this.old) * Math.PI / 180);
+        }
+        this.bodies.forEach(body => {
+          if (body.position.y > this.height || body.position.x < 0 || body.position.x > this.width) {
+
+            World.remove(this.engine.world, body);
+            this.bodies = this.bodies.filter(b => b !== body);
+            console.log("Body removed:", body, this.bodies.length);
+          } else {
+            Body.applyForce(body, body.position, {x: 0, y: body.mass * 0.0001});
+          }
         });
+        const points = this.bodies.length;
+        if (points !== this.points) {
+          console.log("Points updated:", points);
+          this.points = points;
+          this.socketService.playerEmit("gameResponse", {
+            gameId: this.selectedGame(),
+            data: this.points
+          });
+        }
       }
     });
 
@@ -194,6 +202,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     });
 
     this.socketService.useEffect("gameEnded", (data) => {
+      this.gameOver = true;
       console.log("Game ended:", data);
       if (this.render) {
         Render.stop(this.render);
@@ -229,12 +238,12 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
   }
 
   startMotionListener() {
-  window.addEventListener('deviceorientation', event => {
-    this.socketService.playerEmit("ping", "Hello from the frontend!");
-    this.old = this.rotation;
-    this.rotation = Math.floor(event.gamma || 0);
-  });
-}
+    window.addEventListener('deviceorientation', event => {
+      this.socketService.playerEmit("ping", "Hello from the frontend!");
+      this.old = this.rotation;
+      this.rotation = Math.floor(event.gamma || 0);
+    });
+  }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());

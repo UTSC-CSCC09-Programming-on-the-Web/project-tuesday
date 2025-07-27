@@ -228,13 +228,13 @@ export class AdminSocketService {
     const updatedRankings: PlayerRanking[] = [];
     const globalRank = this.gameStateSubject.value.globalRankings;
 
-     console.log("RESPONSES------------------------ ", responses)
+     console.log("RESPONSES------------------------ ", responses, winners);
     // Create or update rankings for each player
     for (const [playerId, guess] of Object.entries(responses)) {
       const isWinner = winners.includes(playerId);
 
-      if (isWinner) {
-        globalRank[playerId] = { playerId, points: 1 };
+      if (isWinner && this.gameStateSubject.value.roundNumber === this.gameStateSubject.value.finalRound) {
+        globalRank[playerId].points += 1;
       }
 
       // Find existing ranking or create new one
@@ -324,7 +324,14 @@ export class AdminSocketService {
 
   resetGameState() {
     this.resetRoundState();
+    const rankings = this.gameStateSubject.value.playerRankings.map((r) => {
+      return {
+        ...r,
+        points: 0
+      }
+    });
     this.updateState({
+      playerRankings: rankings,
       selectedGame: '',
       data: 0,
     });
@@ -332,6 +339,19 @@ export class AdminSocketService {
       lobbyCode: this.lobbyCode,
     });
     console.log('Game state reset', this.gameStateSubject.value);
+  }
+
+  setRound(round: number, finalRound?: number) {
+    console.log('Setting round:', round, 'Final round:', finalRound);
+    if (finalRound)
+      this.updateState({
+        finalRound: finalRound,
+        roundNumber: 1,
+      });
+    else
+      this.updateState({
+        roundNumber: round,
+      });
   }
 
   getLobbyName(): string {

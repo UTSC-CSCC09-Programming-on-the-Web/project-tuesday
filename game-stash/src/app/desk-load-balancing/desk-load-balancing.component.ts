@@ -63,7 +63,7 @@ export class DeskLoadBalancingComponent implements OnInit {
         this.unresponded = this.players().filter(
           (player) => !this.responded.find(res => res.playerId === player.player.playerId),
         ).map(player => player.player);
-        if (this.unresponded.length === 0) {
+        if (this.unresponded.length === 0 && this.status() === 'Waiting for players') {
           this.status.set('Game Countdown');
           this.startCountdown(this.startGame.bind(this));
         }
@@ -114,6 +114,7 @@ export class DeskLoadBalancingComponent implements OnInit {
     this.startCountdown((() => {
       clearInterval(this.interval);
 
+      console.log("Game ended, sending gameEnded event", this.players());
       this.socketService.lobbyEmit("gameEnded", {
         gameId: "Load Balancing",
         lobbyCode: this.socketService.getLobbyCode(),

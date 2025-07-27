@@ -89,9 +89,11 @@ export class DeskGameSelectComponent {
       if (this.players.length < 2) {
         alert('At least 2 players are required to start the game.');
       } else {
+        this.adminSocketService.setRound(1, 3);
         this.selectedGame = 'Magic Number';
       }
     } else if (game === 'Load Balancing'){
+      this.adminSocketService.setRound(1, 1);
       this.selectedGame = 'Load Balancing';
     } else {
       console.error('Game not implemented:', game);
