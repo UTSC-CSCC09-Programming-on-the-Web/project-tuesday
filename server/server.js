@@ -366,22 +366,27 @@ io.on("connection", (socket) => {
     // set player as having thrown the ball
     lobbies[arg.lobbyCode].players[arg.playerId] = false;
 
+    console.log("server received force: ", arg)
     // alert the frontend that the player has thrown the ball
     socket.to(lobbies[arg.lobbyCode].admin).emit("playerThrowData", {
       playerId: arg.playerId,
-      throwData: arg.force,
+      throwData: arg.data.throwData,
     });
   })
 
   // frontend is asking for the next player to throw, forward query
   socket.on('queryNextPlayerThrow', (arg) => {
+    console.log("querying next player to throw");
     // update values
     if (arg.previousPlayerId) {
       lobbies[arg.lobbyCode].responses[arg.previousPlayerId] = arg.throwDistance;
     }
-    const nextPlayer = Object.entries(lobbies[arg.lobbyCode].responses).find(([playerId, hasResponded]) => hasResponded === true)?.[0];
+
+    console.log(lobbies[arg.lobbyCode])
+    const nextPlayer = Object.entries(lobbies[arg.lobbyCode].players).find(([playerId, hasResponded]) => hasResponded)?.[0];
     // everyone has thrown the ball, so end the game
     if (nextPlayer === undefined) {
+      console.log("no next player found, ending the game");
       if (lobbies[arg.lobbyCode]) {
         lobbies[arg.lobbyCode].gameStarted = false;
       }
@@ -431,6 +436,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on('ping', (msg) => {
+    console.log("Ping received from client:");
     console.log(msg.data)
   })
 });

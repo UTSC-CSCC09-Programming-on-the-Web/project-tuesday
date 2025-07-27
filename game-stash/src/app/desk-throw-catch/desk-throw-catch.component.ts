@@ -23,6 +23,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
 
   // rendering objects in the game
   platform: Matter.Body | undefined;
+  bodies: Matter.Body[] = [];
 
   // for rendering goal pole
   pole: Matter.Body | undefined;
@@ -35,23 +36,19 @@ export class DeskThrowCatchComponent implements AfterViewInit {
   currentPlayerId: string = '';
 
   constructor (private socketService: AdminSocketService) {
-    /*
+    
     socketService.useEffect("playersReady", (arg) => {
       socketService.lobbyEmit("queryNextPlayerThrow", {})
   })
-      */
-
-
+      
   socketService.useEffect("playerThrowData", (arg) => {
     // simulate the throw
     this.currentPlayerId = arg.playerId;
-    this.spawnBall(arg.playerId, arg.throwData);
+    this.bodies.push(this.spawnBall(arg.playerId, arg.throwData));
   })
 
 
   socketService.useEffect("gameResults", (arg) => {
-    console.log("EVERYONE HAS THROWN------------------")
-    // handle results, display on ui
 
     console.log("results: ", arg)
     //end game
@@ -150,6 +147,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
   // spawn a ball
   spawnBall(playerId: string, throwForce: { x: number, y: number }) {
     console.log("spawning a ball")
+    console.log(throwForce)
     this.hasReadStopped = false;
     const platformPos = this.platform!.position;
 
@@ -177,12 +175,16 @@ export class DeskThrowCatchComponent implements AfterViewInit {
     };
 
     //force vector
-    Body.applyForce(this.ball, this.ball.position, throwForce)
+    Body.applyForce(this.ball, this.ball.position, {x: throwForce.x/100, y: throwForce.y/100});
 
     World.add(this.engine.world, this.ball);
 
     return this.ball
   }
 
-  
+  clearScreen() {
+    for (const body of this.bodies) {
+      World.remove(this.engine.world, body);
+    }
+  }
 }

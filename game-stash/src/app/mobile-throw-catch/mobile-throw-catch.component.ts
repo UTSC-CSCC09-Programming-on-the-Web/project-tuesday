@@ -2,10 +2,11 @@ import { Component, OnInit, signal } from '@angular/core';
 import { PlayerSocketService } from '../services/player.socket.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map, filter, distinctUntilChanged } from 'rxjs/operators';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-mobile-throw-catch',
-  imports: [],
+  imports: [NgIf],
   templateUrl: './mobile-throw-catch.component.html',
   styleUrl: './mobile-throw-catch.component.css'
 })
@@ -29,6 +30,10 @@ export class MobileThrowCatchComponent implements OnInit {
   distance: number = -1;
   old_distance: number = -1;
 
+  // for ui
+  permissionButtonVisible: boolean = true;
+  isMyTurn: boolean = false;
+
   constructor(
     private socketService: PlayerSocketService,
     private route: ActivatedRoute,
@@ -40,8 +45,24 @@ export class MobileThrowCatchComponent implements OnInit {
     
     // attach event to track motion
     this.socketService.useEffect("queryPlayerThrow", (data: any) => {
+      //give indicator to user to throw
       this.tracking_motion = true;
+      this.isMyTurn = true;
     });
+
+    this.socketService.useEffect("gameEnded", (data) => {
+          console.log("Game ended:", data);
+
+          this.router.navigate(['/mobile-rankings'], {
+            queryParams: {
+              lobbyCode: this.lobbyCode(),
+              playerName: this.playerName(),
+              selectedGame: 'Load Balancing',
+              roundNumber: 5,
+              guess: 0 // Not used in Load Balancing, but required for consistency
+            }
+          });
+        });
 
     // subscribe to selectedGame instead of this
     this.socketService.playerState$
@@ -84,14 +105,13 @@ export class MobileThrowCatchComponent implements OnInit {
 
       // get permission to use motion sensors
     document.querySelector('#permission')!.addEventListener('click', () => {
-
+        this.permissionButtonVisible = false;
         // Check if iOS-style permission request is needed
         if (
           typeof DeviceMotionEvent !== 'undefined' &&
           typeof (DeviceMotionEvent as any).requestPermission === 'function'
         ) {
           (DeviceMotionEvent as any).requestPermission().then((response: any) => {
-            this.socketService.playerEmit("ping", "permission granted!");
             this.permissionGranted = response === 'granted';
             if (this.permissionGranted) {
               this.startMotionListener();
@@ -130,12 +150,12 @@ export class MobileThrowCatchComponent implements OnInit {
         y: -(acc.y ?? 0) / 100,
       };
 
-      console.log("Throw detected! Force vector:", force);
-
       // Send to server
       this.socketService.playerEmit("playerThrowData", {
         throwData: force
       });
+      this.isMyTurn = false;
+      
     }
   });
 }
