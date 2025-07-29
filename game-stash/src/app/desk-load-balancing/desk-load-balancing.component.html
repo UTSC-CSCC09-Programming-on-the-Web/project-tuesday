@@ -1,5 +1,5 @@
 @if (!(status() === "Game Over")) {
-  <header class="rankings-header">
+  <header style="text-align: center;">
     <h1 class="player-list">Load Balancing</h1>
   </header>
   @if (status() === "Waiting for players") {
@@ -33,7 +33,7 @@
     } @else {
       <div class="rankings-container">
         <div class="all-rankings">
-          <span class="countdown-number">{{ countdown() }}</span>
+          <h3 class="countdown-number">{{ countdown() }}</h3>
           <div class="rankings-list">
             @for (player of players(); track player) {
               <div
@@ -49,7 +49,7 @@
                   <span class="player-name">{{ player.player.name }}</span>
                   <span class="player-guess">Score: {{ player.points }}</span>
                 </div>
-                <!-- <div class="player-points">{{ player.points }}</div> -->
+                <div class="player-points"></div>
               </div>
             }
           </div>
@@ -78,7 +78,7 @@
                 <span class="player-name">{{ player.player.name }}</span>
                 <span class="player-guess">Score: {{ player.points }}</span>
               </div>
-              <!-- <div class="player-points">{{ player.points }}</div> -->
+              <div class="player-points"></div>
             </div>
           }
         </div>
