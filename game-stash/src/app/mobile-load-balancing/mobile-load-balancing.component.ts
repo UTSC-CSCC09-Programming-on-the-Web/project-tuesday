@@ -1,5 +1,23 @@
-import { AfterViewInit, Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
-import Matter, { Engine, Runner, Render, World, Constraint, MouseConstraint, Bodies, Mouse, Events, Body} from 'matter-js'
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import Matter, {
+  Engine,
+  Runner,
+  Render,
+  World,
+  Constraint,
+  MouseConstraint,
+  Bodies,
+  Mouse,
+  Events,
+  Body,
+} from 'matter-js';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PlayerSocketService } from '../services/player.socket.service';
@@ -9,10 +27,9 @@ import { CommonModule } from '@angular/common';
   selector: 'app-mobile-load-balancing',
   imports: [CommonModule],
   templateUrl: './mobile-load-balancing.component.html',
-  styleUrl: './mobile-load-balancing.component.css'
+  styleUrl: './mobile-load-balancing.component.css',
 })
 export class MobileLoadBalancingComponent implements AfterViewInit {
-
   lobbyCode = signal('');
   selectedGame = signal('');
   playerName = signal('');
@@ -34,12 +51,12 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
   gyroscope: number[] = [0, 0, 0];
   permissionGranted: boolean = false;
-  gameOver: boolean  = false;
+  gameOver: boolean = false;
 
   rotation: number = 0;
   old: number = 0;
   //linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  colours: string[] = ["#667eea", "#6c6ae4", "#7260dd", "#7856d7", "#764ba2"]
+  colours: string[] = ['#667eea', '#6c6ae4', '#7260dd', '#7856d7', '#764ba2'];
 
   get score(): number {
     return this.points;
@@ -53,31 +70,36 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     document.querySelector('#permission')!.addEventListener('click', () => {
-    this.socketService.playerEmit("ping", "permission clicked for device motion");
+      this.socketService.playerEmit(
+        'ping',
+        'permission clicked for device motion',
+      );
 
-    // Check if iOS-style permission request is needed
-    if (
-      typeof DeviceMotionEvent !== 'undefined' &&
-      typeof (DeviceMotionEvent as any).requestPermission === 'function'
-    ) {
-      (DeviceMotionEvent as any).requestPermission().then((response: any) => {
-        this.socketService.playerEmit("ping", "permission granted!");
-        this.permissionGranted = response === 'granted';
-        if (this.permissionGranted) {
-          this.startMotionListener();
-        }
+      // Check if iOS-style permission request is needed
+      if (
+        typeof DeviceMotionEvent !== 'undefined' &&
+        typeof (DeviceMotionEvent as any).requestPermission === 'function'
+      ) {
+        (DeviceMotionEvent as any)
+          .requestPermission()
+          .then((response: any) => {
+            this.permissionGranted = response === 'granted';
+            if (this.permissionGranted) {
+              this.startMotionListener();
+            }
+            this.runGame();
+          })
+          .catch((error: any) => alert(error));
+      } else {
+        // seems like for Android some older browsers don't ask you for permission lol
+        this.permissionGranted = true;
+        this.startMotionListener();
         this.runGame();
-      }).catch((error: any) => alert(error));
-    } else {
-      // seems like for Android some older browsers don't ask you for permission lol
-      this.permissionGranted = true;
-      this.startMotionListener();
-      this.runGame();
-    }
-  });
+      }
+    });
 
     this.subscriptions.push(
-      this.route.queryParams.subscribe(params => {
+      this.route.queryParams.subscribe((params) => {
         const lobbyCode = params['lobbyCode'];
         const playerName = params['playerName'];
         const roundNumber = params['roundNumber'];
@@ -98,9 +120,9 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
           lobbyCode: this.lobbyCode(),
           playerName: this.playerName(),
           roundNumber: this.roundNumber(),
-          selectedGame: this.selectedGame()
+          selectedGame: this.selectedGame(),
         });
-      })
+      }),
     );
   }
 
@@ -114,21 +136,28 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
         height: this.height,
         wireframes: false,
         background: 'transparent',
-      }
+      },
     });
 
-    this.platform = Bodies.rectangle(this.width / 2, this.height - 20, this.width - 10, 20, {
+    this.platform = Bodies.rectangle(
+      this.width / 2,
+      this.height - 20,
+      this.width - 10,
+      20,
+      {
         isStatic: true,
-    });
+      },
+    );
 
     const mouse = Mouse.create(this.render.canvas);
     const mouseConstraint = MouseConstraint.create(this.engine, {
       mouse: mouse,
       constraint: {
         render: {
-          visible: false
-        }
-      }});
+          visible: false,
+        },
+      },
+    });
 
     this.render.mouse = mouse;
 
@@ -139,71 +168,82 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     Runner.run(runner, this.engine);
     Render.run(this.render);
 
-    console.log("Game started");
+    console.log('Game started');
 
-    this.socketService.playerEmit('gameResponse',
-      {
-        gameId: this.selectedGame(),
-        data: 0,
-      });
+    this.socketService.playerEmit('gameResponse', {
+      gameId: this.selectedGame(),
+      data: 0,
+    });
 
-    Events.on(this.engine, "afterUpdate", () => {
+    Events.on(this.engine, 'afterUpdate', () => {
       if (!this.gameOver) {
         if (this.permissionGranted) {
-          Body.rotate(this.platform!, (this.rotation - this.old) * Math.PI / 180);
+          Body.rotate(
+            this.platform!,
+            ((this.rotation - this.old) * Math.PI) / 180,
+          );
         }
-        this.bodies.forEach(body => {
-          if (body.position.y > this.height || body.position.x < 0 || body.position.x > this.width) {
-
+        this.bodies.forEach((body) => {
+          if (
+            body.position.y > this.height ||
+            body.position.x < 0 ||
+            body.position.x > this.width
+          ) {
             World.remove(this.engine.world, body);
-            this.bodies = this.bodies.filter(b => b !== body);
-            console.log("Body removed:", body, this.bodies.length);
+            this.bodies = this.bodies.filter((b) => b !== body);
+            console.log('Body removed:', body, this.bodies.length);
           } else {
-            Body.applyForce(body, body.position, {x: 0, y: body.mass * 0.0001});
+            Body.applyForce(body, body.position, {
+              x: 0,
+              y: body.mass * 0.0001,
+            });
           }
         });
         const points = this.bodies.length;
         if (points !== this.points) {
-          console.log("Points updated:", points);
+          console.log('Points updated:', points);
           this.points = points;
-          this.socketService.playerEmit("gameResponse", {
+          this.socketService.playerEmit('gameResponse', {
             gameId: this.selectedGame(),
-            data: this.points
+            data: this.points,
           });
         }
       }
     });
 
-    this.socketService.useEffect("spawnBox", (data) => {
+    this.socketService.useEffect('spawnBox', (data) => {
       console.log(data);
       const box = Bodies.circle(data.x, data.y, data.size / 2, {
         isStatic: true,
         render: {
           fillStyle: 'rgba(255, 255, 255, 0.1)',
           strokeStyle: 'rgba(255, 255, 255, 0.8)',
-          lineWidth: 2
+          lineWidth: 2,
         },
         collisionFilter: {
           category: 0x0002,
-          mask: 0x0000
-        }
+          mask: 0x0000,
+        },
       });
       World.add(this.engine.world, box);
       setTimeout(() => {
         World.remove(this.engine.world, box);
-        const newBox = Bodies.circle(data.x, data.y, data.size / 2, {render: {
-          fillStyle: this.colours[Math.round(Math.random() * this.colours.length)],
-          strokeStyle: 'rgba(255, 255, 255, 0.8)',
-          lineWidth: 2
-        }});
+        const newBox = Bodies.circle(data.x, data.y, data.size / 2, {
+          render: {
+            fillStyle:
+              this.colours[Math.round(Math.random() * this.colours.length)],
+            strokeStyle: 'rgba(255, 255, 255, 0.8)',
+            lineWidth: 2,
+          },
+        });
         this.bodies.push(newBox);
         World.add(this.engine.world, newBox);
       }, 1000);
     });
 
-    this.socketService.useEffect("gameEnded", (data) => {
+    this.socketService.useEffect('gameEnded', (data) => {
       this.gameOver = true;
-      console.log("Game ended:", data);
+      console.log('Game ended:', data);
       if (this.render) {
         Render.stop(this.render);
       }
@@ -211,16 +251,16 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
         Engine.clear(this.engine);
       }
 
-      this.socketService.removeEffect("spawnBox");
-      this.socketService.removeEffect("gameEnded");
+      this.socketService.removeEffect('spawnBox');
+      this.socketService.removeEffect('gameEnded');
       this.router.navigate(['/mobile-rankings'], {
         queryParams: {
           lobbyCode: this.lobbyCode(),
           playerName: this.playerName(),
           selectedGame: 'Load Balancing',
           roundNumber: 5,
-          guess: 0 // Not used in Load Balancing, but required for consistency
-        }
+          guess: 0, // Not used in Load Balancing, but required for consistency
+        },
       });
     });
 
@@ -238,23 +278,22 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
   }
 
   startMotionListener() {
-    window.addEventListener('deviceorientation', event => {
-      this.socketService.playerEmit("ping", "Hello from the frontend!");
+    window.addEventListener('deviceorientation', (event) => {
       this.old = this.rotation;
       this.rotation = Math.floor(event.gamma || 0);
     });
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
     if (this.render) {
       Render.stop(this.render);
     }
     if (this.engine) {
       Engine.clear(this.engine);
     }
-    this.socketService.removeEffect("spawnBox");
-    this.socketService.removeEffect("gameEnded");
-    console.log("MobileLoadBalancingComponent destroyed");
+    this.socketService.removeEffect('spawnBox');
+    this.socketService.removeEffect('gameEnded');
+    console.log('MobileLoadBalancingComponent destroyed');
   }
 }

@@ -9,13 +9,11 @@ interface GlobalRank {
   points: number;
 }
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GlobalRankingService {
-
-  constructor() { }
+  constructor() {}
 
   private rankings: GlobalRanking = {};
 

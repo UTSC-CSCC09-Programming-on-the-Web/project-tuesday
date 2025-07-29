@@ -26,7 +26,6 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private adminSocketService: AdminSocketService,
     private playerSocketService: PlayerSocketService,
   ) {}
 
@@ -65,13 +64,10 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
         this.setupSocketSubscriptions();
 
         // Emit game response when component initializes
-        this.playerSocketService.playerEmit(
-          'gameResponse',
-          {
-            gameId: this.selectedGame(),
-            data: this.guess(),
-          }
-        );
+        this.playerSocketService.playerEmit('gameResponse', {
+          gameId: this.selectedGame(),
+          data: this.guess(),
+        });
       }),
     );
   }

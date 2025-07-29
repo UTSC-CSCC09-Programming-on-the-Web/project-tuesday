@@ -1,10 +1,8 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  AdminSocketService,
-  GameState,
-} from '../services/admin.socket.service';
+
+import { AdminSocketService } from '../services/admin.socket.service';
 import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription, map } from 'rxjs';
 
@@ -32,6 +30,7 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Get lobby details from query parameters
+    
     this.subscriptions.push(
       this.route.queryParams.subscribe((params) => {
         const lobbyCode = params['lobbyCode'];
@@ -72,8 +71,8 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
           lobbyCode: this.lobbyCode(),
           playerName: this.playerName(),
           selectedGame: gameId,
-          roundNumber: 1
-        }
+          roundNumber: 1,
+        },
       });
     else if (gameId === 'Magic Number')
       this.router.navigate(['/mobile-magic-number'], {
@@ -84,19 +83,17 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
           roundNumber: 1,
         },
       });
-      else if (gameId === 'Throw and Catch') {
-        console.log("attempt to navigate to throw and catch")
-        this.router.navigate(['/mobile-throw-and-catch'], {
+    else if (gameId === 'Throw and Catch') {
+      console.log('attempt to navigate to throw and catch');
+      this.router.navigate(['/mobile-throw-and-catch'], {
         queryParams: {
           lobbyCode: this.lobbyCode(),
           playerName: this.playerName(),
           selectedGame: gameId,
           roundNumber: 1,
         },
-      
-        
-        });
-      }
+      });
+    }
   }
 
   ngOnDestroy(): void {

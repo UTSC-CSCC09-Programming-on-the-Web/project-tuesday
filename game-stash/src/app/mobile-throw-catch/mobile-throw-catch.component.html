@@ -1,11 +1,12 @@
-
 <div class="lobby-header">
-    <div class="lobby-code-display">
-      <span class="lobby-code"></span>
-      <h2 *ngIf="this.isMyTurn">throw dat shit</h2>
-      <button id="permission" *ngIf="this.permissionButtonVisible">permission to play</button>
-    </div>
+  <div class="lobby-code-display">
+    <span class="lobby-code"></span>
+    <h2 *ngIf="this.isMyTurn">Throw the Ball!</h2>
+    <button class="leave-btn" id="permission" *ngIf="this.permissionButtonVisible">
+      Permission to Play
+    </button>
   </div>
+</div>
 <div class="content">
   <div #gameWrapper class="game-wrapper"></div>
 </div>

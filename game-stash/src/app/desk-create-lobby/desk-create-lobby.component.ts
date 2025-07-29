@@ -25,31 +25,30 @@ import { Subscription } from 'rxjs';
   styleUrl: './desk-create-lobby.component.css',
 })
 export class DeskCreateLobbyComponent implements OnInit, OnDestroy {
-
   lobbyName: string = '';
   lobbyCode: string = '';
   loading: boolean = false;
   user: User | null = null;
-  
+
   private userSubscription?: Subscription;
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
     // NO-AUTH BRANCH: Skip authentication checks
     // Subscribe to current user
-    this.userSubscription = this.authService.currentUser$.subscribe(user => {
+    this.userSubscription = this.authService.currentUser$.subscribe((user) => {
       this.user = user;
-      
+
       // COMMENTED OUT FOR NO-AUTH BRANCH: If user is not authenticated, redirect to login
       // if (!user) {
       //   this.router.navigate(['/desk-login']);
       //   return;
       // }
-      
+
       // COMMENTED OUT FOR NO-AUTH BRANCH: If user doesn't have active subscription, redirect to account page
       // if (!this.authService.hasActiveSubscription()) {
       //   this.router.navigate(['/user-account']);

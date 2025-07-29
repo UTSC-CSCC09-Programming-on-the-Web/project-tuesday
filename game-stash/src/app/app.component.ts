@@ -12,6 +12,5 @@ export class AppComponent {
   title = 'game-stash';
   message = 'Loading...';
 
-  constructor() {
-  }
+  constructor() {}
 }

@@ -1,10 +1,8 @@
-@if (!(status() === 'Game Over')) {
+@if (!(status() === "Game Over")) {
   <header class="rankings-header">
-    <h1 class="player-list">
-        Load Balancing
-    </h1>
+    <h1 class="player-list">Load Balancing</h1>
   </header>
-  @if (status() === 'Waiting for players') {
+  @if (status() === "Waiting for players") {
     <div class="player-list">
       <h2>Waiting for players to give permission...</h2>
       <ul class="game-list">
@@ -14,13 +12,16 @@
         >
           {{ player.name }}
         </li>
-        <li class="player-item player-response" *ngFor="let player of responded">
+        <li
+          class="player-item player-response"
+          *ngFor="let player of responded"
+        >
           {{ player.name }}
         </li>
       </ul>
     </div>
   } @else {
-    @if (status() === 'Game Countdown') {
+    @if (status() === "Game Countdown") {
       <header class="rankings-header">
         <div class="countdown-display player-list">
           <h2 class="countdown-text">Game Starts in...</h2>
@@ -33,35 +34,47 @@
       <div class="rankings-container">
         <div class="all-rankings">
           <span class="countdown-number">{{ countdown() }}</span>
-          <div class="rankings-list">        @for (player of players(); track player) {
-            <div class="ranking-item" [class.winner]="players().indexOf(player) === 0">
-              <div class="rank-position">
-                <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
-              </div><div class="player-details">
-                <span class="player-name">{{ player.player.name }}</span>
-                <span class="player-guess">Score: {{ player.points }}</span>
+          <div class="rankings-list">
+            @for (player of players(); track player) {
+              <div
+                class="ranking-item"
+                [class.winner]="players().indexOf(player) === 0"
+              >
+                <div class="rank-position">
+                  <span class="rank-number">{{
+                    players().indexOf(player) + 1
+                  }}</span>
+                </div>
+                <div class="player-details">
+                  <span class="player-name">{{ player.player.name }}</span>
+                  <span class="player-guess">Score: {{ player.points }}</span>
+                </div>
+                <!-- <div class="player-points">{{ player.points }}</div> -->
               </div>
-              <!-- <div class="player-points">{{ player.points }}</div> -->
-            </div>
-          }
+            }
+          </div>
         </div>
       </div>
-    </div>
     }
   }
 } @else {
   <div class="rankings-container">
     <header class="rankings-header">
-      <h1>
-          Final Results
-      </h1>
+      <h1>Final Results</h1>
       <div class="all-rankings">
         <h3>Load Balancing</h3>
-        <div class="rankings-list">        @for (player of players(); track player) {
-            <div class="ranking-item" [class.winner]="players().indexOf(player) === 0">
+        <div class="rankings-list">
+          @for (player of players(); track player) {
+            <div
+              class="ranking-item"
+              [class.winner]="players().indexOf(player) === 0"
+            >
               <div class="rank-position">
-                <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
-              </div><div class="player-details">
+                <span class="rank-number">{{
+                  players().indexOf(player) + 1
+                }}</span>
+              </div>
+              <div class="player-details">
                 <span class="player-name">{{ player.player.name }}</span>
                 <span class="player-guess">Score: {{ player.points }}</span>
               </div>
@@ -72,11 +85,11 @@
       </div>
     </header>
     <footer class="rankings-footer">
-        <div class="final-actions">
-          <button (click)="gameOverEmit()" class="stay-btn">
-            Back to Game Select
-          </button>
-        </div>
+      <div class="final-actions">
+        <button (click)="gameOverEmit()" class="stay-btn">
+          Back to Game Select
+        </button>
+      </div>
     </footer>
   </div>
 }

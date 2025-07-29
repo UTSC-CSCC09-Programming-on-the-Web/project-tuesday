@@ -6,9 +6,9 @@
         {{ getBackButtonText() }}
       </button>
     </div>
-    
+
     <h1>My Account</h1>
-    
+
     <!-- Error/Success Messages -->
     <div *ngIf="errorMessage" class="error-message">
       {{ errorMessage }}
@@ -31,7 +31,7 @@
         </div>
         <div class="info-item">
           <label>Member Since:</label>
-          <span>{{ user.createdAt | date:'mediumDate' }}</span>
+          <span>{{ user.createdAt | date: "mediumDate" }}</span>
         </div>
         <div class="info-item">
           <label>Subscription Status:</label>
@@ -45,12 +45,12 @@
     <!-- Subscription Management -->
     <div class="subscription-section">
       <h2>Subscription Management</h2>
-      
+
       <!-- Update Payment Method Section - Always visible -->
       <div class="payment-form">
         <h3>Update Payment Method</h3>
         <p>Enter your payment information below.</p>
-        
+
         <div class="form-group">
           <label>Payment Information:</label>
           <div id="card-element-update" class="stripe-card-element">
@@ -59,50 +59,71 @@
         </div>
 
         <div class="action-buttons">
-          <button 
-            type="button" 
-            (click)="updatePaymentMethod()" 
-            [disabled]="isProcessingPayment" 
-            class="leave-btn content">
-            {{ isProcessingPayment ? 'Processing...' : 'Update' }}
+          <button
+            type="button"
+            (click)="updatePaymentMethod()"
+            [disabled]="isProcessingPayment"
+            class="leave-btn content"
+          >
+            {{ isProcessingPayment ? "Processing..." : "Update" }}
           </button>
-          <button 
-            type="button" 
-            (click)="cancelSubscription()" 
-            [disabled]="isLoading" 
-            class="leave-btn content logout">
+          <button
+            type="button"
+            (click)="cancelSubscription()"
+            [disabled]="isLoading"
+            class="leave-btn content logout"
+          >
             Cancel Subscription
           </button>
         </div>
 
         <p class="payment-security">
-          <small>🔒 Your payment information is secured by Stripe. We do not store your card details.</small>
+          <small
+            >🔒 Your payment information is secured by Stripe. We do not store
+            your card details.</small
+          >
         </p>
       </div>
 
       <!-- Subscription Status Display -->
       <div class="subscription-status">
-        <div *ngIf="user?.subscriptionStatus === 'active'" class="subscription-active">
+        <div
+          *ngIf="user?.subscriptionStatus === 'active'"
+          class="subscription-active"
+        >
           <p class="subscription-text">
-            ✅ Your subscription is active! You have full access to Game Stash features.
+            ✅ Your subscription is active! You have full access to Game Stash
+            features.
           </p>
         </div>
 
-        <div *ngIf="user?.subscriptionStatus === 'past_due'" class="subscription-warning">
+        <div
+          *ngIf="user?.subscriptionStatus === 'past_due'"
+          class="subscription-warning"
+        >
           <p class="subscription-text">
-            ⚠️ Your payment is past due. Please update your payment method above to continue using Game Stash.
+            ⚠️ Your payment is past due. Please update your payment method above
+            to continue using Game Stash.
           </p>
         </div>
 
-        <div *ngIf="user?.subscriptionStatus === 'canceled'" class="subscription-inactive">
+        <div
+          *ngIf="user?.subscriptionStatus === 'canceled'"
+          class="subscription-inactive"
+        >
           <p class="subscription-text">
-            ❌ Your subscription is canceled. Update your payment method above to resume your subscription.
+            ❌ Your subscription is canceled. Update your payment method above
+            to resume your subscription.
           </p>
         </div>
 
-        <div *ngIf="user?.subscriptionStatus === 'inactive'" class="subscription-inactive">
+        <div
+          *ngIf="user?.subscriptionStatus === 'inactive'"
+          class="subscription-inactive"
+        >
           <p class="subscription-text">
-            ❌ Your subscription is inactive. Update your payment method above to activate your subscription.
+            ❌ Your subscription is inactive. Update your payment method above
+            to activate your subscription.
           </p>
         </div>
       </div>

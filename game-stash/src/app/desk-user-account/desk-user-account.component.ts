@@ -11,59 +11,67 @@ declare var Stripe: any;
   standalone: true,
   imports: [CommonModule],
   templateUrl: './desk-user-account.component.html',
-  styleUrls: ['./desk-user-account.component.css']
+  styleUrls: ['./desk-user-account.component.css'],
 })
 export class DeskUserAccountComponent implements OnInit, OnDestroy {
   user: User | null = null;
   isLoading = false;
   errorMessage = '';
   successMessage = '';
-  
+
   // Track navigation context
   private cameFromMenu = false;
-  
+
   // Stripe related
   stripe: any;
   elements: any;
   cardElement: any;
   isProcessingPayment = false;
-  
+
   private userSubscription?: Subscription;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     // Initialize Stripe with your actual test publishable key
-    this.stripe = Stripe('pk_test_51RgrGg2Xvu7GA77tKbkzt2SX1wI8dXX9zR9zG0fRj4fcTab2AA5RNf7liukYzBfXNGbupkqVgTgxdAOI7LGG36u500aioW0kL5'); // Replace with your real test key
+    this.stripe = Stripe(
+      'pk_test_51RgrGg2Xvu7GA77tKbkzt2SX1wI8dXX9zR9zG0fRj4fcTab2AA5RNf7liukYzBfXNGbupkqVgTgxdAOI7LGG36u500aioW0kL5',
+    ); // Replace with your real test key
     this.elements = this.stripe.elements();
-    
+
     // Check if user came here from menu (lobby)
     this.cameFromMenu = this.route.snapshot.queryParams['from'] === 'menu';
     console.log('ngOnInit - cameFromMenu:', this.cameFromMenu);
     console.log('ngOnInit - query params:', this.route.snapshot.queryParams);
-    
+
     // Initialize Stripe elements immediately
     this.initializeStripeElements();
-    
+
     // Subscribe to current user
-    this.userSubscription = this.authService.currentUser$.subscribe(user => {
+    this.userSubscription = this.authService.currentUser$.subscribe((user) => {
       this.user = user;
       console.log('User subscription update:', user);
-      
+
       // If user is not authenticated, redirect to login
       if (!user) {
         this.router.navigate(['/desk-login']);
         return;
       }
-      
+
       // If user has active subscription and didn't come from menu, redirect to lobby
       // But don't redirect if we're currently processing a payment (to avoid conflicts)
-      if (this.authService.hasActiveSubscription() && !this.cameFromMenu && !this.isProcessingPayment) {
-        console.log('Auto-redirecting to lobby - subscription is active and user did not come from menu');
+      if (
+        this.authService.hasActiveSubscription() &&
+        !this.cameFromMenu &&
+        !this.isProcessingPayment
+      ) {
+        console.log(
+          'Auto-redirecting to lobby - subscription is active and user did not come from menu',
+        );
         this.router.navigate(['/desk-create-lobby']);
         return;
       }
@@ -74,7 +82,7 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
     }
-    
+
     if (this.cardElement) {
       this.cardElement.destroy();
     }
@@ -82,7 +90,7 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
 
   getSubscriptionStatusDisplay(): string {
     if (!this.user) return 'Unknown';
-    
+
     switch (this.user.subscriptionStatus) {
       case 'active':
         return 'Active';
@@ -99,7 +107,7 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
 
   getSubscriptionStatusClass(): string {
     if (!this.user) return '';
-    
+
     switch (this.user.subscriptionStatus) {
       case 'active':
         return 'status-active';
@@ -131,7 +139,9 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
     });
 
     setTimeout(() => {
-      const cardElementContainer = document.getElementById('card-element-update');
+      const cardElementContainer = document.getElementById(
+        'card-element-update',
+      );
       if (cardElementContainer) {
         this.cardElement.mount('#card-element-update');
       }
@@ -149,10 +159,11 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
 
     try {
       // Create payment method
-      const { error: paymentMethodError, paymentMethod } = await this.stripe.createPaymentMethod({
-        type: 'card',
-        card: this.cardElement,
-      });
+      const { error: paymentMethodError, paymentMethod } =
+        await this.stripe.createPaymentMethod({
+          type: 'card',
+          card: this.cardElement,
+        });
 
       if (paymentMethodError) {
         this.errorMessage = paymentMethodError.message;
@@ -164,19 +175,22 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
       this.authService.updatePaymentMethod(paymentMethod.id).subscribe({
         next: (response) => {
           if (response.success) {
-            this.successMessage = 'Payment method updated successfully! Checking subscription status...';
-            
+            this.successMessage =
+              'Payment method updated successfully! Checking subscription status...';
+
             // Refresh user data and check if we should redirect
             this.refreshUserDataAndRedirect();
           } else {
-            this.errorMessage = response.message || 'Failed to update payment method';
+            this.errorMessage =
+              response.message || 'Failed to update payment method';
           }
           this.isProcessingPayment = false;
         },
         error: (error) => {
-          this.errorMessage = error.error?.message || 'Failed to update payment method';
+          this.errorMessage =
+            error.error?.message || 'Failed to update payment method';
           this.isProcessingPayment = false;
-        }
+        },
       });
     } catch (error) {
       this.errorMessage = 'An unexpected error occurred';
@@ -185,7 +199,11 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
   }
 
   cancelSubscription(): void {
-    if (!confirm('Are you sure you want to cancel your subscription? You will lose access to Game Stash features.')) {
+    if (
+      !confirm(
+        'Are you sure you want to cancel your subscription? You will lose access to Game Stash features.',
+      )
+    ) {
       return;
     }
 
@@ -198,14 +216,16 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
           this.successMessage = 'Subscription canceled successfully.';
           this.refreshUserData();
         } else {
-          this.errorMessage = response.message || 'Failed to cancel subscription';
+          this.errorMessage =
+            response.message || 'Failed to cancel subscription';
         }
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.error?.message || 'Failed to cancel subscription';
+        this.errorMessage =
+          error.error?.message || 'Failed to cancel subscription';
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -213,7 +233,10 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
     this.authService.verifyToken().subscribe({
       next: (response) => {
         if (response.success && response.user) {
-          this.authService.setAuth(response.user, localStorage.getItem('authToken') || '');
+          this.authService.setAuth(
+            response.user,
+            localStorage.getItem('authToken') || '',
+          );
           // Update local user data immediately to reflect changes
           this.user = response.user;
         }
@@ -221,7 +244,7 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
       error: () => {
         // Token might be invalid, redirect to login
         this.authService.logout();
-      }
+      },
     });
   }
 
@@ -229,14 +252,18 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
     this.authService.verifyToken().subscribe({
       next: (response) => {
         if (response.success && response.user) {
-          this.authService.setAuth(response.user, localStorage.getItem('authToken') || '');
-          
+          this.authService.setAuth(
+            response.user,
+            localStorage.getItem('authToken') || '',
+          );
+
           // Update local user data immediately to reflect changes
           this.user = response.user;
-          
+
           // If subscription is now active, always redirect to lobby
           if (response.user.subscriptionStatus === 'active') {
-            this.successMessage = 'Payment successful! Subscription is now active. Redirecting to lobby...';
+            this.successMessage =
+              'Payment successful! Subscription is now active. Redirecting to lobby...';
             this.router.navigate(['/desk-create-lobby']);
           } else {
             this.successMessage = 'Payment method updated successfully!';
@@ -246,16 +273,19 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
       error: () => {
         // Token might be invalid, redirect to login
         this.authService.logout();
-      }
+      },
     });
   }
 
   goBack(): void {
     console.log('goBack() called');
     console.log('cameFromMenu:', this.cameFromMenu);
-    console.log('hasActiveSubscription:', this.authService.hasActiveSubscription());
+    console.log(
+      'hasActiveSubscription:',
+      this.authService.hasActiveSubscription(),
+    );
     console.log('user:', this.user);
-    
+
     // If user came from menu (lobby) and has active subscription, go back to lobby
     // Otherwise logout and go to login
     if (this.cameFromMenu && this.authService.hasActiveSubscription()) {
@@ -268,8 +298,9 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
   }
 
   getBackButtonText(): string {
-    const shouldShowLobby = this.cameFromMenu && this.authService.hasActiveSubscription();
-    
+    const shouldShowLobby =
+      this.cameFromMenu && this.authService.hasActiveSubscription();
+
     // Return appropriate text based on navigation context and subscription status
     if (shouldShowLobby) {
       return 'Back to Lobby';

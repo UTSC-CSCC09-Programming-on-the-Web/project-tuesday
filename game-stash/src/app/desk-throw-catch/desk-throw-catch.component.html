@@ -1,9 +1,40 @@
-<div class="lobby-header">
-    <div class="lobby-code-display">
-    </div>
-    <button #spawnButton>spawn a circle</button>
-</div>
-
-<div class="content">
-  <div #gameWrapper class="game-wrapper"></div>
-</div>
+@if (status() !== 'Game Over') {
+  <!-- Game view -->
+  <div #gameWrapper></div>
+} @else {
+  <!-- Rankings view -->
+  <div class="rankings-container">
+    <header class="rankings-header">
+      <h1>Final Results</h1>
+      <div class="all-rankings">
+        <h3>Throw and Catch</h3>
+        <div class="rankings-list">
+          @for (player of players(); track player) {
+            <div
+              class="ranking-item"
+              [class.winner]="players().indexOf(player) === 0"
+            >
+              <div class="rank-position">
+                <span class="rank-number">{{
+                  players().indexOf(player) + 1
+                }}</span>
+              </div>
+              <div class="player-details">
+                <span class="player-name">{{ player.player.name }}</span>
+                <span class="player-guess">Score: {{ player.points }}</span>
+              </div>
+              <!-- <div class="player-points">{{ player.points }}</div> -->
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+    <footer class="rankings-footer">
+      <div class="final-actions">
+        <button (click)="gameOverEmit()" class="stay-btn">
+          Back to Game Select
+        </button>
+      </div>
+    </footer>
+  </div>
+}

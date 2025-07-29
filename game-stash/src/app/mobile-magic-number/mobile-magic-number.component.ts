@@ -50,7 +50,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private adminSocketService: AdminSocketService,
     private playerSocketService: PlayerSocketService,
   ) {}
 
@@ -82,7 +81,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
         this.playerName.set(playerName);
         this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
         this.selectedGame.set(selectedGame);
-
       }),
     );
   }
@@ -112,6 +110,18 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
         roundNumber: this.roundNumber(),
         selectedGame: this.selectedGame(),
         guess: guessValue,
+      },
+    });
+  }
+
+  private navigateToRankings(): void {
+    this.router.navigate(['/mobile-rankings'], {
+      queryParams: {
+        lobbyCode: this.lobbyCode(),
+        playerName: this.playerName(),
+        roundNumber: this.roundNumber(),
+        selectedGame: this.selectedGame(),
+        guess: this.guess(),
       },
     });
   }

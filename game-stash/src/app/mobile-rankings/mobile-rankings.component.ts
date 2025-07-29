@@ -20,15 +20,15 @@ import { map } from 'rxjs/operators';
 export class MobileRankingsComponent implements OnInit, OnDestroy {
   targetNumber = signal(0);
   ranking = signal<PlayerRanking>({
-      player: {
-        name: "",
-        playerId: "",
-      },
-      points: 0,
-      rank: -1,
-      isRoundWinner: false,
-      data: -1, //variable field used differently by different games
-      });
+    player: {
+      name: '',
+      playerId: '',
+    },
+    points: 0,
+    rank: -1,
+    isRoundWinner: false,
+    data: -1, //variable field used differently by different games
+  });
   playerRank = signal(0);
   isGameOver = signal(false);
   countdown = signal(10);
@@ -57,14 +57,14 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     this.targetNumber.set(0);
     this.ranking.set({
       player: {
-        name: "",
-        playerId: "",
+        name: '',
+        playerId: '',
       },
       points: 0,
       rank: -1,
       isRoundWinner: false,
       data: -1, //variable field used differently by different games
-      });
+    });
     this.playerRank.set(0);
     this.isGameOver.set(false);
     this.countdown.set(10);
@@ -100,7 +100,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
         if (this.isGameOver()) {
           // Emit gameEnded to backend as soon as final rankings screen is shown
-          this.adminSocketService.lobbyEmit("gameEnded", {});
+          this.adminSocketService.lobbyEmit('gameEnded', {});
         }
 
         if (!this.isGameOver()) {
@@ -112,10 +112,10 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     // Subscribe to rankings from AdminSocketService
     this.subscriptions.push(
       this.playerSocketService.playerState$
-      .pipe(map((playerState) => playerState.ranking))
-      .subscribe((ranking) => {
-        this.ranking.set(ranking)
-        })
+        .pipe(map((playerState) => playerState.ranking))
+        .subscribe((ranking) => {
+          this.ranking.set(ranking);
+        }),
     );
 
     // Subscribe to targetNumber from from PlayerSocketService
@@ -129,18 +129,18 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.playerSocketService.playerState$
-      .pipe(map((playerState) => playerState.selectedGame))
-      .subscribe((selectedGame) => {
-        this.selectedGame.set(selectedGame);
-        if (selectedGame === ''){
-          this.router.navigate(['/mobile-lobby'], {
-            queryParams: {
-              lobbyCode: this.lobbyCode(),
-              playerName: this.playerName(),
-            },
-          });
-        }
-      }),
+        .pipe(map((playerState) => playerState.selectedGame))
+        .subscribe((selectedGame) => {
+          this.selectedGame.set(selectedGame);
+          if (selectedGame === '') {
+            this.router.navigate(['/mobile-lobby'], {
+              queryParams: {
+                lobbyCode: this.lobbyCode(),
+                playerName: this.playerName(),
+              },
+            });
+          }
+        }),
     );
   }
 
@@ -150,9 +150,8 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   }
 
   private startCountdown(): void {
-
     this.playerSocketService.useEffect('countdownTick', (tick) => {
-      console.log("tick")
+      console.log('tick');
       if (tick > 0) {
         this.countdown.set(tick);
       } else {
@@ -174,8 +173,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   }
 
   private finishRound(): void {
-
-     const nextRound = this.roundNumber() + 1;
+    const nextRound = this.roundNumber() + 1;
     this.router.navigate(['/mobile-magic-number'], {
       queryParams: {
         lobbyCode: this.lobbyCode(),
@@ -214,11 +212,11 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     const socketId = this.adminSocketService.getSocketId();
     if (!socketId) return 0;
 
-    return this.ranking().points
+    return this.ranking().points;
   }
 
   getPlayerRank(): number {
-    return this.ranking().rank
+    return this.ranking().rank;
   }
 
   getRankSuffix(rank: number): string {

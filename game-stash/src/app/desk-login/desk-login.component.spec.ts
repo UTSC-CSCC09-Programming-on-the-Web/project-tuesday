@@ -8,9 +8,8 @@ describe('DeskLoginComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeskLoginComponent]
-    })
-    .compileComponents();
+      imports: [DeskLoginComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DeskLoginComponent);
     component = fixture.componentInstance;

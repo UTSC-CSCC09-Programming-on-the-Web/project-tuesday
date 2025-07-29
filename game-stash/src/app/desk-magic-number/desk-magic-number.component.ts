@@ -44,12 +44,16 @@ export class DeskMagicNumberComponent implements OnInit {
       .pipe(map((gameState) => gameState.playerRankings))
       .subscribe((players) => {
         this.rankings.set(players);
-        this.players = players.map(player => player.player);
-        this.responded = players.filter(players => players.data !== undefined).map(player => player.player);
+        this.players = players.map((player) => player.player);
+        this.responded = players
+          .filter((players) => players.data !== undefined)
+          .map((player) => player.player);
         this.unresponded = this.players.filter(
-          (player) => !this.responded.find(res => res.playerId === player.playerId),
+          (player) =>
+            !this.responded.find((res) => res.playerId === player.playerId),
         );
-        if (this.unresponded.length === 0 && !this.isRoundOver()) this.roundEnd();
+        if (this.unresponded.length === 0 && !this.isRoundOver())
+          this.roundEnd();
       });
 
     this.adminSocketService.gameState$
@@ -73,10 +77,9 @@ export class DeskMagicNumberComponent implements OnInit {
         this.finalRound.set(finalRound || 3);
       });
 
-
     // Start the game
     this.adminSocketService.lobbyEmit('startGame', {
-      gameId: 'Magic Number'
+      gameId: 'Magic Number',
     });
   }
 
@@ -113,7 +116,7 @@ export class DeskMagicNumberComponent implements OnInit {
 
   private startCountdown(): void {
     this.countdown.set(10);
-    console.log("starting countdown", this.countdownInterval);
+    console.log('starting countdown', this.countdownInterval);
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
       if (current > 0) {
@@ -123,7 +126,9 @@ export class DeskMagicNumberComponent implements OnInit {
         this.stopCountdown();
         this.moveToNextRound();
       }
-      this.adminSocketService.lobbyEmit('countdownTick', { countdown: this.countdown() });
+      this.adminSocketService.lobbyEmit('countdownTick', {
+        countdown: this.countdown(),
+      });
     }, 1000);
   }
 }

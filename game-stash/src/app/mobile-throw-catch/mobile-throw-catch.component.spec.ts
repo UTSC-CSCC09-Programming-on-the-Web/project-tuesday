@@ -8,9 +8,8 @@ describe('MobileThrowCatchComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MobileThrowCatchComponent]
-    })
-    .compileComponents();
+      imports: [MobileThrowCatchComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(MobileThrowCatchComponent);
     component = fixture.componentInstance;

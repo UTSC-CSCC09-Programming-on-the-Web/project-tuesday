@@ -8,9 +8,8 @@ describe('DeskThrowCatchComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeskThrowCatchComponent]
-    })
-    .compileComponents();
+      imports: [DeskThrowCatchComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DeskThrowCatchComponent);
     component = fixture.componentInstance;

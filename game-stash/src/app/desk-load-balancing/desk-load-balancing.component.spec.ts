@@ -8,9 +8,8 @@ describe('DeskLoadBalancingComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeskLoadBalancingComponent]
-    })
-    .compileComponents();
+      imports: [DeskLoadBalancingComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DeskLoadBalancingComponent);
     component = fixture.componentInstance;

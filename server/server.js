@@ -3,9 +3,9 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import { loadBalancing } from "./load_balancing.js";
-import dotenv from 'dotenv';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import dotenv from "dotenv";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 // NO-AUTH BRANCH: Comment out session and passport imports
 // import session from 'express-session';
 // import passport from 'passport';
@@ -23,38 +23,40 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:4200",
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
 const PORT = process.env.PORT || 3000;
 
 // Security middleware
-app.use(helmet({
-  contentSecurityPolicy: false, // Disable for Stripe
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // Disable for Stripe
+  }),
+);
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
 });
-app.use('/api/', limiter);
+app.use("/api/", limiter);
 
 // CORS configuration
 const corsOptions = {
   origin: process.env.FRONTEND_URL || "http://localhost:4200",
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 app.use(cors(corsOptions));
 
 // Body parsing middleware
 // NO-AUTH BRANCH: Comment out Stripe webhook handling
 // app.use('/api/stripe/webhook', express.raw({ type: 'application/json' })); // Raw for Stripe webhooks
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // NO-AUTH BRANCH: Comment out session configuration
 // Session configuration
@@ -79,11 +81,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // app.use('/api/stripe', stripeRoutes);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+app.get("/health", (req, res) => {
+  res.json({
+    status: "OK",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || "development",
   });
 });
 
@@ -100,7 +102,7 @@ app.get("/", (req, res) => {
 // });
 
 // Socket.IO connection ---------------------------------------------------
-const lobbies = {}; 
+const lobbies = {};
 // Following dictionary structure
 // lobby-code
 //     |
@@ -131,7 +133,8 @@ io.on("connection", (socket) => {
   // Catch a game response from a player
   socket.on("gameResponse", (arg) => {
     console.log(
-      `Received gameResponse from ${arg.playerId} in lobby ${arg.lobbyCode}`, arg
+      `Received gameResponse from ${arg.playerId} in lobby ${arg.lobbyCode}`,
+      arg,
     );
 
     // Ensures admin is always ready, even if the admin's id somehow changes
@@ -145,7 +148,7 @@ io.on("connection", (socket) => {
       playerId: arg.playerId,
       data: arg.data.data,
     });
-    console.log("game response")
+    console.log("game response");
 
     // Check if all players have responded (admin is always true, so only real players need to respond)
     const allResponded = Object.values(lobbies[arg.lobbyCode].players).every(
@@ -156,15 +159,14 @@ io.on("connection", (socket) => {
 
     // All players have responded. Calculate the winner and emit
     if (allResponded) {
-      
       if (arg.data.gameId === "Magic Number") {
         // Calculate GameResults object for admin
-        const targetNumber= Math.floor(Math.random() * 100) + 1; // Generate 1-100
+        const targetNumber = Math.floor(Math.random() * 100) + 1; // Generate 1-100
 
         // Calculate the difference between each player's response and the answer number
         let lowestDifference = 100;
         const responses = lobbies[arg.lobbyCode].responses;
-        
+
         const playerDifferences = {};
         for (const [player, response] of Object.entries(responses)) {
           let difference = Math.abs(response - targetNumber);
@@ -175,22 +177,22 @@ io.on("connection", (socket) => {
           }
         }
 
-        // Calculate the rankings      
+        // Calculate the rankings
         const rankings = Object.entries(playerDifferences)
-        .sort(([, a], [, b]) => a - b)  // Sort by value (ascending)
-        .map(([key, value]) => key);
+          .sort(([, a], [, b]) => a - b) // Sort by value (ascending)
+          .map(([key, value]) => key);
 
         // Calculate the winners
         const winners = Object.entries(playerDifferences)
-        .filter(([key, value]) => value === lowestDifference)
-        .map(([key, value]) => key);
+          .filter(([key, value]) => value === lowestDifference)
+          .map(([key, value]) => key);
 
         // Update score
-        for (let i=0; i<winners.length; i++) {
+        for (let i = 0; i < winners.length; i++) {
           if (lobbies[arg.lobbyCode].score[winners[i]]) {
-            lobbies[arg.lobbyCode].score[winners[i]] += 1
+            lobbies[arg.lobbyCode].score[winners[i]] += 1;
           } else {
-            lobbies[arg.lobbyCode].score[winners[i]] = 1
+            lobbies[arg.lobbyCode].score[winners[i]] = 1;
           }
         }
 
@@ -199,15 +201,17 @@ io.on("connection", (socket) => {
           responses: responses,
           rankings: rankings,
           gameId: "Magic Number",
-          targetNumber: targetNumber
-        }
+          targetNumber: targetNumber,
+        };
 
         console.log(`Game results for lobby ${arg.lobbyCode}:`, gameResult);
-        io.to(adminId).emit("gameResults", gameResult)
+        io.to(adminId).emit("gameResults", gameResult);
 
         // Calculate PlayerRanking
-        
-        for (const [key, value] of Object.entries(lobbies[arg.lobbyCode].players)) {
+
+        for (const [key, value] of Object.entries(
+          lobbies[arg.lobbyCode].players,
+        )) {
           let playerId = key;
           if (playerId === adminId) continue; // Skip admin
           const playerRanking = {
@@ -219,10 +223,15 @@ io.on("connection", (socket) => {
             rank: rankings.indexOf(playerId) + 1,
             isRoundWinner: winners.includes(playerId),
             response: lobbies[arg.lobbyCode].responses[playerId],
-            data: responses[playerId]
-          }
-          console.log(`Player ${playerId} has score ${lobbies[arg.lobbyCode].score[playerId]}`);
-          io.to(playerId).emit("gameResults", { ranking: playerRanking, data: targetNumber });
+            data: responses[playerId],
+          };
+          console.log(
+            `Player ${playerId} has score ${lobbies[arg.lobbyCode].score[playerId]}`,
+          );
+          io.to(playerId).emit("gameResults", {
+            ranking: playerRanking,
+            data: targetNumber,
+          });
         }
       }
 
@@ -318,41 +327,44 @@ io.on("connection", (socket) => {
     io.emit("userLeftLobby", `${socket.id} has left a lobby`);
   });
 
-  socket.on('startGame', (arg) => {
+  socket.on("startGame", (arg) => {
     if (lobbies[arg.lobbyCode]) {
       lobbies[arg.lobbyCode].gameStarted = true;
     }
 
-    if (arg.gameId === 'Magic Number') {
-      io.to(arg.lobbyCode).emit('startGamePlayer', {
-        gameId: arg.gameId
-      })
-    }
-    else if (arg.gameId === 'Load Balancing') {
+    if (arg.gameId === "Magic Number") {
+      io.to(arg.lobbyCode).emit("startGamePlayer", {
+        gameId: arg.gameId,
+      });
+    } else if (arg.gameId === "Load Balancing") {
       loadBalancing(socket);
-      io.to(arg.lobbyCode).emit('startGamePlayer', {
-        gameId: arg.gameId
-      })
-    } else if (arg.gameId === 'Throw and Catch') {
-      io.to(arg.lobbyCode).emit('startGamePlayer', {
-        gameId: arg.gameId
-      })
+      io.to(arg.lobbyCode).emit("startGamePlayer", {
+        gameId: arg.gameId,
+      });
+    } else if (arg.gameId === "Throw and Catch") {
+      io.to(arg.lobbyCode).emit("startGamePlayer", {
+        gameId: arg.gameId,
+      });
     }
 
-    console.log(`Lobby: ${arg.lobbyCode} has requested to start the game: ${arg.gameId}`);
+    console.log(
+      `Lobby: ${arg.lobbyCode} has requested to start the game: ${arg.gameId}`,
+    );
   });
 
-  socket.on('playerStart', (arg) => {
+  socket.on("playerStart", (arg) => {
     loadBalancing(socket);
-    io.to(arg.lobbyCode).emit('playerStart', {
+    io.to(arg.lobbyCode).emit("playerStart", {
       playerId: socket.id,
-      gameId: arg.gameId
+      gameId: arg.gameId,
     });
-    console.log(`Player ${socket.id} has started the game in lobby ${arg.lobbyCode}`);
+    console.log(
+      `Player ${socket.id} has started the game in lobby ${arg.lobbyCode}`,
+    );
   });
 
   // For mobile throw and catch, indicate that the player is ready to play
-  socket.on('playerReady', (arg) => {
+  socket.on("playerReady", (arg) => {
     lobbies[arg.lobbyCode].players[socket.id] = true;
 
     const allResponded = Object.values(lobbies[arg.lobbyCode].players).every(
@@ -361,76 +373,50 @@ io.on("connection", (socket) => {
 
     // query the first player to throw a ball
     if (allResponded) {
-      console.log("all players ready !!!")
       socket.to(lobbies[arg.lobbyCode].admin).emit("playersReady");
     }
-  })
+  });
 
   // player has thrown the ball, forward data to the frontend
-  socket.on('playerThrowData', (arg) => {
+  socket.on("playerThrowData", (arg) => {
     // set player as having thrown the ball
     lobbies[arg.lobbyCode].players[arg.playerId] = false;
 
-    console.log("server received force: ", arg)
+    console.log("server received force: ", arg);
     // alert the frontend that the player has thrown the ball
     socket.to(lobbies[arg.lobbyCode].admin).emit("playerThrowData", {
       playerId: arg.playerId,
       throwData: arg.data.throwData,
     });
-  })
+  });
 
   // frontend is asking for the next player to throw, forward query
-  socket.on('queryNextPlayerThrow', (arg) => {
+  socket.on("queryNextPlayerThrow", (arg) => {
     console.log("querying next player to throw");
     // update values
     if (arg.previousPlayerId) {
-      lobbies[arg.lobbyCode].responses[arg.previousPlayerId] = arg.throwDistance;
+      lobbies[arg.lobbyCode].responses[arg.previousPlayerId] =
+        arg.throwDistance;
     }
 
-    console.log(lobbies[arg.lobbyCode])
-    const nextPlayer = Object.entries(lobbies[arg.lobbyCode].players).find(([playerId, hasResponded]) => hasResponded)?.[0];
+    console.log(lobbies[arg.lobbyCode].players);
+    const nextPlayer = Object.entries(lobbies[arg.lobbyCode].players).find(
+      ([playerId, hasResponded]) => hasResponded,
+    )?.[0];
     // everyone has thrown the ball, so end the game
+    // NOTE TO SELF: move this into gameResults
     if (nextPlayer === undefined) {
-      console.log("no next player found, ending the game");
-      if (lobbies[arg.lobbyCode]) {
-        lobbies[arg.lobbyCode].gameStarted = false;
-      }
-
-        // Calculate the rankings      
-        const rankings = Object.entries(lobbies[arg.lobbyCode].responses)
-        .sort(([, a], [, b]) => a - b)  // Sort by value (ascending)
-        .map(([key, value]) => key);
-
-        const lowestDifference = rankings[0]
-        // Calculate the winners
-        const winners = Object.entries(lobbies[arg.lobbyCode].responses)
-        .filter(([key, value]) => value === lowestDifference)
-        .map(([key, value]) => key);
-
-        // Update score
-        for (let i=0; i<winners.length; i++) {
-          if (lobbies[arg.lobbyCode].score[winners[i]]) {
-            lobbies[arg.lobbyCode].score[winners[i]] += 1
-          } else {
-            lobbies[arg.lobbyCode].score[winners[i]] = 1
-          }
-        }
-
-      let gameResult = {
-          winners: winners,
-          responses: lobbies[arg.lobbyCode].responses,
-          rankings: rankings,
-          gameId: "Throw and Catch",
-          targetNumber: -1 // not neccessary for this game
-        }
-
-      socket.to(arg.lobbyCode).emit("gameResults", gameResult);
+      // alert frontend that the game has ended, and it now needs to call gameResults
+      console.log("no next player found, ending the game")
+      io.to(lobbies[arg.lobbyCode].admin).emit("playerThrowData", {
+        playerId: null,
+        throwData: -1,
+      });
     } else {
       socket.to(nextPlayer).emit("queryPlayerThrow", {
-          playerId: nextPlayer,
-        });
+        playerId: nextPlayer,
+      });
     }
-    
   });
 
   socket.on('gameEnded', (arg) => {
@@ -490,11 +476,81 @@ io.on("connection", (socket) => {
 
         io.to(playerId).emit("gameResults", { ranking: playerRanking, data: 0 });
       }
+    } else if (arg.gameId === 'Throw and Catch') {  
+      if (lobbies[arg.lobbyCode]) {
+        lobbies[arg.lobbyCode].gameStarted = false;
+      }
+      
+      // Calculate the rankings
+      const rankings = Object.entries(lobbies[arg.lobbyCode].responses)
+        .sort(([, a], [, b]) => a - b) // Sort by value (ascending)
+        .map(([key, value]) => key);
+
+      const lowestDifference = rankings[0];
+      // Calculate the winners
+      const winners = Object.entries(lobbies[arg.lobbyCode].responses)
+        .filter(([key, value]) => value === lowestDifference)
+        .map(([key, value]) => key);
+
+        console.log("score")
+      // Update score
+      for (let i = 0; i < winners.length; i++) {
+        if (lobbies[arg.lobbyCode].score[winners[i]]) {
+          lobbies[arg.lobbyCode].score[winners[i]] += 1;
+        } else {
+          lobbies[arg.lobbyCode].score[winners[i]] = 1;
+        }
+      }
+      console.log("game result")
+      let gameResult = {
+        winners: winners,
+        responses: lobbies[arg.lobbyCode].responses,
+        rankings: rankings,
+        gameId: "Throw and Catch",
+        targetNumber: -1, // not neccessary for this game
+      };
+      console.log("emitting")
+      console.log(arg.lobbyCode)
+      io.to(arg.lobbyCode).emit("gameResults", gameResult);
+
+      // emitting for players
+      for (const [key, value] of Object.entries(
+        lobbies[arg.lobbyCode]?.players,
+      )) {
+        let playerId = key;
+        if (playerId === lobbies[arg.lobbyCode].admin) continue; // Skip admin
+        const rank = arg.players.findIndex((player) => player.playerId === playerId) + 1;
+        const score =
+          arg.players.find((player) => player.playerId === playerId)
+            .points || 0;
+        const playerRanking = {
+          player: {
+            name: "John Doe", //needs to be replaced with player name on frontend
+            playerId: playerId,
+          },
+          points: 1,
+          rank:
+            winners.find((winner) => winner === playerId) !== undefined
+              ? 1
+              : rank,
+          isRoundWinner:
+            winners.find((winner) => winner === playerId) !== undefined,
+          data: score,
+        };
+        console.log(
+          `Sending game results to player ${playerId} in lobby ${arg.lobbyCode}`,
+          playerRanking,
+        );
+
+        io.to(playerId).emit("gameResults", {
+          ranking: playerRanking,
+          data: 0,
+        });
+      }
     }
   });
 
-
-  socket.on('gameReset', (arg) => {
+  socket.on("gameReset", (arg) => {
     console.log(`Resetting game state for lobby ${socket.id}`);
     if (lobbies[arg.lobbyCode] && lobbies[arg.lobbyCode].admin === socket.id) {
       console.log(`Resetting game state for lobby ${socket.id}`);
@@ -504,16 +560,16 @@ io.on("connection", (socket) => {
     socket.to(arg.lobbyCode).emit("gameReset");
   });
 
-  socket.on('countdownTick', (arg) => {
+  socket.on("countdownTick", (arg) => {
     if (lobbies[arg.lobbyCode]) {
-      socket.to(arg.lobbyCode).emit('countdownTick', arg.countdown);
+      socket.to(arg.lobbyCode).emit("countdownTick", arg.countdown);
     }
-    });
+  });
 
-  socket.on('ping', (msg) => {
+  socket.on("ping", (msg) => {
     console.log("Ping received from client:");
-    console.log(msg.data)
-  })
+    console.log(msg.data);
+  });
 });
 
 server.listen(PORT, () => {

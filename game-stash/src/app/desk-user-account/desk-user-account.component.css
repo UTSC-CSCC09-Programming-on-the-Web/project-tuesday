@@ -1,5 +1,5 @@
-@import url('../desk-game-select/desk-game-select.component.css');
-@import url('../../styles.css');
+@import url("../desk-game-select/desk-game-select.component.css");
+@import url("../../styles.css");
 
 :host {
   --primary-color: #667eea;
@@ -262,31 +262,31 @@ h3 {
   .account-container {
     padding: 10px;
   }
-  
+
   .account-card {
     padding: 30px 20px;
   }
-  
+
   h1 {
     font-size: 1.8rem;
   }
-  
+
   .back-button-container {
     justify-content: center;
   }
-  
+
   .info-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   /* Stack action buttons vertically on mobile */
   .action-buttons {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .action-buttons .leave-btn {
     width: 100%;
     max-width: none;

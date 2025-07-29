@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../services/auth.service';
 
@@ -11,7 +16,7 @@ declare var Stripe: any;
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './desk-login.component.html',
-  styleUrls: ['./desk-login.component.css']
+  styleUrls: ['./desk-login.component.css'],
 })
 export class DeskLoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -20,7 +25,7 @@ export class DeskLoginComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   successMessage = '';
-  
+
   // Stripe related
   stripe: any;
   elements: any;
@@ -32,19 +37,22 @@ export class DeskLoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
-    this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
-    }, { validators: this.passwordMatchValidator });
+    this.registerForm = this.fb.group(
+      {
+        username: ['', [Validators.required, Validators.minLength(2)]],
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', [Validators.required]],
+      },
+      { validators: this.passwordMatchValidator },
+    );
   }
 
   ngOnInit(): void {
@@ -52,12 +60,12 @@ export class DeskLoginComponent implements OnInit {
     // Initialize Stripe with your actual test publishable key
     // this.stripe = Stripe('pk_test_51RgrGg2Xvu7GA77tKbkzt2SX1wI8dXX9zR9zG0fRj4fcTab2AA5RNf7liukYzBfXNGbupkqVgTgxdAOI7LGG36u500aioW0kL5');
     // this.elements = this.stripe.elements();
-    
+
     // COMMENTED OUT FOR NO-AUTH BRANCH: Check if user is already authenticated
     // if (this.authService.isAuthenticated()) {
     //   this.router.navigate(['/desk-create-lobby']);
     // }
-    
+
     // NO-AUTH BRANCH: Directly redirect to desk-create-lobby
     this.router.navigate(['/desk-create-lobby']);
   }
@@ -65,8 +73,12 @@ export class DeskLoginComponent implements OnInit {
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
-    
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
+
+    if (
+      password &&
+      confirmPassword &&
+      password.value !== confirmPassword.value
+    ) {
       return { passwordMismatch: true };
     }
     return null;
@@ -100,7 +112,7 @@ export class DeskLoginComponent implements OnInit {
     //     next: (response) => {
     //       if (response.success && response.user && response.token) {
     //         this.authService.setAuth(response.user, response.token);
-            
+
     //         // Check subscription status
     //         if (this.authService.hasActiveSubscription()) {
     //           this.router.navigate(['/desk-create-lobby']);
@@ -118,7 +130,7 @@ export class DeskLoginComponent implements OnInit {
     //     }
     //   });
     // }
-    
+
     // NO-AUTH BRANCH: Directly redirect to desk-create-lobby
     this.router.navigate(['/desk-create-lobby']);
   }
@@ -150,7 +162,7 @@ export class DeskLoginComponent implements OnInit {
     //     }
     //   });
     // }
-    
+
     // NO-AUTH BRANCH: Directly redirect to desk-create-lobby
     this.router.navigate(['/desk-create-lobby']);
   }
@@ -160,7 +172,6 @@ export class DeskLoginComponent implements OnInit {
     // if (this.cardElement) {
     //   this.cardElement.destroy();
     // }
-
     // this.cardElement = this.elements.create('card', {
     //   style: {
     //     base: {
@@ -172,7 +183,6 @@ export class DeskLoginComponent implements OnInit {
     //     },
     //   },
     // });
-
     // setTimeout(() => {
     //   const cardElementContainer = document.getElementById('card-element');
     //   if (cardElementContainer) {
@@ -217,7 +227,7 @@ export class DeskLoginComponent implements OnInit {
     //           this.errorMessage = confirmError.message;
     //         } else {
     //           this.successMessage = 'Payment confirmed! Setting up your account...';
-              
+
     //           // Confirm subscription payment on the backend and refresh user data
     //           this.authService.confirmSubscriptionPayment().subscribe({
     //             next: (confirmResponse) => {
@@ -281,7 +291,7 @@ export class DeskLoginComponent implements OnInit {
     //   this.errorMessage = 'An unexpected error occurred';
     //   this.isProcessingPayment = false;
     // }
-    
+
     // NO-AUTH BRANCH: Directly redirect to desk-create-lobby
     this.router.navigate(['/desk-create-lobby']);
   }

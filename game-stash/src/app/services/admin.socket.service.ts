@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
-import { SERVER_ADDRESS, GameResults, PlayerRanking, Player, GlobalRanking } from './socket.service.constants';
+import {
+  SERVER_ADDRESS,
+  GameResults,
+  PlayerRanking,
+  Player,
+  GlobalRanking,
+} from './socket.service.constants';
 
 // export interface GameState {
 //   players: Player[];
@@ -21,8 +27,6 @@ export interface GameState {
   globalRankings: GlobalRanking;
   data: number | undefined;
 }
-
-
 
 @Injectable({
   providedIn: 'root',
@@ -55,15 +59,17 @@ export class AdminSocketService {
     if (this.socket) {
       this.socket.emit(event, data);
     } else {
-      console.error("Socket not initialized. Call connectToSocket() first.");
+      console.error('Socket not initialized. Call connectToSocket() first.');
     }
   }
 
   useEffect(event: string, callback: (data: any) => void) {
     if (this.socket) {
-      this.socket.on(event, (arg: any) => { callback(arg) });
+      this.socket.on(event, (arg: any) => {
+        callback(arg);
+      });
     } else {
-      console.error("Socket not initialized. Call connectToSocket() first.");
+      console.error('Socket not initialized. Call connectToSocket() first.');
     }
   }
 
@@ -71,7 +77,7 @@ export class AdminSocketService {
     if (this.socket) {
       this.socket.off(event);
     } else {
-      console.error("Socket not initialized. Call connectToSocket() first.");
+      console.error('Socket not initialized. Call connectToSocket() first.');
     }
   }
 
@@ -95,7 +101,7 @@ export class AdminSocketService {
     this.socket.on('userJoinedLobby', (arg: any) => {
       const userId = arg.user;
       const playerName = arg.playerName;
-      this.addPlayer({name: playerName, playerId: userId});
+      this.addPlayer({ name: playerName, playerId: userId });
     });
 
     // If a user leaves the lobby, update the UI accordingly
@@ -107,15 +113,18 @@ export class AdminSocketService {
     this.socket.on('gameResponseReceived', (arg: any) => {
       const playerRank = this.gameStateSubject.value.playerRankings.map((r) => {
         if (r.player.playerId === arg.playerId) {
-          console.log("found it :)", arg.data);
+          console.log('found it :)', arg.data);
           r.data = arg.data;
         }
         return r;
       });
 
-      console.log("before", playerRank);
-      this.gameStateSubject.next({ ...this.gameStateSubject.value, playerRankings: playerRank });
-      console.log("after", this.gameStateSubject.value.playerRankings);
+      console.log('before', playerRank);
+      this.gameStateSubject.next({
+        ...this.gameStateSubject.value,
+        playerRankings: playerRank,
+      });
+      console.log('after', this.gameStateSubject.value.playerRankings);
 
       console.log('Game response received:', arg);
     });
@@ -137,7 +146,9 @@ export class AdminSocketService {
     this.updateState({ globalRankings: globalRank });
 
     const currentRankings = this.gameStateSubject.value.playerRankings;
-    const existingPlayer = currentRankings.find((r) => r.player.playerId === player.playerId);
+    const existingPlayer = currentRankings.find(
+      (r) => r.player.playerId === player.playerId,
+    );
 
     if (!existingPlayer) {
       const newRanking: PlayerRanking = {
@@ -219,21 +230,20 @@ export class AdminSocketService {
   }
 
   // playerRankings management methods
-  private updateRankings(
-    responses: Record<string, number>,
-    winners: string[],
-  ) {
-    console.log("UPDATE RANKINGS CALLED-------------------")
+  private updateRankings(responses: Record<string, number>, winners: string[]) {
     const currentRankings = this.gameStateSubject.value.playerRankings;
     const updatedRankings: PlayerRanking[] = [];
     const globalRank = this.gameStateSubject.value.globalRankings;
 
-     console.log("RESPONSES------------------------ ", responses, winners);
     // Create or update rankings for each player
     for (const [playerId, guess] of Object.entries(responses)) {
       const isWinner = winners.includes(playerId);
 
-      if (isWinner && this.gameStateSubject.value.roundNumber === this.gameStateSubject.value.finalRound) {
+      if (
+        isWinner &&
+        this.gameStateSubject.value.roundNumber ===
+          this.gameStateSubject.value.finalRound
+      ) {
         globalRank[playerId].points += 1;
       }
 
@@ -243,13 +253,11 @@ export class AdminSocketService {
       );
 
       if (existingRanking) {
-        console.log("UPDATING EXISTING RANKING--------------------------")
         existingRanking.points += isWinner ? 1 : 0;
         existingRanking.isRoundWinner = isWinner;
         existingRanking.data = guess;
         updatedRankings.push({ ...existingRanking });
       } else {
-        console.log("MAKING NEW RANKING--------------------------")
         const newRanking: PlayerRanking = {
           player: {
             name: this.getPlayerName(playerId),
@@ -289,12 +297,18 @@ export class AdminSocketService {
       }
     }
 
-    this.updateState({ playerRankings: updatedRankings, globalRankings: globalRank });
+    this.updateState({
+      playerRankings: updatedRankings,
+      globalRankings: globalRank,
+    });
     console.log('Updated Magic Number Rankings:', updatedRankings);
   }
 
   private getPlayerName(playerId: string): string {
-    const player = this.gameStateSubject.value.playerRankings.find((p) => p.player.playerId === playerId)?.player.name || '';
+    const player =
+      this.gameStateSubject.value.playerRankings.find(
+        (p) => p.player.playerId === playerId,
+      )?.player.name || '';
     return player;
   }
 
@@ -306,6 +320,7 @@ export class AdminSocketService {
     });
   }
 
+  // Called when the round is over
   resetRoundState() {
     console.log('Resetting round state');
     const rankings = this.gameStateSubject.value.playerRankings.map((r) => {
@@ -313,7 +328,7 @@ export class AdminSocketService {
         ...r,
         isRoundWinner: false,
         data: undefined, // Reset data for the new round
-      }
+      };
     });
     this.updateState({
       playerRankings: rankings,
@@ -322,13 +337,14 @@ export class AdminSocketService {
     this.gameRoundCompleteSubject.next();
   }
 
+  // Called when final round is over
   resetGameState() {
     this.resetRoundState();
     const rankings = this.gameStateSubject.value.playerRankings.map((r) => {
       return {
         ...r,
-        points: 0
-      }
+        points: 0,
+      };
     });
     this.updateState({
       playerRankings: rankings,
@@ -341,6 +357,7 @@ export class AdminSocketService {
     console.log('Game state reset', this.gameStateSubject.value);
   }
 
+  // Called to advance to the next round (or to any round)
   setRound(round: number, finalRound?: number) {
     console.log('Setting round:', round, 'Final round:', finalRound);
     if (finalRound)
@@ -366,7 +383,6 @@ export class AdminSocketService {
     this.lobbyName = lobbyName;
     this.lobbyCode = lobbyCode;
   }
-
 
   // Public methods for playerRankings management
   getPlayerRankings(): PlayerRanking[] {

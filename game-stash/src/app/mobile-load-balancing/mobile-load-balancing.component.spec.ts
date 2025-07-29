@@ -8,9 +8,8 @@ describe('MobileLoadBalancingComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MobileLoadBalancingComponent]
-    })
-    .compileComponents();
+      imports: [MobileLoadBalancingComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(MobileLoadBalancingComponent);
     component = fixture.componentInstance;

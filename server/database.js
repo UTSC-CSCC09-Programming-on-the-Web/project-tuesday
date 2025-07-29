@@ -1,28 +1,28 @@
-import pkg from 'pg';
+import pkg from "pg";
 const { Pool } = pkg;
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 
 // Database connection pool
 const pool = new Pool({
-  host: process.env.DB_HOST || '127.0.0.1',
+  host: process.env.DB_HOST || "127.0.0.1",
   port: parseInt(process.env.DB_PORT) || 5432,
-  database: process.env.DB_NAME || 'gamestash',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
+  database: process.env.DB_NAME || "gamestash",
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "postgres",
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
 
 // Test database connection
-pool.on('connect', () => {
-  console.log('Connected to PostgreSQL database');
+pool.on("connect", () => {
+  console.log("Connected to PostgreSQL database");
 });
 
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
+pool.on("error", (err) => {
+  console.error("Unexpected error on idle client", err);
   process.exit(-1);
 });
 
@@ -30,7 +30,7 @@ pool.on('error', (err) => {
 export async function initializeDatabase() {
   try {
     const client = await pool.connect();
-    
+
     // Create users table
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
@@ -65,9 +65,9 @@ export async function initializeDatabase() {
     `);
 
     client.release();
-    console.log('Database tables initialized successfully');
+    console.log("Database tables initialized successfully");
   } catch (error) {
-    console.error('Error initializing database:', error);
+    console.error("Error initializing database:", error);
     throw error;
   }
 }
