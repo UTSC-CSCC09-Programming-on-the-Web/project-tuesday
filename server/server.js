@@ -514,7 +514,7 @@ io.on("connection", (socket) => {
       };
       console.log("emitting")
       console.log(arg.lobbyCode)
-      io.to(arg.lobbyCode).emit("gameResults", gameResult);
+      io.to(lobbies[arg.lobbyCode].admin).emit("gameResults", gameResult);
 
       // emitting for players
       for (const [key, value] of Object.entries(
@@ -523,8 +523,9 @@ io.on("connection", (socket) => {
         let playerId = key;
         if (playerId === lobbies[arg.lobbyCode].admin) continue; // Skip admin
         const rank = arg.players.findIndex((player) => player.playerId === playerId) + 1;
+        
         const score =
-          arg.players.find((player) => player.playerId === playerId)
+          arg.players.find((player) => player.player.playerId === String(playerId))
             .points || 0;
         const playerRanking = {
           player: {
@@ -540,6 +541,9 @@ io.on("connection", (socket) => {
             winners.find((winner) => winner === playerId) !== undefined,
           data: score,
         };
+
+        playerRanking.data = lobbies[arg.lobbyCode].responses[playerId];
+
         console.log(
           `Sending game results to player ${playerId} in lobby ${arg.lobbyCode}`,
           playerRanking,
@@ -547,7 +551,7 @@ io.on("connection", (socket) => {
 
         io.to(playerId).emit("gameResults", {
           ranking: playerRanking,
-          data: 0,
+          data: lobbies[arg.lobbyCode].responses[playerId], //check if this value is in winners
         });
       }
     }
