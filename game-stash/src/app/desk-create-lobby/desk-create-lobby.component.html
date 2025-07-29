@@ -16,8 +16,10 @@
       </button> -->
     </div>
   </div>
-  <div class="loading" *ngIf="loading">
-    <h2>Creating Lobby...</h2>
-    <mat-spinner diameter="50"></mat-spinner>
+  <div class="create-lobby-wrapper row" *ngIf="loading">
+    <div class="lobby-header col-12">
+      <h1>Creating Lobby...</h1>
+    </div>
+    <mat-spinner class="content" diameter="50"></mat-spinner>
   </div>
 </div>

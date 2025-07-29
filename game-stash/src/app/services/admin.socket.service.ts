@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { io } from 'socket.io-client';
 import {
   SERVER_ADDRESS,
@@ -20,6 +20,7 @@ import {
 // }
 
 export interface GameState {
+  lobbyCode: string;
   selectedGame: string;
   roundNumber: number;
   finalRound: number;
@@ -34,10 +35,8 @@ export interface GameState {
 export class AdminSocketService {
   private socket: any = null;
 
-  private lobbyName: string = '';
-  private lobbyCode: string = '';
-
   private gameStateSubject = new BehaviorSubject<GameState>({
+    lobbyCode: '',
     selectedGame: '',
     roundNumber: -1,
     finalRound: -1,
@@ -54,10 +53,16 @@ export class AdminSocketService {
 
   constructor() {}
 
+  checkConnection(): boolean {
+    return this.socket && this.socket.connected;
+  }
+
   lobbyEmit(event: string, data: any) {
-    data.lobbyCode = this.lobbyCode; // Ensure lobbyCode is included in the data
+    data.lobbyCode = this.gameStateSubject.value.lobbyCode; // Ensure lobbyCode is included in the data
     if (this.socket) {
-      this.socket.emit(event, data);
+      this.socket.emit(event, data, (response: any) => {
+        console.log(`SocketService: ${event} response:`, response);
+      });
     } else {
       console.error('Socket not initialized. Call connectToSocket() first.');
     }
@@ -92,8 +97,11 @@ export class AdminSocketService {
     // Create a new lobby
     this.socket.on('connect', () => {
       this.socket.emit('createLobby', {
-        lobbyCode: this.lobbyCode,
         admin: this.socket.id,
+      }, (response: { lobbyCode: string }) => {
+        this.updateState({
+          lobbyCode: response.lobbyCode,
+        });
       });
     });
 
@@ -352,7 +360,7 @@ export class AdminSocketService {
       data: 0,
     });
     this.socket.emit('gameReset', {
-      lobbyCode: this.lobbyCode,
+      lobbyCode: this.gameStateSubject.value.lobbyCode,
     });
     console.log('Game state reset', this.gameStateSubject.value);
   }
@@ -369,19 +377,6 @@ export class AdminSocketService {
       this.updateState({
         roundNumber: round,
       });
-  }
-
-  getLobbyName(): string {
-    return this.lobbyName;
-  }
-
-  getLobbyCode(): string {
-    return this.lobbyCode;
-  }
-
-  setLobby(lobbyName: string, lobbyCode: string) {
-    this.lobbyName = lobbyName;
-    this.lobbyCode = lobbyCode;
   }
 
   // Public methods for playerRankings management

@@ -30,24 +30,11 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Get lobby details from query parameters
-    
-    this.subscriptions.push(
-      this.route.queryParams.subscribe((params) => {
-        const lobbyCode = params['lobbyCode'];
-        const playerName = params['playerName'];
-
-        if (!lobbyCode || !playerName) {
-          // Redirect to join lobby if missing required parameters
-          this.router.navigate(['/mobile-join-lobby']);
-          return;
-        }
-
-        this.lobbyCode.set(lobbyCode);
-        this.playerName.set(playerName);
-
-        this.setupSocketSubscriptions();
-      }),
-    );
+    if (!this.playerSocketService.checkConnection()) {
+      this.router.navigate(['/mobile-join-lobby']);
+      return;
+    }
+    this.setupSocketSubscriptions();
   }
 
   private setupSocketSubscriptions(): void {
@@ -59,6 +46,24 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
           if (gameId) {
             this.selectedGame.set(gameId);
             this.navigateToGame(gameId);
+          }
+        }),
+    );
+    this.subscriptions.push(
+      this.playerSocketService.playerState$
+        .pipe(map((playerState) => playerState.playerName))
+        .subscribe((playerName) => {
+          if (playerName) {
+            this.playerName.set(playerName);
+          }
+        }),
+    );
+    this.subscriptions.push(
+      this.playerSocketService.playerState$
+        .pipe(map((playerState) => playerState.lobbyCode))
+        .subscribe((lobbyCode) => {
+          if (lobbyCode) {
+            this.lobbyCode.set(lobbyCode);
           }
         }),
     );

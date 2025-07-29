@@ -76,7 +76,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
     private route: ActivatedRoute,
   ) {
     socketService.useEffect('playersReady', (arg) => {
-      socketService.lobbyEmit('queryNextPlayerThrow', {lobbyCode: socketService.getLobbyCode()});
+      socketService.lobbyEmit('queryNextPlayerThrow', {});
     });
 
     socketService.useEffect('playerThrowData', (arg) => {

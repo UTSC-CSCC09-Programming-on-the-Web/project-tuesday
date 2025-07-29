@@ -25,7 +25,6 @@ import { GlobalRanking, Player } from '../services/socket.service.constants';
 })
 export class DeskGameSelectComponent {
   constructor(
-    private route: ActivatedRoute,
     private router: Router,
     private adminSocketService: AdminSocketService,
   ) {}
@@ -40,14 +39,9 @@ export class DeskGameSelectComponent {
   selectedGame: string = '';
 
   ngOnInit() {
-    this.route.queryParams.subscribe((value) => {
-      this.adminSocketService.setLobby(value['lobbyName'], value['lobbyCode']);
-      this.lobbyName = this.adminSocketService.getLobbyName();
-      this.lobbyCode = this.adminSocketService.getLobbyCode();
-    });
-
-    this.adminSocketService.connectToSocket();
-
+    if (!this.adminSocketService.checkConnection()) {
+      this.router.navigate(['/desk-create-lobby'])
+    }
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.playerRankings))
       .subscribe((players) => {
@@ -64,13 +58,18 @@ export class DeskGameSelectComponent {
           return bRank - aRank;
         });
       });
+    this.adminSocketService.gameState$
+      .pipe(map((gameState) => gameState.lobbyCode))
+      .subscribe((code) => {
+        this.lobbyCode = code;
+      });
   }
 
   openNewTab() {
     const url = this.router.serializeUrl(
       this.router.createUrlTree([
         '/player',
-        this.adminSocketService.getLobbyCode(),
+        this.lobbyCode,
       ]),
     );
     window.open(url, '_blank');
@@ -82,6 +81,7 @@ export class DeskGameSelectComponent {
   }
 
   playGame(game: string) {
+    // this.adminSocketService.lobbyEmit('stats', {});
     if (game === 'Magic Number') {
       if (this.players.length < 2) {
         alert('At least 2 players are required to start the game.');

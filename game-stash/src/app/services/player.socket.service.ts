@@ -12,6 +12,8 @@ import { PlayerRanking } from './socket.service.constants';
 // }
 
 interface PlayerState {
+  lobbyCode: string;
+  playerName: string;
   selectedGame: string;
   roundNumber: number;
   finalRound: number;
@@ -23,7 +25,6 @@ interface PlayerState {
 })
 export class PlayerSocketService {
   private socket: any = null;
-  private lobbyCode: string = '';
   private playerName: string = '';
 
   private joinLobbySuccessSubject = new Subject<void>();
@@ -36,6 +37,8 @@ export class PlayerSocketService {
   gameRoundComplete$ = this.gameRoundCompleteSubject.asObservable();
 
   private playerStateSubject = new BehaviorSubject<PlayerState>({
+    lobbyCode: '',
+    playerName: '',
     selectedGame: '',
     roundNumber: -1,
     finalRound: -1,
@@ -53,6 +56,10 @@ export class PlayerSocketService {
   });
   playerState$ = this.playerStateSubject.asObservable();
 
+  checkConnection(): boolean {
+    return this.socket && this.socket.connected;
+  }
+
   playerEmit(event: string, data: any) {
     console.log(
       'SocketService: playerEmit called with event:',
@@ -63,7 +70,7 @@ export class PlayerSocketService {
     this.socket.emit(event, {
       data,
       playerId: this.socket.id,
-      lobbyCode: this.lobbyCode,
+      lobbyCode: this.playerStateSubject.value.lobbyCode,
     });
   }
 
@@ -85,7 +92,7 @@ export class PlayerSocketService {
     }
   }
 
-  connectToSocket() {
+  connectToSocket(lobbyCode: string, playerName: string) {
     // Disconnect any existing socket first to avoid conflicts
     if (this.socket) {
       this.socket.disconnect();
@@ -112,11 +119,18 @@ export class PlayerSocketService {
         'PlayerSocketService: Phone connected, socket ID:',
         this.socket.id,
       );
-      console.log('PlayerSocketService: Joining lobby:', this.lobbyCode);
       this.socket.emit('joinLobby', {
-        lobbyCode: this.lobbyCode,
+        lobbyCode: lobbyCode,
         client: this.socket.id,
-        playerName: this.playerName,
+        playerName: this.playerStateSubject.value.playerName,
+      }, (response: { status: number }) => {
+        if (response.status === 200) {
+          this.joinLobbySuccessSubject.next();
+          this.updatePlayerState({
+            lobbyCode: lobbyCode,
+            playerName: playerName,
+          });
+        }
       });
     });
 
@@ -205,15 +219,13 @@ export class PlayerSocketService {
       lobbyCode,
       playerName,
     });
-    this.lobbyCode = lobbyCode;
-    this.playerName = playerName;
-    this.connectToSocket();
+    this.connectToSocket(lobbyCode, playerName);
   }
 
   leaveLobby() {
-    console.log('PlayerSocketService: Leaving lobby', this.lobbyCode);
-    if (this.socket && this.lobbyCode) {
-      this.socket.emit('leaveLobby', { lobbyCode: this.lobbyCode });
+    console.log('PlayerSocketService: Leaving lobby', this.playerStateSubject.value.lobbyCode);
+    if (this.socket && this.playerStateSubject.value.lobbyCode) {
+      this.socket.emit('leaveLobby', { lobbyCode: this.playerStateSubject.value.lobbyCode });
     }
     this.disconnect();
   }
@@ -226,7 +238,7 @@ export class PlayerSocketService {
       });
       this.socket.emit('gameResponse', {
         gameId: gameId,
-        lobbyCode: this.lobbyCode,
+        lobbyCode: this.playerStateSubject.value.lobbyCode,
         playerId: this.socket.id,
         response: response,
       });

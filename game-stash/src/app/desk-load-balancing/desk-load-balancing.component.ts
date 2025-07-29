@@ -127,9 +127,7 @@ export class DeskLoadBalancingComponent implements OnInit {
         console.log('Game ended, sending gameEnded event', this.players());
         this.socketService.lobbyEmit('gameEnded', {
           gameId: 'Load Balancing',
-          lobbyCode: this.socketService.getLobbyCode(),
           players: this.players(),
-          // points: this.points,
         });
 
         this.socketService.removeEffect('scoreUpdate');

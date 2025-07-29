@@ -3,6 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import { loadBalancing } from "./load_balancing.js";
+import { makeId } from "./codeGenerator.js"; // Import the code generator function
 import dotenv from "dotenv";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -119,15 +120,35 @@ io.on("connection", (socket) => {
 
   // Admin listeners and emitters-------------------------------------------------------
 
+  socket.on("stats", (arg, callback) => {
+    console.log('request for stats received', arg);
+    const lobbyCode = arg.lobbyCode;
+    if (!lobbies[lobbyCode]) {
+      console.log(`Lobby ${lobbyCode} does not exist.`);
+      callback({ status: 404, message: "Lobby not found." });
+      return;
+    } else {
+      const lobby = lobbies[lobbyCode];
+      callback({ status: 200, data: lobby });
+    }
+  });
+
   // Client is asking to create a lobby with a given name, should  only be called from lobby screen
-  socket.on("createLobby", (arg) => {
-    socket.join(arg.lobbyCode); //add client to lobby lobby
-    lobbies[arg.lobbyCode] = {
+  socket.on("createLobby", (arg, callback) => {
+    const id = makeId(6);
+    console.log("Creating lobby with admin:", arg.admin, "and lobby code:", id);
+    socket.join(id); //add client to lobby lobby
+    lobbies[id] = {
       admin: arg.admin, // Store the admin of the lobby
       players: {}, // Track who is in the lobby, as well as whether or not they have responded
       responses: {}, // Store player response messages
       score: {},
     };
+
+    callback({
+      lobbyCode: id,
+      status: 200,
+    })
   });
 
   // Catch a game response from a player
@@ -247,7 +268,8 @@ io.on("connection", (socket) => {
   // Player listeners and emitters -----------------------------------------------------
 
   // Client is asking to join a lobby, join and notify other clients in the lobby
-  socket.on("joinLobby", (arg) => {
+  socket.on("joinLobby", (arg, callback) => {
+    console.log("User requesting to join lobby:", arg.lobbyCode, "with name:", arg.playerName);
     // If the lobby does not exist, reject
     if (!lobbies[arg.lobbyCode]) {
       socket.emit("joinLobbyDenied", { reason: "Lobby does not exist." });
@@ -260,15 +282,26 @@ io.on("connection", (socket) => {
       });
       return;
     }
+
+    if (lobbies[arg.lobbyCode].players.length >= 8) {
+      // If the player is already in the lobby, reject
+      socket.emit("joinLobbyDenied", {
+        reason: "Lobby is full.",
+      });
+      return;
+    }
+
+    const admin = lobbies[arg.lobbyCode].admin;
+
     socket.join(arg.lobbyCode);
-    socket.to(arg.lobbyCode).emit("userJoinedLobby", {
+    io.to(admin).emit("userJoinedLobby", {
       user: socket.id,
       playerName: arg.playerName || "Default",
     });
 
     lobbies[arg.lobbyCode].players[socket.id] = false;
-    // Notify the joining client that join was successful
-    socket.emit("joinLobbySuccess");
+
+    callback({status: 200, lobbyCode: arg.lobbyCode});
   });
 
   // Client explicitly leaves lobby
@@ -287,10 +320,10 @@ io.on("connection", (socket) => {
       delete lobbies[arg.lobbyCode].players[socket.id];
       delete lobbies[arg.lobbyCode].responses[socket.id];
 
+      const adminId = lobbies[arg.lobbyCode].admin;
+
       // Notify other clients in the lobby
-      socket
-        .to(arg.lobbyCode)
-        .emit("userLeftLobby", `${socket.id} has left the lobby`);
+      io.to(adminId).emit("userLeftLobby", `${socket.id} has left the lobby`);
 
       // Leave the socket room
       socket.leave(arg.lobbyCode);
@@ -305,6 +338,17 @@ io.on("connection", (socket) => {
 
     // Find and remove player from any lobby they were in
     for (const [lobbyCode, lobby] of Object.entries(lobbies)) {
+      if (lobby.admin === socket.id) {
+        console.log(
+          "Admin disconnected, removing lobby",
+          lobbyCode,
+          "and notifying players",
+        );
+        io.to(lobbyCode).emit("lobbyClosed", {
+          message: "The lobby has been closed because the admin has disconnected.",
+        });
+        delete lobbies[lobbyCode]; // Remove the lobby
+      }
       if (lobby.players[socket.id] !== undefined) {
         console.log(
           "Removing disconnected user",
@@ -323,6 +367,7 @@ io.on("connection", (socket) => {
       }
     }
 
+    console.log("update to lobbies", lobbies);
     // Also emit the general message for any remaining cleanup
     io.emit("userLeftLobby", `${socket.id} has left a lobby`);
   });
