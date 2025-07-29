@@ -416,6 +416,10 @@ io.on("connection", (socket) => {
       socket.to(nextPlayer).emit("queryPlayerThrow", {
         playerId: nextPlayer,
       });
+
+      io.to(lobbies[arg.lobbyCode].admin).emit("nextPlayerId", {
+        playerId: nextPlayer
+      });
     }
   });
 

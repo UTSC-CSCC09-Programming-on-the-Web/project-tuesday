@@ -50,11 +50,13 @@ export class DeskThrowCatchComponent implements AfterViewInit {
   responded: Player[] = [];
   unresponded: Player[] = [];
 
+  currentThrower = signal('silly');
+
   // for rendering
   engine: Engine = Engine.create();
   render: Render | undefined;
 
-  width: number = 600;
+  width: number = 500;
   height: number = 250;
 
   // rendering objects in the game
@@ -102,6 +104,14 @@ export class DeskThrowCatchComponent implements AfterViewInit {
         this.bodies.push(this.spawnBall(arg.playerId, arg.throwData));
       }
     });
+    
+    socketService.useEffect('nextPlayerId', (arg) => {
+      this.players().forEach((player) => {
+        if (player.player.playerId === arg.playerId) {
+          this.currentThrower.set(player.player.name);
+        }
+      });
+    })
   }
 
   ngOnInit() {
@@ -161,7 +171,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
     });
 
     this.platform = Bodies.rectangle(
-      this.width / 2,
+      this.height,
       this.height,
       this.width,
       25,

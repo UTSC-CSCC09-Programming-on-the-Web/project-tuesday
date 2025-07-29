@@ -10,6 +10,15 @@
   --border-radius: 12px;
 }
 
+.game-wrapper {
+  width: 500px;
+  height: 250px;
+  margin: 0 auto; /* centers horizontally */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .game-list {
   list-style-type: none;
   padding: 0;
