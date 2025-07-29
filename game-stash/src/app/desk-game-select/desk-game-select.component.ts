@@ -93,7 +93,7 @@ export class DeskGameSelectComponent {
       this.adminSocketService.setRound(1, 1);
       this.selectedGame = 'Load Balancing';
     } else if (game === 'Throw and Catch') {
-      this.adminSocketService.setRound(1, 3);
+      this.adminSocketService.setRound(1, 1);
       this.selectedGame = 'Throw and Catch';
     } else {
       console.error('Game not implemented:', game);

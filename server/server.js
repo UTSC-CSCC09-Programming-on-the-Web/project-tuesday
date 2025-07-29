@@ -402,7 +402,7 @@ io.on("connection", (socket) => {
 
     console.log(lobbies[arg.lobbyCode].players);
     const nextPlayer = Object.entries(lobbies[arg.lobbyCode].players).find(
-      ([playerId, hasResponded]) => hasResponded,
+      ([playerId, hasResponded]) => hasResponded && playerId !== lobbies[arg.lobbyCode].admin, // Exclude admin
     )?.[0];
     // everyone has thrown the ball, so end the game
     if (nextPlayer === undefined) {
@@ -420,6 +420,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on('gameEnded', (arg) => {
+    console.log(`Game ended for lobby ${arg.lobbyCode} with gameId ${arg.gameId}`);
     if (lobbies[arg.lobbyCode]) {
         lobbies[arg.lobbyCode].gameStarted = false;
     }
@@ -512,8 +513,8 @@ io.on("connection", (socket) => {
         gameId: "Throw and Catch",
         targetNumber: -1, // not neccessary for this game
       };
-      console.log("emitting")
-      console.log(arg.lobbyCode)
+      console.log("emitting", gameResult);
+      console.log(arg.lobbyCode);
       io.to(arg.lobbyCode).emit("gameResults", gameResult);
 
       // emitting for players
@@ -521,11 +522,13 @@ io.on("connection", (socket) => {
         lobbies[arg.lobbyCode]?.players,
       )) {
         let playerId = key;
+        console.log(playerId, lobbies[arg.lobbyCode].admin);
         if (playerId === lobbies[arg.lobbyCode].admin) continue; // Skip admin
         const rank = arg.players.findIndex((player) => player.playerId === playerId) + 1;
         const score =
-          arg.players.find((player) => player.playerId === playerId)
+          arg.players.find((player) => player.player.playerId === playerId)
             .points || 0;
+          console.log("score", score, score.points);
         const playerRanking = {
           player: {
             name: "John Doe", //needs to be replaced with player name on frontend

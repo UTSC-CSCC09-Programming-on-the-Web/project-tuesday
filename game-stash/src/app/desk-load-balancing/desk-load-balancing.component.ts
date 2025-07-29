@@ -119,7 +119,7 @@ export class DeskLoadBalancingComponent implements OnInit {
       this.interval = setInterval(this.spawnBox.bind(this), 1000);
     }, 15000);
 
-    this.countdown.set(5);
+    this.countdown.set(30);
     this.startCountdown(
       (() => {
         clearInterval(this.interval);

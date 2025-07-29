@@ -87,7 +87,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
         console.log(this.players());
 
         this.socketService.lobbyEmit('gameEnded', {
-          gameId: 'Load Balancing',
+          gameId: 'Throw and Catch',
           players: this.players(), //doesnt have points attached to it
           // points: this.points,
         });
@@ -100,25 +100,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
       }
     });
 
-    socketService.useEffect('gameResults', (arg) => {
-      console.log('game over');
-      console.log('results: ', arg);
-      //end game
-
-      // emit for mobile
-      this.socketService.lobbyEmit('gameEnded', {
-        gameId: 'Throw and Catch',
-        lobbyCode: this.socketService.getLobbyCode(),
-        players: this.players(),
-      });
-
-      // reset tracking values for next game
-      this.socketService.resetGameState();
-
-      this.status.set('Game Over');
-
-      // navigate to rankings
-    });
   }
 
   ngOnInit() {
@@ -213,7 +194,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
 
     Events.on(this.engine, 'afterUpdate', () => {
       if (this.ball) {
-        console.log(this.hasReadStopped);
         if (this.ball.velocity.x === 0 && !this.hasReadStopped || this.ball.position.y > this.platform!.position.y) {
           console.log('ball has stopped moving');
           this.hasReadStopped = true;
@@ -306,7 +286,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
   ngOnDestroy() {
     this.socketService.removeEffect('playersReady');
     this.socketService.removeEffect('playerThrowData');
-    this.socketService.removeEffect('gameResults');
 
     if (this.render) {
       Render.stop(this.render);

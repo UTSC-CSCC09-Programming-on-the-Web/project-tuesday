@@ -1,4 +1,4 @@
-export const SERVER_ADDRESS = 'https://7aad926041db.ngrok-free.app';
+export const SERVER_ADDRESS = 'https://b14f6346a0f2.ngrok-free.app';
 
 export interface GameResults {
   winners: Array<string>;
@@ -10,10 +10,20 @@ export interface GameResults {
 
 export interface PlayerRanking {
   player: Player;
+
+  /*
+    Magic Number: points
+    Load Balancing: unused...?
+  */
   points: number;
   rank: number;
   isRoundWinner: boolean;
-  data: number | undefined; //variable field used differently by different games
+
+  /*
+    Magic Number: guess
+    Load Balancing: score
+  */
+  data: number | undefined;
 }
 
 export interface Player {
