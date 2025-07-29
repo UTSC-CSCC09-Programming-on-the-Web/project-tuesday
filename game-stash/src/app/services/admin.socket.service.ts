@@ -57,12 +57,10 @@ export class AdminSocketService {
     return this.socket && this.socket.connected;
   }
 
-  lobbyEmit(event: string, data: any) {
+  lobbyEmit(event: string, data: any, callback?: (response: any) => void) {
     data.lobbyCode = this.gameStateSubject.value.lobbyCode; // Ensure lobbyCode is included in the data
     if (this.socket) {
-      this.socket.emit(event, data, (response: any) => {
-        console.log(`SocketService: ${event} response:`, response);
-      });
+      this.socket.emit(event, data, callback);
     } else {
       console.error('Socket not initialized. Call connectToSocket() first.');
     }

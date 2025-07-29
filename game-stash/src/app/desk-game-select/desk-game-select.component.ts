@@ -63,6 +63,17 @@ export class DeskGameSelectComponent {
       .subscribe((code) => {
         this.lobbyCode = code;
       });
+
+    /* Done so that in case there is some screw-up on the frontend  */
+    setInterval(() => {
+      this.adminSocketService.lobbyEmit('stats', {}, (response: any) => {
+        for (const player of this.players) {
+          if (response.data.players[player.playerId] === undefined) {
+            this.adminSocketService.removePlayer(player.playerId);
+          }
+        }
+      });
+    }, 10000);
   }
 
   openNewTab() {

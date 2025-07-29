@@ -122,7 +122,7 @@ export class PlayerSocketService {
       this.socket.emit('joinLobby', {
         lobbyCode: lobbyCode,
         client: this.socket.id,
-        playerName: this.playerStateSubject.value.playerName,
+        playerName: playerName,
       }, (response: { status: number }) => {
         if (response.status === 200) {
           this.joinLobbySuccessSubject.next();
@@ -146,6 +146,16 @@ export class PlayerSocketService {
     this.socket.on('joinLobbyDenied', (data: any) => {
       console.log('PlayerSocketService: Join lobby denied:', data);
       this.joinLobbyDeniedSubject.next(data);
+    });
+
+    this.socket.on('lobbyClosed', (data: any) => {
+      console.log('PlayerSocketService: Lobby closed:', data);
+      this.joinLobbyDeniedSubject.next({ reason: 'Lobby closed by admin' });
+      this.updatePlayerState({
+        lobbyCode: '',
+        playerName: ''
+      });
+      this.resetGameState();
     });
 
     this.socket.on('gameReset', (data: any) => {

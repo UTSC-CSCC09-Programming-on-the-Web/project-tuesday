@@ -64,6 +64,8 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
         .subscribe((lobbyCode) => {
           if (lobbyCode) {
             this.lobbyCode.set(lobbyCode);
+          } else {
+            this.router.navigate(['/mobile-join-lobby']);
           }
         }),
     );
