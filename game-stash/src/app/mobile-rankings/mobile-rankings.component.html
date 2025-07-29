@@ -61,7 +61,12 @@
           <p class="guess-info">
             Your guess: <span class="guess-number">{{ ranking().data }}</span>
           </p>
-        } @else {
+        } @else if (selectedGame() === "Throw and Catch") {
+          <p class="guess-info">
+            Distance from flag: <span class="guess-number">{{ ranking().data }}</span>
+          </p>
+        }
+         @else {
           <p class="guess-info">
             Your score: <span class="guess-number">{{ ranking().data }}</span>
           </p>

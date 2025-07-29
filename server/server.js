@@ -545,7 +545,7 @@ io.on("connection", (socket) => {
           data: score,
         };
 
-        playerRanking.data = lobbies[arg.lobbyCode].responses[playerId];
+        playerRanking.data = Math.trunc(lobbies[arg.lobbyCode].responses[playerId]);
 
         console.log(
           `Sending game results to player ${playerId} in lobby ${arg.lobbyCode}`,
@@ -554,7 +554,7 @@ io.on("connection", (socket) => {
 
         io.to(playerId).emit("gameResults", {
           ranking: playerRanking,
-          data: lobbies[arg.lobbyCode].responses[playerId], //check if this value is in winners
+          data: Math.trunc(lobbies[arg.lobbyCode].responses[playerId]), //check if this value is in winners
         });
       }
     }

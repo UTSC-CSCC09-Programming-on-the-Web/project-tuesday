@@ -36,6 +36,7 @@ interface PlayerPoint {
   templateUrl: './desk-throw-catch.component.html',
   styleUrl: './desk-throw-catch.component.css',
 })
+
 export class DeskThrowCatchComponent implements AfterViewInit {
   @ViewChild('gameWrapper') wrapper!: ElementRef;
   @ViewChild('spawnButton') spawnButton!: ElementRef;
@@ -64,11 +65,13 @@ export class DeskThrowCatchComponent implements AfterViewInit {
   pole: Matter.Body | undefined;
   poleWidth = 10;
   poleHeight = 50;
-
+  
   // for keeping track of the current ball
+  ballGuide: Matter.Body | undefined;
   ball: Matter.Body | undefined;
   hasReadStopped: boolean = false;
   currentPlayerId: string = '';
+  colours: string[] = ['#667eea', '#6c6ae4', '#7260dd', '#7856d7', '#764ba2'];
 
   constructor(
     private socketService: AdminSocketService,
@@ -99,7 +102,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
         this.bodies.push(this.spawnBall(arg.playerId, arg.throwData));
       }
     });
-
   }
 
   ngOnInit() {
@@ -110,7 +112,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
               players.map((player) => {
                 return {
                   player: player.player,
-                  points: player.data,
+                  points: Math.trunc(player.data!),
                 };
               }),
             );
@@ -141,7 +143,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
     this.socketService.lobbyEmit('startGame', { gameId: 'Throw and Catch' });
     this.renderScreen();
     this.pole = this.spawnGoal();
-
+    this.ballGuide = this.spawnBallGuide();
   }
 
   // render the landscape, with a goalpost
@@ -194,7 +196,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
 
     Events.on(this.engine, 'afterUpdate', () => {
       if (this.ball) {
-        if (this.ball.velocity.x === 0 && !this.hasReadStopped || this.ball.position.y > this.platform!.position.y) {
+        if (this.ball.velocity.x === 0 && !this.hasReadStopped) {
           console.log('ball has stopped moving');
           this.hasReadStopped = true;
 
@@ -216,7 +218,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
     const platformPos = this.platform!.position;
 
     const poleX = platformPos.x;
-    const poleY = platformPos.y - this.poleHeight / 2 - 10; // 10 is half the platform height
+    const poleY = platformPos.y - this.poleHeight / 2 - 12; // 10 is half the platform height
 
     const locationX = Math.random() * 2 * poleX;
 
@@ -227,13 +229,51 @@ export class DeskThrowCatchComponent implements AfterViewInit {
       this.poleHeight,
       {
         isStatic: true,
+        render: {
+          fillStyle: '#E5DF2B',
+          strokeStyle: '#E5DF2B'
+        }
       },
     );
 
     pole.isSensor = true;
     World.add(this.engine.world, pole);
 
+    const poleHead = Bodies.circle(locationX, poleY - 25, 5, {
+      isStatic: true,
+      render: {
+        fillStyle: '#E5DF2B',
+          strokeStyle: '#E5DF2B'
+      },
+    })
+    World.add(this.engine.world, poleHead);
+
     return pole;
+  }
+
+  spawnBallGuide() {
+    const platformPos = this.platform!.position;
+    const poleX = platformPos.x;
+    const poleY = platformPos.y - this.poleHeight / 2 - 10; // 10 is half the platform height
+
+    const ballGuide = Bodies.circle(poleX, poleY - 60, 5, {
+        isStatic: true,
+        render: {
+          fillStyle: 'rgba(255, 255, 255, 0.0)',
+          strokeStyle: 'rgba(255, 255, 255, 1.0)',
+          lineWidth: 1,
+        }
+      });
+
+    ballGuide.collisionFilter = {
+        group: -1, // prevent collision with other balls in same group
+        category: 0x0002, // it's a ball
+        mask: 0x0001, // only collide with platform
+      };
+
+    World.add(this.engine.world, ballGuide);
+
+    return ballGuide;
   }
 
   // spawn a ball
@@ -257,7 +297,14 @@ export class DeskThrowCatchComponent implements AfterViewInit {
     this.currentPlayerId = playerId;
 
     //change current ball to this one
-    this.ball = Bodies.circle(poleX, poleY - 60, 5);
+    this.ball = Bodies.circle(poleX, poleY - 60, 5, {
+      render: {
+        fillStyle:
+              this.colours[Math.round(Math.random() * this.colours.length)],
+        strokeStyle: 'rgba(255, 255, 255, 0.8)',
+        lineWidth: 3,
+      }
+    });
     this.ball.friction = 1;
 
     this.ball.collisionFilter = {
