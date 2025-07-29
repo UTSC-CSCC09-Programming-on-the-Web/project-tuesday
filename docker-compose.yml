@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # Automatic Nginx Proxy with SSL
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    labels:
+      - "com.github.nginx-proxy.nginx"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+    networks:
+      - gamestash-network
+    restart: unless-stopped
+
+  # Automatic SSL Certificate Management
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    env_file:
+      - ./server/.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - ./acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=alton.liu.cs@gmail.com
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    networks:
+      - gamestash-network
+    restart: unless-stopped
+    depends_on:
+      - nginx-proxy
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: gamestash-postgres
+    env_file:
+      - ./server/.env
+    environment:
+      POSTGRES_DB: gamestash
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - gamestash-network
+    restart: unless-stopped
+
+  # Backend API Server
+  backend:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: gamestash-backend
+    env_file:
+      - ./server/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: gamestash
+      DB_USER: postgres
+      NODE_ENV: production
+      FRONTEND_URLS: http://localhost:4200,https://gamestash.live,https://www.gamestash.live,https://api.gamestash.live
+      VIRTUAL_HOST: api.gamestash.live
+      LETSENCRYPT_HOST: api.gamestash.live
+    expose:
+      - "3000"
+    depends_on:
+      - postgres
+    networks:
+      - gamestash-network
+    restart: unless-stopped
+
+  frontend:
+    build: 
+      context: ./game-stash
+      dockerfile: Dockerfile
+    container_name: gamestash-frontend
+    environment:
+      # Backend API URL for production deployment - use API subdomain consistently
+      API_URL: https://api.gamestash.live
+      VIRTUAL_HOST: gamestash.live,www.gamestash.live
+      LETSENCRYPT_HOST: gamestash.live,www.gamestash.live
+    expose:
+      - "80"
+    networks:
+      - gamestash-network
+    restart: unless-stopped
+
+networks:
+  gamestash-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

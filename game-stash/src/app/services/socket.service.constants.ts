@@ -1,4 +1,7 @@
-export const SERVER_ADDRESS = 'http://localhost:3000/';
+import { environment } from '../../environments/environment';
+
+// Use environment-based server address for Socket.IO
+export const SERVER_ADDRESS = environment.socketUrl + '/';
 
 export interface GameResults {
   winners: Array<string>

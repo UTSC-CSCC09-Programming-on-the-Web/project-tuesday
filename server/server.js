@@ -19,9 +19,15 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
+// Socket.IO configuration with flexible CORS for containerized deployment
+const socketAllowedOrigins = process.env.FRONTEND_URLS 
+  ? process.env.FRONTEND_URLS.split(',')
+  : [process.env.FRONTEND_URL || "http://localhost:4200"];
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:4200",
+    origin: socketAllowedOrigins,
     credentials: true
   }
 });
@@ -40,9 +46,22 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// CORS configuration
+// CORS configuration - support multiple frontend URLs for containerized deployment
+const allowedOrigins = process.env.FRONTEND_URLS 
+  ? process.env.FRONTEND_URLS.split(',')
+  : [process.env.FRONTEND_URL || "http://localhost:4200"];
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:4200",
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
