@@ -381,6 +381,7 @@ io.on("connection", (socket) => {
   socket.on("playerThrowData", (arg) => {
     // set player as having thrown the ball
     lobbies[arg.lobbyCode].players[arg.playerId] = false;
+    lobbies[arg.lobbyCode].responses[arg.playerId] = arg.data.throwData;
 
     console.log("server received force: ", arg);
     // alert the frontend that the player has thrown the ball
@@ -404,7 +405,6 @@ io.on("connection", (socket) => {
       ([playerId, hasResponded]) => hasResponded,
     )?.[0];
     // everyone has thrown the ball, so end the game
-    // NOTE TO SELF: move this into gameResults
     if (nextPlayer === undefined) {
       // alert frontend that the game has ended, and it now needs to call gameResults
       console.log("no next player found, ending the game")
@@ -484,14 +484,17 @@ io.on("connection", (socket) => {
       // Calculate the rankings
       const rankings = Object.entries(lobbies[arg.lobbyCode].responses)
         .sort(([, a], [, b]) => a - b) // Sort by value (ascending)
-        .map(([key, value]) => key);
+        .map(([key, value]) => value);
 
       const lowestDifference = rankings[0];
+
+      console.log("lowest difference", lowestDifference);
       // Calculate the winners
       const winners = Object.entries(lobbies[arg.lobbyCode].responses)
         .filter(([key, value]) => value === lowestDifference)
         .map(([key, value]) => key);
 
+        console.log("winners", winners);
         console.log("score")
       // Update score
       for (let i = 0; i < winners.length; i++) {

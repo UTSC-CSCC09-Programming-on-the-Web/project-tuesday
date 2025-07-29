@@ -153,6 +153,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
             }
           });
 
+    console.log(this.players());
   }
 
   ngAfterViewInit() {
