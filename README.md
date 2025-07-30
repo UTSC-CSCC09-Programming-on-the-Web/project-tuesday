@@ -1,3 +1,6 @@
+LIVE LINK: https://gamestash.live/desk-login (credit card signup with 4242...) \
+YOUTUBE LINK: https://youtu.be/9gFLDR9AR7U
+
 ## Basic Flow
 
 ### Step 1: Start the Backend
