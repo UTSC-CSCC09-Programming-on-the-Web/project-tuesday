@@ -109,7 +109,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       }),
     );
 
-    // Subscribe to rankings from AdminSocketService
+    // Subscribe to rankings from PlayerSocketService
     this.subscriptions.push(
       this.playerSocketService.playerState$
         .pipe(map((playerState) => playerState.ranking))

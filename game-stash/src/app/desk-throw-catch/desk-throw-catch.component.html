@@ -1,6 +1,9 @@
 @if (status() !== 'Game Over') {
   <!-- Game view -->
-  <div #gameWrapper></div>
+  <div>
+    <h3>Current thrower: {{currentThrower()}}</h3>
+    <div #gameWrapper class="game-wrapper"></div>
+  </div>
 } @else {
   <!-- Rankings view -->
   <div class="rankings-container">
@@ -21,7 +24,7 @@
               </div>
               <div class="player-details">
                 <span class="player-name">{{ player.player.name }}</span>
-                <span class="player-guess">Score: {{ player.points }}</span>
+                <span class="player-guess">Distance from Flag: {{ player.points }}</span>
               </div>
               <!-- <div class="player-points">{{ player.points }}</div> -->
             </div>
