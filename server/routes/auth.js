@@ -63,7 +63,7 @@ router.post("/register", async (req, res) => {
   try {
     const { email, password, username } = req.body;
 
-    // Validation
+    // Input validation and sanitization
     if (!email || !password || !username) {
       return res.status(400).json({
         success: false,
@@ -71,10 +71,36 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address",
+      });
+    }
+
+    // Username validation (alphanumeric + some special chars, 2-30 chars)
+    const usernameRegex = /^[a-zA-Z0-9_.-]{2,30}$/;
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({
+        success: false,
+        message: "Username must be 2-30 characters and contain only letters, numbers, dots, hyphens, and underscores",
+      });
+    }
+
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
         message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Prevent extremely long inputs (potential DoS)
+    if (email.length > 255 || username.length > 30 || password.length > 128) {
+      return res.status(400).json({
+        success: false,
+        message: "Input too long",
       });
     }
 
@@ -128,10 +154,28 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Input validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required",
+      });
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address",
+      });
+    }
+
+    // Prevent extremely long inputs
+    if (email.length > 255 || password.length > 128) {
+      return res.status(400).json({
+        success: false,
+        message: "Input too long",
       });
     }
 
