@@ -1,4 +1,6 @@
 @import url("../../styles.css");
+@import url('../desk-load-balancing/desk-load-balancing.component.css');
+
 
 :host {
   --primary-color: #667eea;
@@ -13,6 +15,26 @@
 .game-list {
   list-style-type: none;
   padding: 0;
+}
+
+.rankings-container {
+  padding: 0 0 0 4rem !important;
+}
+
+.rankings-header {
+  text-align: left !important;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif !important;
+
+}
+
+.rankings-list {
+  margin-top: 16px;
+}
+
+h2 {
+  margin: 0 !important;
 }
 
 .game-item {
@@ -38,6 +60,17 @@
   font-size: 1rem;
   font-weight: 500;
   backdrop-filter: blur(10px);
+}
+
+.form-card {
+  background: var(--card-background);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 40px;
+  width: 100%;
+  /* max-width: 400px; */
+  backdrop-filter: blur(10px);
+  color: white;
 }
 
 .game-item:hover {

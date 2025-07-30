@@ -20,8 +20,10 @@ import { map } from 'rxjs/operators';
 export class MobileRankingsComponent implements OnInit, OnDestroy {
   targetNumber = signal(0);
   ranking = signal<PlayerRanking>({
-      name: "",
-      playerId: "",
+      player: {
+        name: "",
+        playerId: "",
+      },
       points: 0,
       rank: -1,
       isRoundWinner: false,
@@ -42,6 +44,8 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   private countdownInterval?: number;
   private subscriptions: Subscription[] = [];
 
+  private maxRounds: number = 3;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -53,8 +57,10 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     // Reset all signals to default values
     this.targetNumber.set(0);
     this.ranking.set({
-      name: "",
-      playerId: "",
+      player: {
+        name: "",
+        playerId: "",
+      },
       points: 0,
       rank: -1,
       isRoundWinner: false,
@@ -69,7 +75,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
     this.roundNumber.set(1);
     this.selectedGame.set('');
     this.guess.set(0);
-    
+
     // Read all parameters from route
     this.subscriptions.push(
       this.route.queryParams.subscribe((params) => {
@@ -92,7 +98,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         this.guess.set(guess ? parseInt(guess) : 0);
 
         // Determine if this is the final round
-        this.isGameOver.set(this.roundNumber() >= 5);
+        this.isGameOver.set(this.roundNumber() >= this.maxRounds);
 
         if (this.isGameOver()) {
           // Emit gameEnded to backend as soon as final rankings screen is shown
@@ -112,7 +118,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
       .subscribe((ranking) => {
         this.ranking.set(ranking)
         })
-        
+
     );
 
     // Subscribe to targetNumber from from PlayerSocketService
@@ -131,13 +137,20 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   }
 
   private startCountdown(): void {
+
     this.countdownInterval = window.setInterval(() => {
+      console.log("tick")
       const current = this.countdown();
       if (current > 1) {
         this.countdown.set(current - 1);
       } else {
         this.stopCountdown();
-        this.moveToNextRound();
+        if (this.roundNumber() === this.maxRounds) {
+          this.finishRound();
+        } else {
+          this.moveToNextRound();
+        }
+
       }
     }, 1000);
   }
@@ -145,15 +158,31 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   private stopCountdown(): void {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
+      this.countdownInterval = undefined;
     }
+  }
+
+  private finishRound(): void {
+
+     const nextRound = this.roundNumber() + 1;
+    this.router.navigate(['/mobile-magic-number'], {
+      queryParams: {
+        lobbyCode: this.lobbyCode(),
+        playerName: this.playerName(),
+        roundNumber: nextRound,
+        selectedGame: this.selectedGame() || 'Magic Number',
+      },
+    });
   }
 
   private moveToNextRound(): void {
     // Reset round-specific parameters for next round
     this.countdown.set(10);
     this.ranking.set({
-      name: "",
-      playerId: "",
+      player: {
+        name: "",
+        playerId: ""
+      },
       points: 0,
       rank: -1,
       isRoundWinner: false,

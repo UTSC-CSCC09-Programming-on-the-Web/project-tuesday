@@ -31,8 +31,10 @@ export class PlayerSocketService {
     selectedGame: '',
     data: -1,
     ranking: {
-      name: "",
-      playerId: "",
+      player: {
+        name: "",
+        playerId: "",
+      },
       points: 0,
       rank: -1,
       isRoundWinner: false,
@@ -99,6 +101,7 @@ export class PlayerSocketService {
       this.socket.emit('joinLobby', {
         lobbyCode: this.lobbyCode,
         client: this.socket.id,
+        playerName: this.playerName,
       });
     });
 
@@ -115,6 +118,10 @@ export class PlayerSocketService {
       console.log('PlayerSocketService: Join lobby denied:', data);
       this.joinLobbyDeniedSubject.next(data);
     });
+
+    this.socket.on('gameReset', (data: any) => {
+      this.resetState();
+    })
 
     // Listen for game start event
     this.socket.on('startGamePlayer', (arg: any) => {
@@ -133,7 +140,7 @@ export class PlayerSocketService {
         case 'Magic Number':
 
           const newPlayerRanking = arg;
-          newPlayerRanking.name = this.playerName
+          newPlayerRanking.player.name = this.playerName
             this.updatePlayerRankings(newPlayerRanking);
           break;
         default:
@@ -153,7 +160,7 @@ export class PlayerSocketService {
   updatePlayerRankings(
     arg: PlayerRanking) {
 
-  
+
 
     /*name: string;
   playerId: string;
@@ -166,7 +173,7 @@ export class PlayerSocketService {
 
 
     this.updatePlayerState({
-      ranking: arg, 
+      ranking: arg,
       data: arg.data})
   }
 
@@ -218,6 +225,24 @@ export class PlayerSocketService {
       this.socket.disconnect();
       this.socket = null;
     }
+  }
+
+  private resetState() {
+    this.updatePlayerState({
+      selectedGame: '',
+      data: -1,
+      ranking: {
+        player: {
+          name: "",
+          playerId: "",
+        },
+        points: 0,
+        rank: -1,
+        isRoundWinner: false,
+        response: "",
+        data: -1, //variable field used differently by different games
+      },
+    });
   }
 
   // update the player state

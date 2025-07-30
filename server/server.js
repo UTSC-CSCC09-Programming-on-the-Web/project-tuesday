@@ -222,8 +222,10 @@ io.on("connection", (socket) => {
           let playerId = key
 
           const playerRanking = {
-            name: "John Doe", //needs to be replaced with player name on frontend
-            playerId: playerId,
+            player: {
+              name: "John Doe", //needs to be replaced with player name on frontend
+              playerId: playerId,
+            },
             points: lobbies[arg.lobbyCode].score[playerId] ?? 0,
             rank: rankings.indexOf(playerId) + 1,
             isRoundWinner: winners.includes(playerId),
@@ -263,6 +265,7 @@ io.on("connection", (socket) => {
     socket.join(arg.lobbyCode);
     socket.to(arg.lobbyCode).emit("userJoinedLobby", {
       user: socket.id,
+      playerName: arg.playerName || "Default",
     });
 
     lobbies[arg.lobbyCode].players[socket.id] = false;
@@ -354,6 +357,16 @@ io.on("connection", (socket) => {
     }
     socket.to(arg.lobbyCode).emit("gameEnded");
 });
+
+  socket.on('gameReset', (arg) => {
+    console.log(`Resetting game state for lobby ${socket.id}`);
+    if (lobbies[arg.lobbyCode] && lobbies[arg.lobbyCode].admin === socket.id) {
+      console.log(`Resetting game state for lobby ${socket.id}`);
+      lobbies[arg.lobbyCode].gameStarted = false;
+      lobbies[arg.lobbyCode].responses = {};
+    }
+    socket.to(arg.lobbyCode).emit("gameReset");
+  });
 });
 
 server.listen(PORT, () => {

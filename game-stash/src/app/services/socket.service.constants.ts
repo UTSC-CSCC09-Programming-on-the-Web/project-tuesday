@@ -12,11 +12,24 @@ export interface GameResults {
 }
 
 export interface PlayerRanking {
-  name: string;
-  playerId: string;
+  player: Player;
   points: number;
   rank: number;
   isRoundWinner: boolean;
   response: string;
   data: number; //variable field used differently by different games
+}
+
+export interface Player {
+  name: string;
+  playerId: string;
+}
+
+export interface GlobalRanking {
+  [playerId: string]: GlobalRank;
+}
+
+export interface GlobalRank {
+  playerId: string;
+  points: number;
 }

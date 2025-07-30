@@ -12,18 +12,18 @@
           class="player-item player-unresponse"
           *ngFor="let player of unresponded"
         >
-          {{ player }}
+          {{ player.name }}
         </li>
         <li class="player-item player-response" *ngFor="let player of responded">
-          {{ player }}
+          {{ player.name }}
         </li>
       </ul>
     </div>
   } @else {
     @if (status() === 'Game Countdown') {
       <header class="rankings-header">
-        <div class="countdown-display">
-          <p class="countdown-text">Game Starts in...</p>
+        <div class="countdown-display player-list">
+          <h2 class="countdown-text">Game Starts in...</h2>
           <div class="countdown-div">
             <span class="countdown-number">{{ countdown() }}</span>
           </div>
@@ -38,7 +38,7 @@
               <div class="rank-position">
                 <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
               </div><div class="player-details">
-                <span class="player-name">{{ player }}</span>
+                <span class="player-name">{{ player.name }}</span>
                 <span class="player-guess">Score: {{ points[players().indexOf(player)] }}</span>
               </div>
               <!-- <div class="player-points">{{ player.points }}</div> -->
@@ -62,7 +62,7 @@
               <div class="rank-position">
                 <span class="rank-number">{{ players().indexOf(player) + 1 }}</span>
               </div><div class="player-details">
-                <span class="player-name">{{ player }}</span>
+                <span class="player-name">{{ player.name }}</span>
                 <span class="player-guess">Score: {{ results[players().indexOf(player)] }}</span>
               </div>
               <!-- <div class="player-points">{{ player.points }}</div> -->
