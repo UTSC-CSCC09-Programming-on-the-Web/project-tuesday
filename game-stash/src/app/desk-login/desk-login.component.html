@@ -1,21 +1,23 @@
 <div class="login-container">
   <div class="login-card">
     <h1>Game Stash</h1>
-    
+
     <!-- Mode Toggle -->
     <div class="mode-toggle">
-      <button 
-        type="button" 
-        [class.active]="isLoginMode" 
+      <button
+        type="button"
+        [class.active]="isLoginMode"
         (click)="setLoginMode(true)"
-        [disabled]="isLoading || isProcessingPayment">
+        [disabled]="isLoading || isProcessingPayment"
+      >
         Login
       </button>
-      <button 
-        type="button" 
-        [class.active]="!isLoginMode" 
+      <button
+        type="button"
+        [class.active]="!isLoginMode"
         (click)="setLoginMode(false)"
-        [disabled]="isLoading || isProcessingPayment">
+        [disabled]="isLoading || isProcessingPayment"
+      >
         Register
       </button>
     </div>
@@ -29,38 +31,57 @@
     </div>
 
     <!-- Login Form -->
-    <form *ngIf="isLoginMode && !showPaymentForm" [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+    <form
+      *ngIf="isLoginMode && !showPaymentForm"
+      [formGroup]="loginForm"
+      (ngSubmit)="onLogin()"
+      class="auth-form"
+    >
       <div class="form-group">
         <label for="loginEmail">Email:</label>
-        <input 
+        <input
           id="loginEmail"
-          type="email" 
-          formControlName="email" 
+          type="email"
+          formControlName="email"
           [disabled]="isLoading"
-          placeholder="Enter your email">
-        <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="field-error">
+          placeholder="Enter your email"
+        />
+        <div
+          *ngIf="
+            loginForm.get('email')?.invalid && loginForm.get('email')?.touched
+          "
+          class="field-error"
+        >
           Email is required and must be valid
         </div>
       </div>
 
       <div class="form-group">
         <label for="loginPassword">Password:</label>
-        <input 
+        <input
           id="loginPassword"
-          type="password" 
-          formControlName="password" 
+          type="password"
+          formControlName="password"
           [disabled]="isLoading"
-          placeholder="Enter your password">
-        <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="field-error">
+          placeholder="Enter your password"
+        />
+        <div
+          *ngIf="
+            loginForm.get('password')?.invalid &&
+            loginForm.get('password')?.touched
+          "
+          class="field-error"
+        >
           Password must be at least 6 characters
         </div>
       </div>
 
-      <button 
-        type="submit" 
-        [disabled]="loginForm.invalid || isLoading" 
-        class="leave-btn submit-btn">
-        {{ isLoading ? 'Signing In...' : 'Sign In' }}
+      <button
+        type="submit"
+        [disabled]="loginForm.invalid || isLoading"
+        class="leave-btn submit-btn"
+      >
+        {{ isLoading ? "Signing In..." : "Sign In" }}
       </button>
 
       <!-- Google Sign-In Section -->
@@ -76,68 +97,105 @@
     </form>
 
     <!-- Register Form -->
-    <form *ngIf="!isLoginMode && !showPaymentForm" [formGroup]="registerForm" (ngSubmit)="onRegister()" class="auth-form">
+    <form
+      *ngIf="!isLoginMode && !showPaymentForm"
+      [formGroup]="registerForm"
+      (ngSubmit)="onRegister()"
+      class="auth-form"
+    >
       <div class="form-group">
         <label for="registerUsername">Username:</label>
-        <input 
+        <input
           id="registerUsername"
-          type="text" 
-          formControlName="username" 
+          type="text"
+          formControlName="username"
           [disabled]="isLoading"
-          placeholder="Enter your username">
-        <div *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" class="field-error">
+          placeholder="Enter your username"
+        />
+        <div
+          *ngIf="
+            registerForm.get('username')?.invalid &&
+            registerForm.get('username')?.touched
+          "
+          class="field-error"
+        >
           Username must be at least 2 characters
         </div>
       </div>
 
       <div class="form-group">
         <label for="registerEmail">Email:</label>
-        <input 
+        <input
           id="registerEmail"
-          type="email" 
-          formControlName="email" 
+          type="email"
+          formControlName="email"
           [disabled]="isLoading"
-          placeholder="Enter your email">
-        <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="field-error">
+          placeholder="Enter your email"
+        />
+        <div
+          *ngIf="
+            registerForm.get('email')?.invalid &&
+            registerForm.get('email')?.touched
+          "
+          class="field-error"
+        >
           Email is required and must be valid
         </div>
       </div>
 
       <div class="form-group">
         <label for="registerPassword">Password:</label>
-        <input 
+        <input
           id="registerPassword"
-          type="password" 
-          formControlName="password" 
+          type="password"
+          formControlName="password"
           [disabled]="isLoading"
-          placeholder="Enter your password">
-        <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="field-error">
+          placeholder="Enter your password"
+        />
+        <div
+          *ngIf="
+            registerForm.get('password')?.invalid &&
+            registerForm.get('password')?.touched
+          "
+          class="field-error"
+        >
           Password must be at least 6 characters
         </div>
       </div>
 
       <div class="form-group">
         <label for="confirmPassword">Confirm Password:</label>
-        <input 
+        <input
           id="confirmPassword"
-          type="password" 
-          formControlName="confirmPassword" 
+          type="password"
+          formControlName="confirmPassword"
           [disabled]="isLoading"
-          placeholder="Confirm your password">
-        <div *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched" class="field-error">
+          placeholder="Confirm your password"
+        />
+        <div
+          *ngIf="
+            registerForm.hasError('passwordMismatch') &&
+            registerForm.get('confirmPassword')?.touched
+          "
+          class="field-error"
+        >
           Passwords do not match
         </div>
       </div>
 
       <div class="subscription-notice">
-        <p><strong>Note:</strong> Registration includes a monthly subscription ($9.99/month) to access Game Stash features.</p>
+        <p>
+          <strong>Note:</strong> Registration includes a monthly subscription
+          ($9.99/month) to access Game Stash features.
+        </p>
       </div>
 
-      <button 
-        type="submit" 
-        [disabled]="registerForm.invalid || isLoading" 
-        class="leave-btn submit-btn">
-        {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+      <button
+        type="submit"
+        [disabled]="registerForm.invalid || isLoading"
+        class="leave-btn submit-btn"
+      >
+        {{ isLoading ? "Creating Account..." : "Create Account" }}
       </button>
 
       <!-- Google Sign-In Section -->
@@ -155,8 +213,11 @@
     <!-- Payment Form -->
     <div *ngIf="showPaymentForm" class="payment-form">
       <h3>Set Up Your Subscription</h3>
-      <p>Complete your registration by setting up your monthly subscription ($9.99/month).</p>
-      
+      <p>
+        Complete your registration by setting up your monthly subscription
+        ($9.99/month).
+      </p>
+
       <div class="form-group">
         <label>Payment Information:</label>
         <div id="card-element" class="stripe-card-element">
@@ -164,16 +225,24 @@
         </div>
       </div>
 
-      <button 
-        type="button" 
-        (click)="onSetupSubscription()" 
-        [disabled]="isProcessingPayment" 
-        class="leave-btn submit-btn payment-btn">
-        {{ isProcessingPayment ? 'Processing Payment...' : 'Complete Subscription Setup' }}
+      <button
+        type="button"
+        (click)="onSetupSubscription()"
+        [disabled]="isProcessingPayment"
+        class="leave-btn submit-btn payment-btn"
+      >
+        {{
+          isProcessingPayment
+            ? "Processing Payment..."
+            : "Complete Subscription Setup"
+        }}
       </button>
 
       <p class="payment-security">
-        <small>🔒 Your payment information is secured by Stripe. We do not store your card details.</small>
+        <small
+          >🔒 Your payment information is secured by Stripe. We do not store
+          your card details.</small
+        >
       </p>
     </div>
   </div>

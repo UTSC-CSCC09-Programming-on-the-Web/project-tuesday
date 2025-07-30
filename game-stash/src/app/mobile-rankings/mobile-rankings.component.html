@@ -7,11 +7,13 @@
         Round {{ roundNumber() }} Results
       }
     </h1>
-    <p class="target-info">
-      Target Number: <span class="target-number">{{ targetNumber() }}</span>
-    </p>
+    @if (selectedGame() === "Magic Number") {
+      <p class="target-info">
+        Target Number: <span class="target-number">{{ targetNumber() }}</span>
+      </p>
+    }
     <!-- Round Winner Display -->
-     <!--
+    <!--
     @if (!isGameOver()) {
       <div class="round-winner-display">
         @if (getRoundWinners().length === 1) {
@@ -50,13 +52,25 @@
       >
         <div class="rank-badge">
           <span class="rank-text"
-            >{{ getPlayerRank() }}{{ getRankSuffix(getPlayerRank()) }} Place</span
+            >{{ getPlayerRank()
+            }}{{ getRankSuffix(getPlayerRank()) }} Place</span
           >
         </div>
         <h2>{{ playerName() }}</h2>
-        <p class="guess-info">
-          Your guess: <span class="guess-number">{{ guess() }}</span>
-        </p>
+        @if (selectedGame() === "Magic Number") {
+          <p class="guess-info">
+            Your guess: <span class="guess-number">{{ ranking().data }}</span>
+          </p>
+        } @else if (selectedGame() === "Throw and Catch") {
+          <p class="guess-info">
+            Distance from flag: <span class="guess-number">{{ ranking().data }}</span>
+          </p>
+        }
+         @else {
+          <p class="guess-info">
+            Your score: <span class="guess-number">{{ ranking().data }}</span>
+          </p>
+        }
       </div>
     </div>
 
@@ -87,9 +101,6 @@
   <footer class="rankings-footer">
     @if (isGameOver()) {
       <div class="final-actions">
-        <button (click)="onStayInLobby()" class="stay-btn">
-          Stay in Lobby
-        </button>
         <button (click)="onLeaveLobby()" class="leave-btn">Leave Lobby</button>
       </div>
     }

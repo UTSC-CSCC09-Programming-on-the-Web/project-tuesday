@@ -2,10 +2,9 @@ import { Component, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AdminSocketService } from '../services/admin.socket.service';
 import { PlayerSocketService } from '../services/player.socket.service';
-import { Subscription, map } from 'rxjs';
-import { Player } from '../services/socket.service.constants';
+import { Subscription } from 'rxjs';
+import { PlayerRanking } from '../services/socket.service.constants';
 
 @Component({
   selector: 'app-mobile-join-lobby',
@@ -20,7 +19,7 @@ export class MobileJoinLobbyComponent implements OnDestroy {
   isJoining = signal(false);
   errorMessage = signal('');
 
-  players = signal<Player[]>([]);
+  players = signal<PlayerRanking[]>([]);
 
   private subscriptions: Subscription[] = [];
 
@@ -35,33 +34,26 @@ export class MobileJoinLobbyComponent implements OnDestroy {
 
   constructor(
     private router: Router,
-    private adminSocketService: AdminSocketService,
     private playerSocketService: PlayerSocketService,
   ) {
     // Subscribe to join lobby events
     this.subscriptions.push(
       this.playerSocketService.joinLobbySuccess$.subscribe(() => {
         this.isJoining.set(false); // Reset joining state
-        this.router.navigate(['/mobile-lobby'], {
-          queryParams: {
-            lobbyCode: this.lobbyCode(),
-            playerName: this.playerName().trim(),
-          },
-        });
+        this.router.navigate(['/mobile-lobby']);
       }),
     );
 
     this.subscriptions.push(
       this.playerSocketService.joinLobbyDenied$.subscribe((data) => {
-        console.log('Join lobby denied:', data);
         this.isJoining.set(false);
         this.errorMessage.set(data.reason || 'Unable to join lobby.');
       }),
     );
 
-    this.adminSocketService.gameState$
-      .pipe(map((gameState) => gameState.players))
-      .subscribe((players) => this.players.set(players));
+    // this.adminSocketService.gameState$
+    //   .pipe(map((gameState) => gameState.playerRankings))
+    //   .subscribe((players) => this.players.set(players));
   }
 
   onJoinLobby(): void {

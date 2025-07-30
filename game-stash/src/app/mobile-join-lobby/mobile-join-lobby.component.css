@@ -91,7 +91,7 @@
 .code-input {
   text-transform: uppercase;
   letter-spacing: 2px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   text-align: center;
   font-size: 18px;
   font-weight: 700;
@@ -180,15 +180,15 @@
   .join-lobby-container {
     padding: 15px;
   }
-  
+
   .header h1 {
     font-size: 2rem;
   }
-  
+
   .form-card {
     padding: 30px 20px;
   }
-  
+
   .input-field {
     font-size: 16px; /* Prevents zoom on iOS */
   }
@@ -198,7 +198,7 @@
   .form-card {
     padding: 25px 15px;
   }
-  
+
   .header h1 {
     font-size: 1.8rem;
   }

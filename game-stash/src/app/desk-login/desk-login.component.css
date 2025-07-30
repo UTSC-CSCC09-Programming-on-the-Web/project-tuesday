@@ -1,5 +1,5 @@
-@import url('../desk-game-select/desk-game-select.component.css');
-@import url('../../styles.css');
+@import url("../desk-game-select/desk-game-select.component.css");
+@import url("../../styles.css");
 
 :host {
   --primary-color: #667eea;
@@ -73,7 +73,8 @@ h1 {
   cursor: not-allowed;
 }
 
-.auth-form, .payment-form {
+.auth-form,
+.payment-form {
   text-align: left;
 }
 
@@ -242,11 +243,11 @@ h1 {
   .login-container {
     padding: 10px;
   }
-  
+
   .login-card {
     padding: 30px 20px;
   }
-  
+
   h1 {
     font-size: 1.8rem;
   }

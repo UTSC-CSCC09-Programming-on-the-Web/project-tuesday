@@ -4,7 +4,7 @@ import { environment } from '../../environments/environment';
 export const SERVER_ADDRESS = environment.socketUrl + '/';
 
 export interface GameResults {
-  winners: Array<string>
+  winners: Array<string>;
   responses: Record<string, number>;
   rankings: Array<string>;
   gameId: string;
@@ -13,11 +13,20 @@ export interface GameResults {
 
 export interface PlayerRanking {
   player: Player;
+
+  /*
+    Magic Number: points
+    Load Balancing: unused...?
+  */
   points: number;
   rank: number;
   isRoundWinner: boolean;
-  response: string;
-  data: number; //variable field used differently by different games
+
+  /*
+    Magic Number: guess
+    Load Balancing: score
+  */
+  data: number | undefined;
 }
 
 export interface Player {

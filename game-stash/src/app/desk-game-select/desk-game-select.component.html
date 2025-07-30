@@ -5,17 +5,32 @@
       <span class="lobby-code">{{ lobbyCode }}</span>
     </div>
   </div>
-  @if (selectedGame === '') {
-    <div class="col-3">
-      <div class="player-list player-info">
-        <h2>Players</h2>
-        <ul class="game-list">
-          <li class="player-item" *ngFor="let player of players">{{ player.name }}</li>
-        </ul>
-        <button class="leave-btn" color="primary" (click)="openNewTab()">
-          Add Player
-        </button>
-      </div>
+  @if (selectedGame === "") {
+    <div class="rankings-container col-3">
+      <header class="rankings-header">
+        <div class="player-info">
+          <h2>Players</h2>
+          <div class="rankings-list">
+            @for (player of players; track player) {
+              <div
+                class="ranking-item"
+                [class.winner]="players.indexOf(player) === 0"
+              >
+                <div class="rank-position">
+                  <span class="rank-number">{{
+                    rankings[player.playerId].points
+                  }}</span>
+                </div>
+                <div class="player-details">
+                  <span class="player-name">{{ player.name }}</span>
+                  <!-- <span class="player-guess">Rounds Won: {{ rankings[player.playerId].points }}</span> -->
+                </div>
+                <!-- <div class="player-points">{{ player.points }}</div> -->
+              </div>
+            }
+          </div>
+        </div>
+      </header>
     </div>
   } @else {
     <div class="col-3"></div>
@@ -36,31 +51,19 @@
           </li>
         </ul>
       </div>
-      <app-desk-magic-number *ngSwitchCase="'Magic Number'" (gameOver)="resetGame()"></app-desk-magic-number>
-      <app-desk-load-balancing *ngSwitchCase="'Load Balancing'" (gameOver)="resetGame()"></app-desk-load-balancing>
+      <app-desk-magic-number
+        *ngSwitchCase="'Magic Number'"
+        (gameOver)="resetGame()"
+      ></app-desk-magic-number>
+      <app-desk-load-balancing
+        *ngSwitchCase="'Load Balancing'"
+        (gameOver)="resetGame()"
+      ></app-desk-load-balancing>
+      <app-desk-throw-catch
+        *ngSwitchCase="'Throw and Catch'"
+        (gameOver)="resetGame()"
+      ></app-desk-throw-catch>
     </div>
   </div>
-  @if (selectedGame === '') {
-    <div class="rankings-container col-3">
-      <header class="rankings-header">
-        <div class="player-info">
-          <h2>Rankings</h2>
-          <div class="rankings-list">        @for (player of players; track player) {
-              <div class="ranking-item" [class.winner]="players.indexOf(player) === 0">
-                <div class="rank-position">
-                  <span class="rank-number">{{ players.indexOf(player) + 1 }}</span>
-                </div><div class="player-details">
-                  <span class="player-name">{{ player.name }}</span>
-                  <span class="player-guess">Rounds Won: {{ rankings[player.playerId].points }}</span>
-                </div>
-                <!-- <div class="player-points">{{ player.points }}</div> -->
-              </div>
-            }
-          </div>
-        </div>
-      </header>
-    </div>
-  } @else {
-    <div class="col-3"></div>
-  }
+  <div class="col-3"></div>
 </div>

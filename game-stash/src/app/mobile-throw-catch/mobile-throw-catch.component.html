@@ -1,1 +1,9 @@
-<p>mobile-throw-catch works!</p>
+<div class="lobby-header">
+  <div class="lobby-code-display">
+    <span class="lobby-code"></span>
+    <h2 *ngIf="this.isMyTurn">Throw the Ball!</h2>
+    <button class="leave-btn" id="permission" *ngIf="this.permissionButtonVisible">
+      Permission to Play
+    </button>
+  </div>
+</div>

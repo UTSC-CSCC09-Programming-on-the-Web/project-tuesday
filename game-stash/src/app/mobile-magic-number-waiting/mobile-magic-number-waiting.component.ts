@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminSocketService } from '../services/admin.socket.service';
 import { PlayerSocketService } from '../services/player.socket.service';
-import { Subscription } from 'rxjs';
+import { map, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-mobile-magic-number-waiting',
@@ -20,62 +20,42 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
   selectedGame = signal('');
   guess = signal(0);
   allSubmitted = signal(false);
+  init: boolean = false;
 
   private subscriptions: Subscription[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private adminSocketService: AdminSocketService,
     private playerSocketService: PlayerSocketService,
   ) {}
 
   ngOnInit(): void {
-    // Reset all signals to default values
-    this.lobbyCode.set('');
-    this.playerName.set('');
-    this.roundNumber.set(1);
-    this.selectedGame.set('');
-    this.guess.set(0);
-    this.allSubmitted.set(false);
-
-    // Read all parameters from route
-    this.subscriptions.push(
-      this.route.queryParams.subscribe((params) => {
-        const lobbyCode = params['lobbyCode'];
-        const playerName = params['playerName'];
-        const roundNumber = params['roundNumber'];
-        const selectedGame = params['selectedGame'] || 'Magic Number';
-        const guess = params['guess'];
-
-        if (!lobbyCode || !playerName || guess === undefined) {
-          console.error(
-            'PhoneGuessingGameWaiting: Missing required parameters',
-          );
-          this.router.navigate(['/mobile-join-lobby']);
-          return;
-        }
-
-        this.lobbyCode.set(lobbyCode);
-        this.playerName.set(playerName);
-        this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
-        this.selectedGame.set(selectedGame);
-        this.guess.set(parseInt(guess));
+    this.playerSocketService.playerState$
+      .pipe(
+        map((state) => state))
+      .subscribe((state) => {
+        this.lobbyCode.set(state.lobbyCode);
+        this.playerName.set(state.playerName);
+        this.roundNumber.set(state.roundNumber);
+        this.selectedGame.set(state.selectedGame);
+        this.guess.set(state.ranking.data || 0);
 
         this.setupSocketSubscriptions();
 
         // Emit game response when component initializes
-        this.submitGameResponse();
-      }),
-    );
+        if (!this.init) {
+          this.playerSocketService.playerEmit('gameResponse', {
+            gameId: this.selectedGame(),
+            data: this.guess(),
+          });
+        }
+        this.init = true;
+      });
   }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
-  }
-
-  private submitGameResponse(): void {
-    this.playerSocketService.submitGameResponse('Magic Number', this.guess());
   }
 
   private setupSocketSubscriptions(): void {
@@ -89,15 +69,7 @@ export class MobileMagicNumberWaitingComponent implements OnInit, OnDestroy {
   }
 
   private navigateToRankings(): void {
-    this.router.navigate(['/mobile-rankings'], {
-      queryParams: {
-        lobbyCode: this.lobbyCode(),
-        playerName: this.playerName(),
-        roundNumber: this.roundNumber(),
-        selectedGame: this.selectedGame(),
-        guess: this.guess(),
-      },
-    });
+    this.router.navigate(['/mobile-rankings']);
   }
 
   onLeaveLobby(): void {

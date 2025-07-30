@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../services/auth.service';
 import { GoogleSignInService } from '../services/google-signin.service';
@@ -13,7 +18,7 @@ declare var Stripe: any;
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './desk-login.component.html',
-  styleUrls: ['./desk-login.component.css']
+  styleUrls: ['./desk-login.component.css'],
 })
 export class DeskLoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -22,7 +27,7 @@ export class DeskLoginComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   successMessage = '';
-  
+
   // Stripe related
   stripe: any;
   elements: any;
@@ -42,15 +47,18 @@ export class DeskLoginComponent implements OnInit {
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
-    this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
-    }, { validators: this.passwordMatchValidator });
+    this.registerForm = this.fb.group(
+      {
+        username: ['', [Validators.required, Validators.minLength(2)]],
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', [Validators.required]],
+      },
+      { validators: this.passwordMatchValidator },
+    );
   }
 
   ngOnInit(): void {
@@ -98,8 +106,12 @@ export class DeskLoginComponent implements OnInit {
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
-    
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
+
+    if (
+      password &&
+      confirmPassword &&
+      password.value !== confirmPassword.value
+    ) {
       return { passwordMismatch: true };
     }
     return null;

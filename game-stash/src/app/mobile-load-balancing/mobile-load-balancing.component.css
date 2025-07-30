@@ -1,265 +1,294 @@
-/* Shared Variables */
+@import url("../desk-game-select/desk-game-select.component.css");
+@import url("../../styles.css");
+
 :host {
   --primary-color: #667eea;
   --secondary-color: #764ba2;
   --success-color: #48bb78;
   --error-color: #f56565;
-  --card-background: rgba(255, 255, 255, 0.1);  --border-color: rgba(255, 255, 255, 0.3);
+  --card-background: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.3);
   --border-radius: 12px;
 }
 
-.game-wrapper{
-  border:rgba(255, 255, 255, 0.5) 1px solid;
+.account-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
 }
 
-.form-card {
+.back-button-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+/* Override for buttons in user account to match create-lobby */
+.leave-btn.content {
+  min-width: 200px;
+  text-align: center;
+}
+
+/* Override any imported button column styles */
+.payment-form .action-buttons {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+/* Ensure buttons don't inherit column styling */
+.payment-form .action-buttons .leave-btn {
+  flex: 1;
+  max-width: 250px;
+  min-width: 180px;
+  text-align: center;
+  width: auto !important;
+  display: inline-flex !important;
+}
+
+/* Nuclear option: completely override any inherited column styles */
+.account-card .payment-form .action-buttons {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 15px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
+}
+
+.account-card {
   background: var(--card-background);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   padding: 40px;
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
   backdrop-filter: blur(10px);
   color: white;
 }
 
-.waiting-container {
-  height: 100vh;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  overflow: hidden;
-}
-
-/* Lobby Header */
-.lobby-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.2rem;
+h1 {
   color: white;
-  flex-shrink: 0;
-}
-
-.lobby-code-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.lobby-label {
-  font-size: 0.75rem;
-  opacity: 0.8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  /* margin-bottom: 0.25rem; */
-}
-
-.lobby-code {
-  font-size: 3rem;
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 2.2rem;
   font-weight: 700;
-  font-family: 'Courier New', monospace;
-  letter-spacing: 0.125em;
 }
 
-/* Main Content */
-.content {
-  flex: 1;
+h2 {
+  color: white;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 10px;
+}
+
+h3 {
+  color: white;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border: 1px solid #c3e6cb;
+}
+
+.user-info {
+  margin-bottom: 30px;
+}
+
+.info-grid {
+  display: grid;
+  gap: 15px;
+}
+
+.info-item {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  text-align: center;
-  min-height: 0;
-  overflow-y: auto;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
 }
 
-.player-info {
-  margin-bottom: 1rem;
-}
-
-.player-info h2 {
-  color: white;
-  font-size: 1.5rem;
+.info-item label {
   font-weight: 600;
-  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.waiting-message {
-  margin-bottom: 10rem;
-}
-
-.loading-dots {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.loading-dots span {
-  width: 12px;
-  height: 12px;
-  background: white;
-  border-radius: 50%;
-  animation: bounce 1.4s ease-in-out infinite both;
-}
-
-.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes bounce {
-  0%, 80%, 100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1);
-  }
-}
-
-.waiting-message h3 {
+.info-item span {
   color: white;
-  font-size: 1.25rem;
+}
+
+.status-active {
+  color: #28a745;
   font-weight: 600;
-  margin: 0 0 0.5rem 0;
 }
 
-.connection-status {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-  margin: 0.5rem 0 0 0;
-  text-align: center;
+.status-warning {
+  color: #ffc107;
+  font-weight: 600;
 }
 
-/* Actions */
-.actions {
-  padding: 1rem 0;
-  display: flex;
-  justify-content: center;
-  flex-shrink: 0;
+.status-inactive {
+  color: #dc3545;
+  font-weight: 600;
 }
 
-.leave-btn {
-  background: var(--card-background);
-  color: white;
-  border: 2px solid var(--border-color);
-  padding: 0.75rem 1.5rem;
+.subscription-section {
+  margin-bottom: 30px;
+}
+
+.subscription-active,
+.subscription-warning,
+.subscription-inactive {
+  padding: 20px;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
+  margin-bottom: 20px;
 }
 
-.leave-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
+.subscription-active {
+  background: #67c27c;
+  border: 1px solid #67c27c;
+  color: white;
 }
 
-/* Mobile optimizations */
-@media (max-width: 480px) {
-  .waiting-container {
-    padding: 15px;
-  }
-
-  .lobby-header {
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-  }
-
-  .lobby-code-display {
-    align-items: center;
-  }
-    .player-info {
-    margin-bottom: 0.75rem;
-  }
-
-  .player-info h2 {
-    font-size: 1.125rem;
-  }
-
-  .waiting-message {
-    margin-bottom: 1.5rem;
-  }
-
-  .waiting-message h3 {
-    font-size: 1rem;
-  }
-
-  .actions {
-    padding: 0.75rem 0;
-  }
-
-  .leave-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
+.subscription-warning {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
 }
 
-/* Landscape orientation on mobile */
-@media (max-height: 600px) and (orientation: landscape) {
-  .waiting-container {
+.subscription-inactive {
+  background: #f77878;
+  border: 1px solid #f77878;
+}
+
+.subscription-text {
+  margin-bottom: 15px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.payment-form {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 25px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: white;
+}
+
+.stripe-card-element {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.stripe-card-element:focus-within {
+  border-color: #667eea;
+}
+
+.action-buttons {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.action-buttons .leave-btn {
+  flex: 1;
+  max-width: 250px;
+  min-width: 180px;
+  text-align: center;
+  width: auto !important;
+}
+
+.payment-security {
+  text-align: center;
+  margin-top: 15px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.payment-security small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .account-container {
     padding: 10px;
   }
 
-  .lobby-header {
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-  }
-    .player-info {
-    margin-bottom: 0.5rem;
+  .account-card {
+    padding: 30px 20px;
   }
 
-  .waiting-message {
-    margin-bottom: 1rem;
+  h1 {
+    font-size: 1.8rem;
   }
 
-  .player-info h2 {
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
+  .back-button-container {
+    justify-content: center;
   }
 
-  .waiting-message h3 {
-    font-size: 0.875rem;
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 
-  .actions {
-    padding: 0.5rem 0;
+  /* Stack action buttons vertically on mobile */
+  .action-buttons {
+    flex-direction: column;
+    gap: 15px;
   }
 
-  .leave-btn {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.75rem;
-  }
-}
-
-/* Very small screens */
-@media (max-height: 500px) {
-  .content {
-    overflow-y: auto;
-  }
-
-  .player-info h2 {
-    font-size: 0.875rem;
-  }
-
-  .waiting-message h3 {
-    font-size: 0.75rem;
-  }
-
-  .loading-dots {
-    margin-bottom: 0.5rem;
-  }
-
-  .loading-dots span {
-    width: 8px;
-    height: 8px;
+  .action-buttons .leave-btn {
+    width: 100%;
+    max-width: none;
   }
 }

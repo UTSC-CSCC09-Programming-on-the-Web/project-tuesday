@@ -1,38 +1,49 @@
-
 ## Basic Flow
+
 ### Step 1: Start the Backend
+
+Go into ./server and run `node server.js` to start the backend (set up Postgres using the steps below if starting this app for the first time)
 Go into ./server and run `node server.js` to start the backend (if starting this app for the first time, set up Postgres using the steps below and make sure to create a server/.env file based off of the server/.env.example file. Ask Alton for any secrets you don't have)
 
 ### Step 2: Start the Frontend
+
 Go into ./game-stash and run `ng serve` to start the frontend
 
 ### Step 3: Start Stripe Webhooks Locally (remove this step once the web app is deployed)
+
 Go to ./game-stash and run `stripe listen --forward-to localhost:3000/webhook/stripe` to start the Stripe webhooks
 
 ## Public Domain Hosting (ngrok) Flow
-### Step 1: Setup 
+
+### Step 1: Setup
+
 Refer to the steps given at the bottom. Setup will only have to be done once.
 
 ### Step 2: Start the ngrok reverse-proxy
+
 Open a terminal and run `ngrok start --all`, this should start 2 HTTPS tunnels
 
 ### Step 3: Modify SERVER_ADDRESS
+
 in `socket.service.ts` change the value of `SERVER_ADDRESS` to be the ngrok tunnel entrypoint address for http://localhost:3000. It should look something like `https://067f-135-0-196-98.ngrok-free.app`. We are pointing our frontend to our backend.
 
 ### Step 4: Start the Backend
+
 Go into ./server and run `node server.js` to start the backend
 
 ### Step 5: Start the Frontend
+
 Go into ./game-stash and run `ng serve --disable-host-check` to start the frontend
 
 ## First-time Setup Steps
+
 ### Setting up ngrok
 
 1. Make an [ngrok account](https://ngrok.com/)
 
 2. From the same website, **download and install ngrok** (don't use the chocolatey install)
 
-	*ngrok is sometimes used by malicious actors to develop viruses, so it will probably get flagged as a trojan by windows security. It is not.*
+   _ngrok is sometimes used by malicious actors to develop viruses, so it will probably get flagged as a trojan by windows security. It is not._
 
 3. On the ngrok website again, find your **auth token**, and copy it down
 

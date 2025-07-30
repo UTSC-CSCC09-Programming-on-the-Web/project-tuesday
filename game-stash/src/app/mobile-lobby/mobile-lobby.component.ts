@@ -1,10 +1,8 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  AdminSocketService,
-  GameState,
-} from '../services/admin.socket.service';
+
+import { AdminSocketService } from '../services/admin.socket.service';
 import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription, map } from 'rxjs';
 
@@ -32,23 +30,11 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Get lobby details from query parameters
-    this.subscriptions.push(
-      this.route.queryParams.subscribe((params) => {
-        const lobbyCode = params['lobbyCode'];
-        const playerName = params['playerName'];
-
-        if (!lobbyCode || !playerName) {
-          // Redirect to join lobby if missing required parameters
-          this.router.navigate(['/mobile-join-lobby']);
-          return;
-        }
-
-        this.lobbyCode.set(lobbyCode);
-        this.playerName.set(playerName);
-
-        this.setupSocketSubscriptions();
-      }),
-    );
+    if (!this.playerSocketService.checkConnection()) {
+      this.router.navigate(['/mobile-join-lobby']);
+      return;
+    }
+    this.setupSocketSubscriptions();
   }
 
   private setupSocketSubscriptions(): void {
@@ -57,10 +43,29 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
       this.playerSocketService.playerState$
         .pipe(map((playerState) => playerState.selectedGame))
         .subscribe((gameId) => {
-          console.log("DETECTED SOCKET SUBSCRIPTION CHANGE --------- ", gameId)
           if (gameId) {
             this.selectedGame.set(gameId);
             this.navigateToGame(gameId);
+          }
+        }),
+    );
+    this.subscriptions.push(
+      this.playerSocketService.playerState$
+        .pipe(map((playerState) => playerState.playerName))
+        .subscribe((playerName) => {
+          if (playerName) {
+            this.playerName.set(playerName);
+          }
+        }),
+    );
+    this.subscriptions.push(
+      this.playerSocketService.playerState$
+        .pipe(map((playerState) => playerState.lobbyCode))
+        .subscribe((lobbyCode) => {
+          if (lobbyCode) {
+            this.lobbyCode.set(lobbyCode);
+          } else {
+            this.router.navigate(['/mobile-join-lobby']);
           }
         }),
     );
@@ -73,8 +78,8 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
           lobbyCode: this.lobbyCode(),
           playerName: this.playerName(),
           selectedGame: gameId,
-          roundNumber: 1
-        }
+          roundNumber: 1,
+        },
       });
     else if (gameId === 'Magic Number')
       this.router.navigate(['/mobile-magic-number'], {
@@ -85,6 +90,16 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
           roundNumber: 1,
         },
       });
+    else if (gameId === 'Throw and Catch') {
+      this.router.navigate(['/mobile-throw-and-catch'], {
+        queryParams: {
+          lobbyCode: this.lobbyCode(),
+          playerName: this.playerName(),
+          selectedGame: gameId,
+          roundNumber: 1,
+        },
+      });
+    }
   }
 
   ngOnDestroy(): void {

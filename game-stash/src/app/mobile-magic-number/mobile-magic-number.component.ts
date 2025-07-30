@@ -11,7 +11,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminSocketService } from '../services/admin.socket.service';
 import { PlayerSocketService } from '../services/player.socket.service';
-import { Subscription } from 'rxjs';
+import { map, Subscription } from 'rxjs';
+import { PlayerRanking } from '../services/socket.service.constants';
 
 @Component({
   selector: 'app-mobile-magic-number',
@@ -32,6 +33,17 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   isSubmitting = signal(false);
   errorMessage = signal('');
 
+  ranking = signal<PlayerRanking>({
+    player: {
+      name: '',
+      playerId: '',
+    },
+    points: 0,
+    rank: -1,
+    isRoundWinner: false,
+    data: -1, // variable field used differently by different games
+  })
+
   private subscriptions: Subscription[] = [];
 
   guess = computed(() => {
@@ -50,41 +62,21 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private adminSocketService: AdminSocketService,
     private playerSocketService: PlayerSocketService,
   ) {}
 
   ngOnInit(): void {
-    // Reset ALL component state for new navigation
-    this.lobbyCode.set('');
-    this.selectedGame.set('');
-    this.playerName.set('');
-    this.roundNumber.set(1);
-    this.guessInput.set('');
-    this.isSubmitting.set(false);
-    this.errorMessage.set('');
 
-    // Read all parameters from route
-    this.subscriptions.push(
-      this.route.queryParams.subscribe((params) => {
-        const lobbyCode = params['lobbyCode'];
-        const playerName = params['playerName'];
-        const roundNumber = params['roundNumber'];
-        const selectedGame = params['selectedGame'] || 'Magic Number';
-
-        if (!lobbyCode || !playerName) {
-          console.error('PhoneGuessingGame: Missing required parameters');
-          this.router.navigate(['/mobile-join-lobby']);
-          return;
-        }
-
-        this.lobbyCode.set(lobbyCode);
-        this.playerName.set(playerName);
-        this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
-        this.selectedGame.set(selectedGame);
-
-      }),
-    );
+    this.playerSocketService.playerState$
+      .pipe(
+        map((state) => state))
+      .subscribe((state) => {
+        this.lobbyCode.set(state.lobbyCode);
+        this.playerName.set(state.playerName);
+        this.roundNumber.set(state.roundNumber);
+        this.selectedGame.set(state.selectedGame);
+        this.ranking.set(state.ranking);
+      });
   }
 
   onSubmitGuess(): void {
@@ -92,7 +84,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
 
     const guessValue = this.guess();
     if (isNaN(guessValue)) {
-      console.error('PhoneGuessingGame: Invalid guess value (NaN)');
       this.errorMessage.set('Please enter a valid number');
       return;
     }
@@ -100,20 +91,13 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    console.log(
-      'PhoneGuessingGame: Set isSubmitting to true, navigating to waiting screen with guess:',
-      guessValue,
-    );
-
-    this.router.navigate(['/mobile-magic-number-waiting'], {
-      queryParams: {
-        lobbyCode: this.lobbyCode(),
-        playerName: this.playerName(),
-        roundNumber: this.roundNumber(),
-        selectedGame: this.selectedGame(),
-        guess: guessValue,
-      },
+    const ranking = this.ranking();
+    ranking.data = guessValue;
+    this.playerSocketService.updatePlayerState({
+      ranking
     });
+
+    this.router.navigate(['/mobile-magic-number-waiting']);
   }
 
   onLeaveLobby(): void {

@@ -1,6 +1,5 @@
 @import url("../../styles.css");
-@import url('../desk-load-balancing/desk-load-balancing.component.css');
-
+@import url("../desk-load-balancing/desk-load-balancing.component.css");
 
 :host {
   --primary-color: #667eea;
@@ -18,7 +17,7 @@
 }
 
 .rankings-container {
-  padding: 0 0 0 4rem !important;
+  padding: 0 4rem 0 0 !important;
 }
 
 .rankings-header {
@@ -26,7 +25,6 @@
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
     Cantarell, sans-serif !important;
-
 }
 
 .rankings-list {

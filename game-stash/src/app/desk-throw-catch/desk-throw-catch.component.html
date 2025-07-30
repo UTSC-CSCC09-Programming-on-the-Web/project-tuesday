@@ -1,0 +1,43 @@
+@if (status() !== 'Game Over') {
+  <!-- Game view -->
+  <div>
+    <h3>Current thrower: {{currentThrower()}}</h3>
+    <div #gameWrapper class="game-wrapper"></div>
+  </div>
+} @else {
+  <!-- Rankings view -->
+  <div class="rankings-container">
+    <header class="rankings-header">
+      <h1>Final Results</h1>
+      <div class="all-rankings">
+        <h3>Throw and Catch</h3>
+        <div class="rankings-list">
+          @for (player of players(); track player) {
+            <div
+              class="ranking-item"
+              [class.winner]="players().indexOf(player) === 0"
+            >
+              <div class="rank-position">
+                <span class="rank-number">{{
+                  players().indexOf(player) + 1
+                }}</span>
+              </div>
+              <div class="player-details">
+                <span class="player-name">{{ player.player.name }}</span>
+                <span class="player-guess">Distance from Flag: {{ player.points }}</span>
+              </div>
+              <!-- <div class="player-points">{{ player.points }}</div> -->
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+    <footer class="rankings-footer">
+      <div class="final-actions">
+        <button (click)="gameOverEmit()" class="stay-btn">
+          Back to Game Select
+        </button>
+      </div>
+    </footer>
+  </div>
+}

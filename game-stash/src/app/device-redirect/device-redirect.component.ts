@@ -10,11 +10,10 @@ import { Router } from '@angular/router';
 export class DeviceRedirectComponent {
   check = false;
 
-  constructor(private router: Router) {
-  }
+  constructor(private router: Router) {}
 
   mobileCheck(): void {
-    if (navigator.userAgent.includes("Mobile")) this.check = true;
+    if (navigator.userAgent.includes('Mobile')) this.check = true;
     ((a) => {
       if (
         !/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(
@@ -31,16 +30,12 @@ export class DeviceRedirectComponent {
   ngOnInit() {
     this.mobileCheck();
     if (this.check) {
-      console.log('Mobile device detected');
-      // Add any mobile-specific logic here
-      // route to mobile view
       this.router.navigate(['/mobile-join-lobby']);
     } else {
-      console.log('Desktop device detected');
       // Add any desktop-specific logic here
       // route to desktop view
       this.router.navigate(['/create-lobby']);
-      alert(navigator.userAgent);
+      // alert(navigator.userAgent);
 
     }
   }

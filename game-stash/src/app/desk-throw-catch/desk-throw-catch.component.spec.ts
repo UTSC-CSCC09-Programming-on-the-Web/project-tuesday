@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DeskLoginComponent } from './desk-login.component';
+import { DeskThrowCatchComponent } from './desk-throw-catch.component';
 
-describe('DeskLoginComponent', () => {
-  let component: DeskLoginComponent;
-  let fixture: ComponentFixture<DeskLoginComponent>;
+describe('DeskThrowCatchComponent', () => {
+  let component: DeskThrowCatchComponent;
+  let fixture: ComponentFixture<DeskThrowCatchComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeskLoginComponent],
+      imports: [DeskThrowCatchComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DeskLoginComponent);
+    fixture = TestBed.createComponent(DeskThrowCatchComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
