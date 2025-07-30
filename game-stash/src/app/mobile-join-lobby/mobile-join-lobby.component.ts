@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AdminSocketService } from '../services/admin.socket.service';
 import { PlayerSocketService } from '../services/player.socket.service';
 import { Subscription, map } from 'rxjs';
+import { Player } from '../services/socket.service.constants';
 
 @Component({
   selector: 'app-mobile-join-lobby',
@@ -19,7 +20,7 @@ export class MobileJoinLobbyComponent implements OnDestroy {
   isJoining = signal(false);
   errorMessage = signal('');
 
-  players = signal<string[]>([]);
+  players = signal<Player[]>([]);
 
   private subscriptions: Subscription[] = [];
 

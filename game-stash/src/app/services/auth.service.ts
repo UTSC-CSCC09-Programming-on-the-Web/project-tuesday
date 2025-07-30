@@ -131,12 +131,16 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('authToken');
+    // NO-AUTH BRANCH: Always return true to skip authentication
+    return true;
+    // return !!localStorage.getItem('authToken');
   }
 
   hasActiveSubscription(): boolean {
-    const user = this.currentUserSubject.value;
-    return user?.subscriptionStatus === 'active';
+    // NO-AUTH BRANCH: Always return true to skip subscription checks
+    return true;
+    // const user = this.currentUserSubject.value;
+    // return user?.subscriptionStatus === 'active';
   }
 
   requiresPayment(): boolean {

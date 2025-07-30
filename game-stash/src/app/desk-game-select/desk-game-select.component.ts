@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatListModule } from '@angular/material/list';
 import { DeskLoadBalancingComponent } from "../desk-load-balancing/desk-load-balancing.component";
 import { map } from 'rxjs';
+import { GlobalRanking, Player } from '../services/socket.service.constants';
 
 @Component({
   selector: 'app-desk-game-select',
@@ -28,7 +29,8 @@ export class DeskGameSelectComponent {
     private adminSocketService: AdminSocketService,
   ) {}
 
-  players: string[] = [];
+  players: Player[] = [];
+  rankings: GlobalRanking = {};
   lobbyName: string = '';
   lobbyCode: string = '';
 
@@ -52,7 +54,20 @@ export class DeskGameSelectComponent {
 
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.players))
-      .subscribe((players) => (this.players = players));
+      .subscribe((players) => {
+        console.log('Players in lobby:', players);
+        this.players = players
+      });
+    this.adminSocketService.gameState$
+      .pipe(map((gameState) => gameState.globalRankings))
+      .subscribe((globalRankings) => {
+        this.rankings = globalRankings;
+        this.players.sort((a, b) => {
+          const aRank = this.rankings[a.playerId]?.points || 0;
+          const bRank = this.rankings[b.playerId]?.points || 0;
+          return bRank - aRank;
+        })
+      });
   }
 
   openNewTab() {
@@ -63,6 +78,11 @@ export class DeskGameSelectComponent {
       ]),
     );
     window.open(url, '_blank');
+  }
+
+  resetGame() {
+    this.selectedGame = '';
+    this.adminSocketService.resetGameState();
   }
 
   playGame(game: string) {

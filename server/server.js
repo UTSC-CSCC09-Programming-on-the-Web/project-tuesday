@@ -6,13 +6,14 @@ import { loadBalancing } from "./load_balancing.js";
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import session from 'express-session';
-import passport from 'passport';
+// NO-AUTH BRANCH: Comment out session and passport imports
+// import session from 'express-session';
+// import passport from 'passport';
 
-// Import custom modules
-import { initializeDatabase } from './database.js';
-import authRoutes from './routes/auth.js';
-import stripeRoutes from './routes/stripe.js';
+// NO-AUTH BRANCH: Comment out custom modules for auth and stripe
+// import { initializeDatabase } from './database.js';
+// import authRoutes from './routes/auth.js';
+// import stripeRoutes from './routes/stripe.js';
 
 // Load environment variables
 dotenv.config();
@@ -69,28 +70,32 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Body parsing middleware
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' })); // Raw for Stripe webhooks
+// NO-AUTH BRANCH: Comment out Stripe webhook handling
+// app.use('/api/stripe/webhook', express.raw({ type: 'application/json' })); // Raw for Stripe webhooks
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// NO-AUTH BRANCH: Comment out session configuration
 // Session configuration
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-session-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
+// app.use(session({
+//   secret: process.env.SESSION_SECRET || 'your-session-secret',
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     secure: process.env.NODE_ENV === 'production',
+//     maxAge: 24 * 60 * 60 * 1000 // 24 hours
+//   }
+// }));
 
+// NO-AUTH BRANCH: Comment out Passport initialization
 // Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
+// NO-AUTH BRANCH: Comment out auth and stripe routes
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/stripe', stripeRoutes);
+// app.use('/api/auth', authRoutes);
+// app.use('/api/stripe', stripeRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -106,11 +111,12 @@ app.get("/", (req, res) => {
   res.json({ message: "Game Stash API Server" });
 });
 
+// NO-AUTH BRANCH: Comment out database initialization
 // Initialize database
-initializeDatabase().catch(error => {
-  console.error('Failed to initialize database:', error);
-  process.exit(1);
-});
+// initializeDatabase().catch(error => {
+//   console.error('Failed to initialize database:', error);
+//   process.exit(1);
+// });
 
 // Socket.IO connection ---------------------------------------------------
 const lobbies = {}; 
@@ -222,8 +228,10 @@ io.on("connection", (socket) => {
           let playerId = key
 
           const playerRanking = {
-            name: "John Doe", //needs to be replaced with player name on frontend
-            playerId: playerId,
+            player: {
+              name: "John Doe", //needs to be replaced with player name on frontend
+              playerId: playerId,
+            },
             points: lobbies[arg.lobbyCode].score[playerId] ?? 0,
             rank: rankings.indexOf(playerId) + 1,
             isRoundWinner: winners.includes(playerId),
@@ -263,6 +271,7 @@ io.on("connection", (socket) => {
     socket.join(arg.lobbyCode);
     socket.to(arg.lobbyCode).emit("userJoinedLobby", {
       user: socket.id,
+      playerName: arg.playerName || "Default",
     });
 
     lobbies[arg.lobbyCode].players[socket.id] = false;
@@ -354,6 +363,16 @@ io.on("connection", (socket) => {
     }
     socket.to(arg.lobbyCode).emit("gameEnded");
 });
+
+  socket.on('gameReset', (arg) => {
+    console.log(`Resetting game state for lobby ${socket.id}`);
+    if (lobbies[arg.lobbyCode] && lobbies[arg.lobbyCode].admin === socket.id) {
+      console.log(`Resetting game state for lobby ${socket.id}`);
+      lobbies[arg.lobbyCode].gameStarted = false;
+      lobbies[arg.lobbyCode].responses = {};
+    }
+    socket.to(arg.lobbyCode).emit("gameReset");
+  });
 });
 
 server.listen(PORT, () => {
