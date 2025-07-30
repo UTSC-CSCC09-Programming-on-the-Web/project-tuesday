@@ -119,24 +119,17 @@ export class AdminSocketService {
     this.socket.on('gameResponseReceived', (arg: any) => {
       const playerRank = this.gameStateSubject.value.playerRankings.map((r) => {
         if (r.player.playerId === arg.playerId) {
-          console.log('found it :)', arg.data);
           r.data = arg.data;
         }
         return r;
       });
-
-      console.log('before', playerRank);
       this.gameStateSubject.next({
         ...this.gameStateSubject.value,
         playerRankings: playerRank,
       });
-      console.log('after', this.gameStateSubject.value.playerRankings);
-
-      console.log('Game response received:', arg);
     });
 
     this.socket.on('gameResults', (arg: GameResults) => {
-      console.log('Game results received:', arg);
       this.updateState({ data: arg.targetNumber });
       this.updateRankings(arg.responses, arg.winners);
     });
@@ -224,7 +217,6 @@ export class AdminSocketService {
   // Method to disconnect the socket
   disconnect() {
     if (this.socket) {
-      console.log('AdminSocketService: Disconnecting socket');
       this.socket.disconnect();
       this.socket = null;
     }
@@ -307,7 +299,6 @@ export class AdminSocketService {
       playerRankings: updatedRankings,
       globalRankings: globalRank,
     });
-    console.log('Updated Magic Number Rankings:', updatedRankings);
   }
 
   private getPlayerName(playerId: string): string {
@@ -328,7 +319,6 @@ export class AdminSocketService {
 
   // Called when the round is over
   resetRoundState() {
-    console.log('Resetting round state');
     const rankings = this.gameStateSubject.value.playerRankings.map((r) => {
       return {
         ...r,
@@ -360,12 +350,10 @@ export class AdminSocketService {
     this.socket.emit('gameReset', {
       lobbyCode: this.gameStateSubject.value.lobbyCode,
     });
-    console.log('Game state reset', this.gameStateSubject.value);
   }
 
   // Called to advance to the next round (or to any round)
   setRound(round: number, finalRound?: number) {
-    console.log('Setting round:', round, 'Final round:', finalRound);
     if (finalRound)
       this.updateState({
         finalRound: finalRound,

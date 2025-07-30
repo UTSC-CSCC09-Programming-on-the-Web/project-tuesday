@@ -45,7 +45,6 @@ export class DeskGameSelectComponent {
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.playerRankings))
       .subscribe((players) => {
-        console.log('Players in lobby:', players);
         this.players = players.map((player) => player.player);
       });
     this.adminSocketService.gameState$

@@ -45,8 +45,6 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
 
     // Check if user came here from menu (lobby)
     this.cameFromMenu = this.route.snapshot.queryParams['from'] === 'menu';
-    console.log('ngOnInit - cameFromMenu:', this.cameFromMenu);
-    console.log('ngOnInit - query params:', this.route.snapshot.queryParams);
 
     // Initialize Stripe elements immediately
     this.initializeStripeElements();
@@ -54,7 +52,6 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
     // Subscribe to current user
     this.userSubscription = this.authService.currentUser$.subscribe((user) => {
       this.user = user;
-      console.log('User subscription update:', user);
 
       // If user is not authenticated, redirect to login
       if (!user) {
@@ -69,9 +66,6 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
         !this.cameFromMenu &&
         !this.isProcessingPayment
       ) {
-        console.log(
-          'Auto-redirecting to lobby - subscription is active and user did not come from menu',
-        );
         this.router.navigate(['/desk-create-lobby']);
         return;
       }
@@ -278,21 +272,12 @@ export class DeskUserAccountComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    console.log('goBack() called');
-    console.log('cameFromMenu:', this.cameFromMenu);
-    console.log(
-      'hasActiveSubscription:',
-      this.authService.hasActiveSubscription(),
-    );
-    console.log('user:', this.user);
 
     // If user came from menu (lobby) and has active subscription, go back to lobby
     // Otherwise logout and go to login
     if (this.cameFromMenu && this.authService.hasActiveSubscription()) {
-      console.log('Navigating to desk-create-lobby');
       this.router.navigate(['/desk-create-lobby']);
     } else {
-      console.log('Logging out and navigating to login');
       this.authService.logout(); // This will handle navigation to login and cleanup
     }
   }

@@ -84,7 +84,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
 
     const guessValue = this.guess();
     if (isNaN(guessValue)) {
-      console.error('PhoneGuessingGame: Invalid guess value (NaN)');
       this.errorMessage.set('Please enter a valid number');
       return;
     }
@@ -92,10 +91,6 @@ export class MobileMagicNumberComponent implements OnInit, OnDestroy {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    console.log(
-      'PhoneGuessingGame: Set isSubmitting to true, navigating to waiting screen with guess:',
-      guessValue,
-    );
     const ranking = this.ranking();
     ranking.data = guessValue;
     this.playerSocketService.updatePlayerState({

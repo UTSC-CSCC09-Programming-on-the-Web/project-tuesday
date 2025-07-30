@@ -35,17 +35,6 @@ export class DeskLoadBalancingComponent implements OnInit {
 
   ngOnInit() {
     this.status.set('Waiting for players');
-    console.log(this.status());
-
-    // .pipe(map((gameState) => gameState.playerRankings))
-    //   .subscribe((players) => {
-    //     this.players = players.map(player => player.player)
-    //     this.responded = players.filter(players => players.data !== undefined).map(player => player.player);
-    //     this.unresponded = this.players.filter(
-    //       (player) => !this.responded.find(res => res.playerId === player.playerId),
-    //     );
-    //     if (this.unresponded.length === 0) this.roundEnd();
-    //   });
 
     this.socketService.gameState$
       .pipe(map((gameState) => gameState.playerRankings))
@@ -81,17 +70,6 @@ export class DeskLoadBalancingComponent implements OnInit {
     this.socketService.lobbyEmit('startGame', {
       gameId: 'Load Balancing',
     });
-
-    /* THIS IS REPLACED BY GAMERESPONSERECEIVED. RESPONDED ARRAY IS NOW JUST THE DATA VALUE NOT BEING UNDEFINED IN THE PLAYERRANKING ARRAY */
-    // this.socketService.useEffect("playerStart", (data) => {
-    //   this.socketService.setResponded([...this.responded, this.players().find(player => player.playerId === data.playerId)!]);
-    //   console.log(`Player ${data.playerId} started the game in lobby`);
-    //   if (this.responded.length === this.players().length) {
-    //     console.log("All players have started the game, starting the game logic");
-    //     this.status.set('Game Countdown');
-    //     this.startCountdown(this.startGame.bind(this));
-    //   }
-    // });
   }
 
   gameOverEmit() {
@@ -124,25 +102,21 @@ export class DeskLoadBalancingComponent implements OnInit {
       (() => {
         clearInterval(this.interval);
 
-        console.log('Game ended, sending gameEnded event', this.players());
         this.socketService.lobbyEmit('gameEnded', {
           gameId: 'Load Balancing',
           players: this.players(),
         });
 
         this.socketService.removeEffect('scoreUpdate');
-        console.log('Game ended');
         this.status.set('Game Over');
       }).bind(this),
     );
 
     this.socketService.useEffect('scoreUpdate', (data) => {
-      console.log('Score update received:', data);
       const player = this.players().find(
         (player) => player.player.playerId === data.playerId,
       ) || { player: { playerId: data.playerId, name: '' }, points: undefined };
       player.points = data.points;
-      console.log('Updated points:', player);
       this.players.set(
         this.players().sort((a, b) => {
           const aPoints = a.points || 0;
@@ -160,7 +134,6 @@ export class DeskLoadBalancingComponent implements OnInit {
   }
 
   private startCountdown(callback: () => void): void {
-    console.log('starting countdown', this.countdownInterval);
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
       if (current > 0) {
@@ -181,6 +154,5 @@ export class DeskLoadBalancingComponent implements OnInit {
     }
     this.socketService.removeEffect('playerStart');
     this.socketService.removeEffect('scoreUpdate');
-    console.log('DeskLoadBalancingComponent destroyed');
   }
 }

@@ -91,7 +91,6 @@ export class MobileLobbyComponent implements OnInit, OnDestroy {
         },
       });
     else if (gameId === 'Throw and Catch') {
-      console.log('attempt to navigate to throw and catch');
       this.router.navigate(['/mobile-throw-and-catch'], {
         queryParams: {
           lobbyCode: this.lobbyCode(),

@@ -46,7 +46,6 @@ export class MobileJoinLobbyComponent implements OnDestroy {
 
     this.subscriptions.push(
       this.playerSocketService.joinLobbyDenied$.subscribe((data) => {
-        console.log('Join lobby denied:', data);
         this.isJoining.set(false);
         this.errorMessage.set(data.reason || 'Unable to join lobby.');
       }),

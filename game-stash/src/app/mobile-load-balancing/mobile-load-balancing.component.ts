@@ -112,7 +112,6 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
   }
 
   runGame() {
-    console.log(this.wrapper);
     this.render = Render.create({
       element: this.wrapper.nativeElement,
       engine: this.engine,
@@ -153,8 +152,6 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     Runner.run(runner, this.engine);
     Render.run(this.render);
 
-    console.log('Game started');
-
     this.socketService.playerEmit('gameResponse', {
       gameId: this.selectedGame(),
       data: 0,
@@ -176,7 +173,6 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
           ) {
             World.remove(this.engine.world, body);
             this.bodies = this.bodies.filter((b) => b !== body);
-            console.log('Body removed:', body, this.bodies.length);
           } else {
             Body.applyForce(body, body.position, {
               x: 0,
@@ -186,7 +182,6 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
         });
         const points = this.bodies.length;
         if (points !== this.points) {
-          console.log('Points updated:', points);
           this.points = points;
           this.socketService.playerEmit('gameResponse', {
             gameId: this.selectedGame(),
@@ -197,7 +192,6 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     });
 
     this.socketService.useEffect('spawnBox', (data) => {
-      console.log(data);
       const box = Bodies.circle(data.x, data.y, data.size / 2, {
         isStatic: true,
         render: {
@@ -228,7 +222,6 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
     this.socketService.useEffect('gameEnded', (data) => {
       this.gameOver = true;
-      console.log('Game ended:', data);
       if (this.render) {
         Render.stop(this.render);
       }
@@ -240,18 +233,6 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
       this.socketService.removeEffect('gameEnded');
       this.router.navigate(['/mobile-rankings']);
     });
-
-    // setInterval(() => {
-    //   // Example of a game action after 5 seconds
-    //   console.log("Game action executed after 5 seconds");
-
-    //   const x = Math.random() * this.width;
-    //   const y = Math.random() * 100;
-    //   const size = Math.random() * 50 + 20;
-    //   const box = Bodies.rectangle(x, y, size, size);
-    //   this.bodies.push(box);
-    //   // World.add(this.engine.world, box);
-    // }, 3000);
   }
 
   startMotionListener() {
@@ -271,6 +252,5 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     }
     this.socketService.removeEffect('spawnBox');
     this.socketService.removeEffect('gameEnded');
-    console.log('MobileLoadBalancingComponent destroyed');
   }
 }

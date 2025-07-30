@@ -110,12 +110,10 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
 
   private startCountdown(): void {
     this.playerSocketService.useEffect('countdownTick', (tick) => {
-      console.log('tick');
       this.countdown.set(tick);
     });
 
     this.playerSocketService.useEffect('nextRound', (data) => {
-      console.log('nextRound effect received:', data);
       this.playerSocketService.updatePlayerState({
         roundNumber: data.roundNumber,
         finalRound: data.finalRound,

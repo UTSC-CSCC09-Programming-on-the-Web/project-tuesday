@@ -30,16 +30,11 @@ export class DeviceRedirectComponent {
   ngOnInit() {
     this.mobileCheck();
     if (this.check) {
-      console.log('Mobile device detected');
-      // Add any mobile-specific logic here
-      // route to mobile view
       this.router.navigate(['/mobile-join-lobby']);
     } else {
-      console.log('Desktop device detected');
       // Add any desktop-specific logic here
       // NO-AUTH BRANCH: route directly to desk-create-lobby
       this.router.navigate(['/desk-create-lobby']);
-      // alert(navigator.userAgent); // Commenting out alert for cleaner UX
     }
   }
 }

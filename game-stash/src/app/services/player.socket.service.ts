@@ -61,12 +61,7 @@ export class PlayerSocketService {
   }
 
   playerEmit(event: string, data: any) {
-    console.log(
-      'SocketService: playerEmit called with event:',
-      event,
-      'and data:',
-      data,
-    );
+
     this.socket.emit(event, {
       data,
       playerId: this.socket.id,
@@ -100,9 +95,6 @@ export class PlayerSocketService {
     }
 
     // Create a fresh socket for phone client
-    console.log(
-      'PlayerSocketService: Creating new socket connection for phone',
-    );
     this.socket = io(SERVER_ADDRESS, {
       forceNew: true, // Force a new connection
       reconnection: true,
@@ -110,15 +102,8 @@ export class PlayerSocketService {
       transports: ['websocket', 'polling'],
     });
 
-    this.socket.on('welcome', (res: any) => {
-      console.log('PlayerSocketService: Received welcome:', res.message);
-    });
 
     this.socket.on('connect', () => {
-      console.log(
-        'PlayerSocketService: Phone connected, socket ID:',
-        this.socket.id,
-      );
       this.socket.emit('joinLobby', {
         lobbyCode: lobbyCode,
         client: this.socket.id,
@@ -138,18 +123,11 @@ export class PlayerSocketService {
       console.error('PlayerSocketService: Socket connection error:', error);
     });
 
-    this.socket.on('joinLobbySuccess', () => {
-      console.log('PlayerSocketService: Join lobby successful');
-      this.joinLobbySuccessSubject.next();
-    });
-
     this.socket.on('joinLobbyDenied', (data: any) => {
-      console.log('PlayerSocketService: Join lobby denied:', data);
       this.joinLobbyDeniedSubject.next(data);
     });
 
     this.socket.on('lobbyClosed', (data: any) => {
-      console.log('PlayerSocketService: Lobby closed:', data);
       this.joinLobbyDeniedSubject.next({ reason: 'Lobby closed by admin' });
       this.updatePlayerState({
         lobbyCode: '',
@@ -164,7 +142,6 @@ export class PlayerSocketService {
 
     // Listen for game start event
     this.socket.on('startGamePlayer', (arg: any) => {
-      console.log('PlayerSocketService: received ping to start ', arg.gameId);
       if (arg.gameId === 'Magic Number') {
         this.updatePlayerState({
           selectedGame: arg.gameId,
@@ -183,52 +160,23 @@ export class PlayerSocketService {
     this.socket.on(
       'gameResults',
       (arg: { ranking: PlayerRanking; data: number | undefined }) => {
-        console.log(
-          'MobileSocketService received gameResults for gameId:',
-          this.playerStateSubject.value.selectedGame,
-        );
-        console.log('MobileSocketService gameResults data:', arg);
 
-        switch (this.playerStateSubject.value.selectedGame) {
-          // case 'Magic Number':
-
-          //   const newPlayerRanking = arg;
-          //   newPlayerRanking.player.name = this.playerName
-          //     this.updatePlayerRankings(newPlayerRanking);
-          //   break;
-          default:
-            const newPlayerRanking = arg.ranking;
-            newPlayerRanking.player.name = this.playerName;
-            this.updatePlayerRankings({
-              ranking: newPlayerRanking,
-              data: arg.data,
-            });
-            // console.log('Unknown game ID:', this.playerStateSubject.value.selectedGame);
-            break;
-        }
-
-        console.log(
-          'PlayerSocketService: Game round complete, all players submitted',
-        );
+        const newPlayerRanking = arg.ranking;
+          newPlayerRanking.player.name = this.playerName;
+          this.updatePlayerRankings({
+            ranking: newPlayerRanking,
+            data: arg.data,
+          });
         this.gameRoundCompleteSubject.next();
       },
     );
 
-    console.log('PlayerSocketService: Socket connection initiated');
   }
 
   updatePlayerRankings(arg: {
     ranking: PlayerRanking;
     data: number | undefined;
   }) {
-    /*name: string;
-  playerId: string;
-  points: number;
-  rank: number;
-  isRoundWinner: boolean;
-
-  data: number; //variable field used differently by different games
-    */
 
     this.updatePlayerState({
       ranking: arg.ranking,
@@ -237,15 +185,10 @@ export class PlayerSocketService {
   }
 
   joinLobby(lobbyCode: string, playerName: string) {
-    console.log('PlayerSocketService: Starting joinLobby process', {
-      lobbyCode,
-      playerName,
-    });
     this.connectToSocket(lobbyCode, playerName);
   }
 
   leaveLobby() {
-    console.log('PlayerSocketService: Leaving lobby', this.playerStateSubject.value.lobbyCode);
     if (this.socket && this.playerStateSubject.value.lobbyCode) {
       this.socket.emit('leaveLobby', { lobbyCode: this.playerStateSubject.value.lobbyCode });
     }
@@ -259,7 +202,6 @@ export class PlayerSocketService {
 
   disconnect() {
     if (this.socket) {
-      console.log('PlayerSocketService: Disconnecting socket');
       this.socket.disconnect();
       this.socket = null;
     }

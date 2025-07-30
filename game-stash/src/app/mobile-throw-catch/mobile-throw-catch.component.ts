@@ -41,8 +41,6 @@ export class MobileThrowCatchComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('MobileThrowCatchComponent initialized');
-
     // attach event to track motion
     this.socketService.useEffect('queryPlayerThrow', (data: any) => {
       //give indicator to user to throw
@@ -51,7 +49,6 @@ export class MobileThrowCatchComponent implements OnInit {
     });
 
     this.socketService.useEffect('gameEnded', (data) => {
-      console.log('Game ended:', data);
 
       this.router.navigate(['/mobile-rankings'], {
         queryParams: {
@@ -94,13 +91,6 @@ export class MobileThrowCatchComponent implements OnInit {
       this.playerName.set(playerName);
       this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
       this.selectedGame.set(selectedGame);
-
-      console.log('Throw and Catch: Loaded parameters', {
-        lobbyCode: this.lobbyCode(),
-        playerName: this.playerName(),
-        roundNumber: this.roundNumber(),
-        selectedGame: this.selectedGame(),
-      });
     });
 
     // get permission to use motion sensors

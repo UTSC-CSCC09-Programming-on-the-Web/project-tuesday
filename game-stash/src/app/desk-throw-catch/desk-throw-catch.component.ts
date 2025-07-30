@@ -87,9 +87,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
     socketService.useEffect('playerThrowData', (arg) => {
       // simulate the throw
       if (arg.throwData === -1) {
-        console.log('Game ended, sending gameEnded event', this.players());
-
-        console.log(this.players());
 
         this.socketService.lobbyEmit('gameEnded', {
           gameId: 'Throw and Catch',
@@ -97,7 +94,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
           // points: this.points,
         });
 
-        console.log('Game ended');
         this.status.set('Game Over');
       } else {
         this.currentPlayerId = arg.playerId;
@@ -116,37 +112,34 @@ export class DeskThrowCatchComponent implements AfterViewInit {
 
   ngOnInit() {
     this.socketService.gameState$
-          .pipe(map((gameState) => gameState.playerRankings))
-          .subscribe((players) => {
-            this.players.set(
-              players.map((player) => {
-                return {
-                  player: player.player,
-                  points: Math.abs(Math.trunc(player.data!)),
-                };
-              }),
-            );
-            this.responded = players
-              .filter((players) => players.data !== undefined)
-              .map((player) => player.player);
-            this.unresponded = this.players()
-              .filter(
-                (player) =>
-                  !this.responded.find(
-                    (res) => res.playerId === player.player.playerId,
-                  ),
-              )
-              .map((player) => player.player);
-            if (
-              this.unresponded.length === 0 &&
-              this.status() === 'Waiting for players'
-            ) {
-              this.status.set('Game Countdown');
-              //this.startCountdown(this.startGame.bind(this));
-            }
-          });
-
-    console.log(this.players());
+      .pipe(map((gameState) => gameState.playerRankings))
+      .subscribe((players) => {
+        this.players.set(
+          players.map((player) => {
+            return {
+              player: player.player,
+              points: Math.abs(Math.trunc(player.data!)),
+            };
+          }),
+        );
+        this.responded = players
+          .filter((players) => players.data !== undefined)
+          .map((player) => player.player);
+        this.unresponded = this.players()
+          .filter(
+            (player) =>
+              !this.responded.find(
+                (res) => res.playerId === player.player.playerId,
+              ),
+          )
+          .map((player) => player.player);
+        if (
+          this.unresponded.length === 0 &&
+          this.status() === 'Waiting for players'
+        ) {
+          this.status.set('Game Countdown');
+        }
+      });
   }
 
   ngAfterViewInit() {
@@ -158,7 +151,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
 
   // render the landscape, with a goalpost
   renderScreen() {
-    console.log(this.wrapper);
     this.render = Render.create({
       element: this.wrapper.nativeElement,
       engine: this.engine,
@@ -207,7 +199,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
     Events.on(this.engine, 'afterUpdate', () => {
       if (this.ball) {
         if (this.ball.position.y > this.platform!.position.y && !this.hasReadStopped) {
-          console.log('ball has fallen below the platform');
           this.hasReadStopped = true;
 
           this.socketService.lobbyEmit('queryNextPlayerThrow', {
@@ -220,7 +211,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
         }
 
         if (this.ball.velocity.x === 0 && !this.hasReadStopped) {
-          console.log('ball has stopped moving');
           this.hasReadStopped = true;
 
           this.socketService.lobbyEmit('queryNextPlayerThrow', {
@@ -301,8 +291,6 @@ export class DeskThrowCatchComponent implements AfterViewInit {
 
   // spawn a ball
   spawnBall(playerId: string, throwForce: { x: number; y: number }) {
-    console.log('spawning a ball');
-    console.log(throwForce);
     this.hasReadStopped = false;
     const platformPos = this.platform!.position;
 
@@ -360,7 +348,5 @@ export class DeskThrowCatchComponent implements AfterViewInit {
     if (this.render) {
       Render.stop(this.render);
     }
-
-    console.log('DeskLoadBalancingComponent destroyed');
   }
 }

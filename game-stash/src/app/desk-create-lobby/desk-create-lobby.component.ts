@@ -63,7 +63,6 @@ export class DeskCreateLobbyComponent implements OnInit, OnDestroy {
       .subscribe((code) => {
         this.lobbyCode = code;
         if (this.lobbyCode) {
-          console.log('Lobby code:', this.lobbyCode);
           this.router.navigate(['/lobby']);
         }
       });

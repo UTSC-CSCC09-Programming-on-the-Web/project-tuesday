@@ -56,21 +56,18 @@ export class DeskMagicNumberComponent implements OnInit {
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.data))
       .subscribe((targetNumber) => {
-        console.log('Target number updated:', targetNumber);
         this.targetNumber.set(targetNumber || 0);
       });
 
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.roundNumber))
       .subscribe((roundNumber) => {
-        console.log('Round number updated:', roundNumber);
         this.roundNumber.set(roundNumber || 1);
       });
 
     this.adminSocketService.gameState$
       .pipe(map((gameState) => gameState.finalRound))
       .subscribe((finalRound) => {
-        console.log('Final round updated:', finalRound);
         this.finalRound.set(finalRound || 3);
       });
 
@@ -85,9 +82,6 @@ export class DeskMagicNumberComponent implements OnInit {
     this.isRoundOver.set(true);
     if (!this.isGameOver()) {
       this.startCountdown();
-    }
-    if (this.isGameOver()) {
-      console.log('Magic Number: Game over, final rankings:', this.rankings());
     }
   }
 
@@ -112,19 +106,16 @@ export class DeskMagicNumberComponent implements OnInit {
   }
 
   private stopCountdown(): void {
-    console.log('Stopping countdown', this.countdownInterval);
     clearInterval(this.countdownInterval);
   }
 
   private startCountdown(): void {
     this.countdown.set(10);
-    console.log('starting countdown', this.countdownInterval);
     this.countdownInterval = window.setInterval(() => {
       const current = this.countdown();
       if (current > 0) {
         this.countdown.set(current - 1);
       } else {
-        console.log('Countdown finished, moving to next round');
         this.stopCountdown();
         this.moveToNextRound();
       }
