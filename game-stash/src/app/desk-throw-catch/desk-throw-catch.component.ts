@@ -50,7 +50,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
   responded: Player[] = [];
   unresponded: Player[] = [];
 
-  currentThrower = signal('silly');
+  currentThrower = signal('');
 
   // for rendering
   engine: Engine = Engine.create();
@@ -206,6 +206,19 @@ export class DeskThrowCatchComponent implements AfterViewInit {
 
     Events.on(this.engine, 'afterUpdate', () => {
       if (this.ball) {
+        if (this.ball.position.y > this.platform!.position.y && !this.hasReadStopped) {
+          console.log('ball has fallen below the platform');
+          this.hasReadStopped = true;
+
+          this.socketService.lobbyEmit('queryNextPlayerThrow', {
+            previousPlayerId: this.currentPlayerId,
+            throwDistance: this.ball.position.x - this.pole!.position.x,
+          })
+
+          // if the ball falls below the platform, remove it
+          World.remove(this.engine.world, this.ball);
+        }
+
         if (this.ball.velocity.x === 0 && !this.hasReadStopped) {
           console.log('ball has stopped moving');
           this.hasReadStopped = true;
