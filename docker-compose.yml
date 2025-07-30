@@ -89,7 +89,7 @@ services:
       dockerfile: Dockerfile
     container_name: gamestash-frontend
     environment:
-      # Backend API URL for production deployment - use API subdomain consistently
+      # Backend API URL for production deployment
       API_URL: https://api.gamestash.live
       VIRTUAL_HOST: gamestash.live,www.gamestash.live
       LETSENCRYPT_HOST: gamestash.live,www.gamestash.live
