@@ -37,77 +37,41 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   lobbyCode = signal('');
   playerName = signal('');
   roundNumber = signal(1);
+  finalRound = signal(3);
   selectedGame = signal('');
   guess = signal(0);
 
   private countdownInterval?: number;
   private subscriptions: Subscription[] = [];
 
-  private maxRounds: number = 3;
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private adminSocketService: AdminSocketService,
     private playerSocketService: PlayerSocketService,
   ) {}
 
   ngOnInit(): void {
-    // Reset all signals to default values
-    this.targetNumber.set(0);
-    this.ranking.set({
-      player: {
-        name: '',
-        playerId: '',
-      },
-      points: 0,
-      rank: -1,
-      isRoundWinner: false,
-      data: -1, //variable field used differently by different games
-    });
-    this.playerRank.set(0);
-    this.isGameOver.set(false);
-    this.countdown.set(10);
-    this.lobbyCode.set('');
-    this.playerName.set('');
-    this.roundNumber.set(1);
-    this.selectedGame.set('');
-    this.guess.set(0);
-
-    // Read all parameters from route
-    this.subscriptions.push(
-      this.route.queryParams.subscribe((params) => {
-        const lobbyCode = params['lobbyCode'];
-        const playerName = params['playerName'];
-        const roundNumber = params['roundNumber'];
-        const selectedGame = params['selectedGame'] || 'Magic Number';
-        const guess = params['guess'];
-
-        if (!lobbyCode || !playerName) {
-          console.error('PhoneRankings: Missing required parameters');
-          this.router.navigate(['/mobile-join-lobby']);
-          return;
-        }
-
-        this.lobbyCode.set(lobbyCode);
-        this.playerName.set(playerName);
-        this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
-        this.selectedGame.set(selectedGame);
-        this.guess.set(guess ? parseInt(guess) : 0);
-
-        // Determine if this is the final round
-        this.isGameOver.set(this.roundNumber() >= this.maxRounds);
-
+    this.playerSocketService.playerState$
+      .pipe(
+        map((state) => state))
+      .subscribe((state) => {
+        this.lobbyCode.set(state.lobbyCode);
+        this.playerName.set(state.playerName);
+        this.roundNumber.set(state.roundNumber);
+        this.selectedGame.set(state.selectedGame);
+        this.guess.set(state.ranking.data || 0);
+        this.isGameOver.set(state.finalRound <= state.roundNumber);
+        this.finalRound.set(state.finalRound);
         if (this.isGameOver()) {
           // Emit gameEnded to backend as soon as final rankings screen is shown
-          this.adminSocketService.lobbyEmit('gameEnded', {});
+          this.playerSocketService.playerEmit('gameEnded', {});
         }
 
         if (!this.isGameOver()) {
           this.startCountdown();
         }
-      }),
-    );
+      });
+
 
     // Subscribe to rankings from PlayerSocketService
     this.subscriptions.push(
@@ -133,12 +97,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         .subscribe((selectedGame) => {
           this.selectedGame.set(selectedGame);
           if (selectedGame === '') {
-            this.router.navigate(['/mobile-lobby'], {
-              queryParams: {
-                lobbyCode: this.lobbyCode(),
-                playerName: this.playerName(),
-              },
-            });
+            this.router.navigate(['/mobile-lobby']);
           }
         }),
     );
@@ -152,15 +111,23 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   private startCountdown(): void {
     this.playerSocketService.useEffect('countdownTick', (tick) => {
       console.log('tick');
-      if (tick > 0) {
-        this.countdown.set(tick);
+      this.countdown.set(tick);
+    });
+
+    this.playerSocketService.useEffect('nextRound', (data) => {
+      console.log('nextRound effect received:', data);
+      this.playerSocketService.updatePlayerState({
+        roundNumber: data.roundNumber,
+        finalRound: data.finalRound,
+      });
+
+      this.playerSocketService.removeEffect('countdownTick');
+      this.playerSocketService.removeEffect('nextRound');
+
+      if (data.roundNumber >= data.finalRound) {
+        this.finishRound();
       } else {
-        this.playerSocketService.removeEffect('countdownTick');
-        if (this.roundNumber() === this.maxRounds) {
-          this.finishRound();
-        } else {
-          this.moveToNextRound();
-        }
+        this.moveToNextRound();
       }
     });
   }
@@ -173,15 +140,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   }
 
   private finishRound(): void {
-    const nextRound = this.roundNumber() + 1;
-    this.router.navigate(['/mobile-magic-number'], {
-      queryParams: {
-        lobbyCode: this.lobbyCode(),
-        playerName: this.playerName(),
-        roundNumber: nextRound,
-        selectedGame: this.selectedGame() || 'Magic Number',
-      },
-    });
+    this.router.navigate(['/mobile-magic-number']);
   }
 
   private moveToNextRound(): void {
@@ -209,9 +168,6 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
   }
 
   getPlayerPoints(): number {
-    const socketId = this.adminSocketService.getSocketId();
-    if (!socketId) return 0;
-
     return this.ranking().points;
   }
 

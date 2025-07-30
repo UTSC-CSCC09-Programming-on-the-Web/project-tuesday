@@ -1,8 +1,5 @@
 import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
-import {
-  AdminSocketService,
-  GameState,
-} from '../services/admin.socket.service';
+import { AdminSocketService } from '../services/admin.socket.service';
 import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
 import { map } from 'rxjs/operators';
@@ -107,6 +104,11 @@ export class DeskMagicNumberComponent implements OnInit {
 
     this.adminSocketService.resetRoundState();
     this.adminSocketService.setRound(this.roundNumber() + 1);
+
+    this.adminSocketService.lobbyEmit('nextRound', {
+      roundNumber: this.roundNumber(),
+      finalRound: this.finalRound(),
+    });
   }
 
   private stopCountdown(): void {

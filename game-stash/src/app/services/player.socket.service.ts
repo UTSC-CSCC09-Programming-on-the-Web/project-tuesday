@@ -165,7 +165,19 @@ export class PlayerSocketService {
     // Listen for game start event
     this.socket.on('startGamePlayer', (arg: any) => {
       console.log('PlayerSocketService: received ping to start ', arg.gameId);
-      this.updatePlayerState({ selectedGame: arg.gameId });
+      if (arg.gameId === 'Magic Number') {
+        this.updatePlayerState({
+          selectedGame: arg.gameId,
+          roundNumber: 1,
+          finalRound: 3,
+        });
+      } else {
+        this.updatePlayerState({
+          roundNumber: 1,
+          finalRound: 1,
+          selectedGame: arg.gameId
+        });
+      }
     });
 
     this.socket.on(
@@ -240,25 +252,6 @@ export class PlayerSocketService {
     this.disconnect();
   }
 
-  submitGameResponse(gameId: string, response: number) {
-    if (this.socket && this.socket.connected) {
-      console.log('PlayerSocketService: Submitting game response', {
-        gameId,
-        response,
-      });
-      this.socket.emit('gameResponse', {
-        gameId: gameId,
-        lobbyCode: this.playerStateSubject.value.lobbyCode,
-        playerId: this.socket.id,
-        response: response,
-      });
-    } else {
-      console.error(
-        'PlayerSocketService: Cannot submit game response - socket not connected',
-      );
-    }
-  }
-
   // Method to get current socket ID
   getSocketId(): string | null {
     return this.socket && this.socket.id ? this.socket.id : null;
@@ -291,7 +284,7 @@ export class PlayerSocketService {
   }
 
   // update the player state
-  private updatePlayerState(patch: Partial<PlayerState>) {
+  updatePlayerState(patch: Partial<PlayerState>) {
     this.playerStateSubject.next({
       ...this.playerStateSubject.value,
       ...patch,

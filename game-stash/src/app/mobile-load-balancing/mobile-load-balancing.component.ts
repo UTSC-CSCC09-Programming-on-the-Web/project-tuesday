@@ -19,7 +19,7 @@ import Matter, {
   Body,
 } from 'matter-js';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { map, Subscription } from 'rxjs';
 import { PlayerSocketService } from '../services/player.socket.service';
 import { CommonModule } from '@angular/common';
 
@@ -99,30 +99,15 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
     });
 
     this.subscriptions.push(
-      this.route.queryParams.subscribe((params) => {
-        const lobbyCode = params['lobbyCode'];
-        const playerName = params['playerName'];
-        const roundNumber = params['roundNumber'];
-        const selectedGame = params['selectedGame'] || 'Load Balancing';
-
-        if (!lobbyCode || !playerName) {
-          console.error('Load Balancing: Missing required parameters');
-          this.router.navigate(['/mobile-join-lobby']);
-          return;
-        }
-
-        this.lobbyCode.set(lobbyCode);
-        this.playerName.set(playerName);
-        this.roundNumber.set(roundNumber ? parseInt(roundNumber) : 1);
-        this.selectedGame.set(selectedGame);
-
-        console.log('Load Balancing: Loaded parameters', {
-          lobbyCode: this.lobbyCode(),
-          playerName: this.playerName(),
-          roundNumber: this.roundNumber(),
-          selectedGame: this.selectedGame(),
-        });
-      }),
+      this.socketService.playerState$
+        .pipe(map((playerState) => playerState.lobbyCode))
+        .subscribe((lobbyCode) => {
+          if (lobbyCode) {
+            this.lobbyCode.set(lobbyCode);
+          } else {
+            this.router.navigate(['/mobile-join-lobby']);
+          }
+        }),
     );
   }
 
@@ -253,15 +238,7 @@ export class MobileLoadBalancingComponent implements AfterViewInit {
 
       this.socketService.removeEffect('spawnBox');
       this.socketService.removeEffect('gameEnded');
-      this.router.navigate(['/mobile-rankings'], {
-        queryParams: {
-          lobbyCode: this.lobbyCode(),
-          playerName: this.playerName(),
-          selectedGame: 'Load Balancing',
-          roundNumber: 5,
-          guess: 0, // Not used in Load Balancing, but required for consistency
-        },
-      });
+      this.router.navigate(['/mobile-rankings']);
     });
 
     // setInterval(() => {

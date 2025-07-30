@@ -468,6 +468,18 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("nextRound", (arg) => {
+    console.log(`Next round requested for lobby ${arg.lobbyCode}: round number ${arg.roundNumber}, final round: ${arg.finalRound}`);
+    if (!lobbies[arg.lobbyCode]) {
+      console.log(`Lobby ${arg.lobbyCode} does not exist.`);
+      return;
+    }
+    io.to(arg.lobbyCode).emit("nextRound", {
+      roundNumber: arg.roundNumber,
+      finalRound: arg.finalRound,
+    });
+  });
+
   socket.on('gameEnded', (arg) => {
     console.log(`Game ended for lobby ${arg.lobbyCode} with gameId ${arg.gameId}`);
     if (lobbies[arg.lobbyCode]) {
