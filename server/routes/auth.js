@@ -291,10 +291,23 @@ router.post('/google/verify', async (req, res) => {
     
   } catch (error) {
     console.error('Google token verification error:', error);
-    res.status(401).json({
-      success: false,
-      message: 'Invalid Google token'
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      requestOrigin: req.get('Origin')
     });
+    
+    if (error.message.includes('CORS') || error.message.includes('origin')) {
+      res.status(403).json({
+        success: false,
+        message: 'CORS error: Request blocked by origin policy'
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid Google token'
+      });
+    }
   }
 });
 

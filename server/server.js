@@ -26,6 +26,11 @@ const socketAllowedOrigins = process.env.FRONTEND_URLS
   ? process.env.FRONTEND_URLS.split(',')
   : [process.env.FRONTEND_URL || "http://localhost:4200"];
 
+// HTTP CORS origins (exclude api.gamestash.live since frontend doesn't make HTTP requests to itself)
+const httpAllowedOrigins = process.env.FRONTEND_URLS 
+  ? process.env.FRONTEND_URLS.split(',').filter(origin => !origin.includes('api.gamestash.live'))
+  : [process.env.FRONTEND_URL || "http://localhost:4200"];
+
 const io = new Server(server, {
   cors: {
     origin: socketAllowedOrigins,
@@ -50,9 +55,7 @@ const limiter = rateLimit({
 app.use("/api/", limiter);
 
 // CORS configuration - support multiple frontend URLs for containerized deployment
-const allowedOrigins = process.env.FRONTEND_URLS 
-  ? process.env.FRONTEND_URLS.split(',')
-  : [process.env.FRONTEND_URL || "http://localhost:4200"];
+const allowedOrigins = httpAllowedOrigins;
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -62,7 +65,8 @@ const corsOptions = {
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.warn('CORS blocked origin:', origin);
+      callback(new Error(`Not allowed by CORS. Origin: ${origin}`));
     }
   },
   credentials: true,
@@ -94,15 +98,6 @@ app.use(passport.session());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/stripe', stripeRoutes);
-
-// Health check endpoint
-app.get("/health", (req, res) => {
-  res.json({
-    status: "OK",
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || "development",
-  });
-});
 
 // Simple route
 app.get("/", (req, res) => {
