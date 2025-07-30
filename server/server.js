@@ -9,6 +9,8 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import session from 'express-session';
 import passport from 'passport';
+import { createClient } from 'redis';
+import RedisStore from 'connect-redis';
 
 // Import custom modules
 import { initializeDatabase } from './database.js';
@@ -17,6 +19,21 @@ import stripeRoutes from './routes/stripe.js';
 
 // Load environment variables
 dotenv.config();
+
+// Initialize Redis client for session storage
+const redisClient = createClient({
+  socket: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT) || 6379,
+  },
+  password: process.env.REDIS_PASSWORD,
+});
+
+redisClient.on('error', (err) => console.log('Redis Client Error:', err));
+redisClient.on('connect', () => console.log('Connected to Redis'));
+
+// Connect to Redis
+await redisClient.connect();
 
 const app = express();
 const server = http.createServer(app);
@@ -80,13 +97,15 @@ app.use('/api/stripe/webhook', express.raw({ type: 'application/json' })); // Ra
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Session configuration
+// Session configuration with Redis store
 app.use(session({
+  store: new RedisStore({ client: redisClient }),
   secret: process.env.SESSION_SECRET || 'your-session-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));

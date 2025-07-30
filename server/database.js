@@ -10,20 +10,41 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT) || 5432,
   database: process.env.DB_NAME || "gamestash",
   user: process.env.DB_USER || "postgres",
-  password: process.env.DB_PASSWORD || "postgres",
+  password: process.env.DB_PASSWORD,
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000,
+  acquireTimeoutMillis: 60000,
+  createTimeoutMillis: 30000,
+  destroyTimeoutMillis: 5000,
+  reapIntervalMillis: 1000,
+  createRetryIntervalMillis: 200,
+  // SSL disabled for secure internal Docker network
+  ssl: false,
+  application_name: 'gamestash-api',
+  statement_timeout: 300000,
+  query_timeout: 300000,
+  connectionTimeoutMillis: 10000,
 });
 
 // Test database connection
-pool.on("connect", () => {
+pool.on("connect", (client) => {
   console.log("Connected to PostgreSQL database");
+  client.query('SELECT NOW()'); // Keep connection alive
 });
 
-pool.on("error", (err) => {
+pool.on("error", (err, client) => {
   console.error("Unexpected error on idle client", err);
-  process.exit(-1);
+  console.error("Attempting to reconnect...");
+  // Don't exit the process, let it retry
+});
+
+pool.on("acquire", (client) => {
+  console.log("Client acquired from pool");
+});
+
+pool.on("remove", (client) => {
+  console.log("Client removed from pool");
 });
 
 // Initialize database tables

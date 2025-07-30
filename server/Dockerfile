@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Set production environment on build
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Create a non-root user to run the application for security purposes
 RUN addgroup -g 1001 -S nodejs
