@@ -557,7 +557,7 @@ io.on("connection", (socket) => {
       
       // Calculate the rankings
       const rankings = Object.entries(lobbies[arg.lobbyCode].responses)
-        .sort(([, a], [, b]) => b - a) // Sort by value (ascending)
+        .sort(([, a], [, b]) => Math.abs(a) - Math.abs(b)) // Sort by value (ascending)
         .map(([key, value]) => value);
 
       const lowestDifference = rankings[0];

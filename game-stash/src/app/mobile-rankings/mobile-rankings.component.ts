@@ -64,7 +64,7 @@ export class MobileRankingsComponent implements OnInit, OnDestroy {
         this.finalRound.set(state.finalRound);
         if (this.isGameOver()) {
           // Emit gameEnded to backend as soon as final rankings screen is shown
-          this.playerSocketService.playerEmit('gameEnded', {});
+          // this.playerSocketService.playerEmit('gameEnded', {});
         }
 
         if (!this.isGameOver()) {

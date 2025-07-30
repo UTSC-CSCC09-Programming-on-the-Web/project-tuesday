@@ -49,7 +49,7 @@ export class MobileThrowCatchComponent implements OnInit {
     });
 
     this.socketService.useEffect('gameEnded', (data) => {
-
+      this.socketService.removeEffect('gameEnded');
       this.router.navigate(['/mobile-rankings'], {
         queryParams: {
           lobbyCode: this.lobbyCode(),
