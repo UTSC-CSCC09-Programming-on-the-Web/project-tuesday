@@ -67,7 +67,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
   pole: Matter.Body | undefined;
   poleWidth = 10;
   poleHeight = 50;
-  
+
   // for keeping track of the current ball
   ballGuide: Matter.Body | undefined;
   ball: Matter.Body | undefined;
@@ -104,7 +104,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
         this.bodies.push(this.spawnBall(arg.playerId, arg.throwData));
       }
     });
-    
+
     socketService.useEffect('nextPlayerId', (arg) => {
       this.players().forEach((player) => {
         if (player.player.playerId === arg.playerId) {
@@ -122,7 +122,7 @@ export class DeskThrowCatchComponent implements AfterViewInit {
               players.map((player) => {
                 return {
                   player: player.player,
-                  points: Math.trunc(player.data!),
+                  points: Math.abs(Math.trunc(player.data!)),
                 };
               }),
             );
