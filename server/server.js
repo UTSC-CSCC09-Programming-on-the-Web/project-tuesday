@@ -526,12 +526,16 @@ io.on("connection", (socket) => {
       for (const [key, value] of Object.entries(lobbies[arg.lobbyCode]?.players)) {
         let playerId = key
         if (playerId === lobbies[arg.lobbyCode].admin) continue; // Skip admin
+
         console.log("players", arg.players, playerId, arg.players.find((player) => {
           console.log("player", player, player.player.playerId, playerId);
           return player.player.playerId === playerId
         }));
+
         const rank = arg.players.findIndex((player) => player.player.playerId === playerId) + 1;
+
         const score = arg.players.find((player) => player.player.playerId === playerId).points || 0;
+
         const playerRanking = {
           player: {
             name: "John Doe", //needs to be replaced with player name on frontend
@@ -553,7 +557,7 @@ io.on("connection", (socket) => {
       
       // Calculate the rankings
       const rankings = Object.entries(lobbies[arg.lobbyCode].responses)
-        .sort(([, a], [, b]) => a - b) // Sort by value (ascending)
+        .sort(([, a], [, b]) => b - a) // Sort by value (ascending)
         .map(([key, value]) => value);
 
       const lowestDifference = rankings[0];
@@ -590,10 +594,11 @@ io.on("connection", (socket) => {
       for (const [key, value] of Object.entries(
         lobbies[arg.lobbyCode]?.players,
       )) {
+
         let playerId = key;
         console.log(playerId, lobbies[arg.lobbyCode].admin);
         if (playerId === lobbies[arg.lobbyCode].admin) continue; // Skip admin
-        const rank = arg.players.findIndex((player) => player.playerId === playerId) + 1;
+        const rank = arg.players.findIndex((player) => player.player.playerId === playerId) + 1;
         
         const score =
           arg.players.find((player) => player.player.playerId === playerId)
